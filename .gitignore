@@ -1,0 +1,9 @@
+# Variables de entorno locales
+.env
+
+# Logs de WordPress
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
