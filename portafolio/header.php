@@ -1,6 +1,6 @@
 <?php
 /**
- * Cabecera del documento.
+ * Cabecera del documento: apertura de <html>, <head> y cabecera del sitio.
  *
  * @package Portafolio
  */
@@ -12,14 +12,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<?php wp_head(); ?>
 </head>
+
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
-<a class="salto-contenido" href="#contenido"><?php esc_html_e( 'Saltar al contenido', 'portafolio' ); ?></a>
+<a class="salto-contenido screen-reader-text" href="#contenido">
+	<?php esc_html_e( 'Saltar al contenido', 'portafolio' ); ?>
+</a>
 
 <header class="sitio-cabecera">
 	<p class="sitio-titulo">
-		<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php bloginfo( 'name' ); ?></a>
+		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a>
 	</p>
 
 	<nav class="sitio-navegacion" aria-label="<?php esc_attr_e( 'Menú principal', 'portafolio' ); ?>">
@@ -27,7 +30,10 @@
 		wp_nav_menu(
 			array(
 				'theme_location' => 'principal',
+				'menu_id'        => 'menu-principal',
+				'menu_class'     => 'menu',
 				'container'      => false,
+				'fallback_cb'    => false,
 			)
 		);
 		?>
