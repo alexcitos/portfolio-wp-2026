@@ -34,6 +34,7 @@ Text Domain: portafolio
 	   nuevos). Así cualquier var() recibe siempre un color válido. */
 	--color-fondo-oscuro: #030711;
 	--color-vidrio: #060d1a;
+	--color-vidrio-trasero: #252541; /* Panel eco: más claro y violáceo que --color-vidrio, para despegarlo del fondo. */
 	--color-primario-claro: #9bbcfb;
 	--color-acento-violeta: #a35de4;
 	--color-acento-lavanda: #9798f9;
@@ -285,11 +286,14 @@ a:focus {
 	--hero-forma-lavanda: rgba(151, 152, 249, 0.55);
 	--hero-forma-purpura: rgba(138, 127, 244, 0.55);
 	--hero-vidrio: rgba(6, 13, 26, 0.62);
-	--hero-vidrio-eco: rgba(6, 13, 26, 0.32);
-	--hero-linea: rgba(255, 255, 255, 0.09);
 	--hero-texto-tenue: rgba(255, 255, 255, 0.78);
 	--hero-resplandor-a: rgba(37, 99, 235, 0.4);
 	--hero-resplandor-b: rgba(163, 93, 228, 0.28);
+	/* Panel eco: relleno traslúcido con tono propio, borde claro definido y
+	   resplandor, para que se lea como una capa —no como un borde difuso. */
+	--hero-eco-fondo: rgba(37, 37, 65, 0.58);
+	--hero-eco-borde: #bbbcfb;
+	--hero-eco-resplandor: rgba(138, 127, 244, 0.42);
 	--hero-vineta-a: rgba(26, 26, 26, 0.32);
 	--hero-vineta-b: rgba(26, 26, 26, 0.08);
 	--hero-foco: rgba(255, 255, 255, 0.8);
@@ -362,35 +366,38 @@ a:focus {
 .hero-panel {
 	position: relative;
 	z-index: 1;
-	width: min(28rem, 100%);
+	width: min(32rem, 100%);
 }
 
-/* Capas traseras giradas que asoman por los bordes del panel. La posición
-   base va en las propiedades individuales translate/rotate para que la
-   animación (transform) componga encima sin perder el desfase ni el giro.
-   Su deriva es de pocos píxeles y más lenta que la de las esferas: al ir
-   a distinto ritmo se genera sensación de profundidad (parallax). */
+/* Capas traseras giradas que asoman por los bordes del panel principal. La
+   posición base va en las propiedades individuales translate/rotate para
+   que la animación (transform) componga encima sin perder el desfase ni el
+   giro. El desfase y el giro son marcados a propósito, y llevan tono, borde
+   claro y resplandor propios, para que se lean como una capa distinta.
+   Su deriva (parallax) va más rápida que las esferas y con distinto ritmo
+   entre sí, para que el desplazamiento se perciba. */
 .hero-panel-eco {
 	position: absolute;
 	inset: 0;
 	z-index: 0;
 	border-radius: 1.75rem;
-	background: var(--hero-vidrio-eco);
-	border: 1px solid var(--hero-linea);
-	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
+	background: var(--hero-eco-fondo);
+	border: 1px solid var(--hero-eco-borde);
+	box-shadow: 0 0 32px var(--hero-eco-resplandor);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 }
 
 .hero-panel-eco--1 {
-	translate: -1rem 1.4rem;
-	rotate: 4deg;
-	animation: hero-eco-1 13s ease-in-out infinite;
+	translate: -2.1rem 2.6rem;
+	rotate: 6.5deg;
+	animation: hero-eco-1 9s ease-in-out infinite;
 }
 
 .hero-panel-eco--2 {
-	translate: 0.9rem -0.8rem;
-	rotate: -3deg;
-	animation: hero-eco-2 19s ease-in-out -7s infinite;
+	translate: 1.9rem -1.8rem;
+	rotate: -5.5deg;
+	animation: hero-eco-2 12s ease-in-out -6s infinite;
 }
 
 /* Borde degradado: relleno de 2px sobre un gradiente de acentos. */
@@ -441,9 +448,13 @@ a:focus {
 	color: var(--color-primario-claro);
 }
 
+/* Tipografía fluida: escala de forma continua con el viewport en lugar de
+   dar saltos por breakpoint. El máximo (2.95rem) está calculado para que
+   "Nombre Apellido" quepa en una línea dentro del panel de 32rem; el
+   término medio combina rem + vw para respetar el zoom del usuario. */
 .hero-nombre {
 	margin: 0.75rem 0 0.5rem;
-	font-size: clamp(2rem, 5vw, 3.25rem);
+	font-size: clamp(2rem, 1.4rem + 2.6vw, 2.95rem);
 	font-weight: 700;
 	letter-spacing: -0.01em;
 	color: var(--color-fondo);
@@ -471,7 +482,8 @@ a:focus {
    Cada esfera recorre un lazo cerrado y asimétrico por una zona amplia del
    hero, en una dirección distinta y con los puntos clave en porcentajes
    diferentes, para que no lleguen a los extremos a la vez. Las dos capas
-   "eco" del panel derivan solo unos píxeles, a otro ritmo (parallax). */
+   "eco" del panel derivan más rápido y con un giro leve, a otro ritmo que
+   las esferas (parallax). */
 @keyframes hero-flotar-1 {
 	0%   { transform: translate(0, 0) scale(1); }
 	30%  { transform: translate(13rem, 4rem) scale(1.1); }
@@ -505,13 +517,13 @@ a:focus {
 }
 
 @keyframes hero-eco-1 {
-	0%, 100% { transform: translate(0, 0); }
-	50% { transform: translate(7px, -5px); }
+	0%, 100% { transform: translate(0, 0) rotate(0); }
+	50% { transform: translate(15px, -11px) rotate(1deg); }
 }
 
 @keyframes hero-eco-2 {
-	0%, 100% { transform: translate(0, 0); }
-	50% { transform: translate(-6px, 6px); }
+	0%, 100% { transform: translate(0, 0) rotate(0); }
+	50% { transform: translate(-13px, 14px) rotate(-1.2deg); }
 }
 
 /* Movimiento reducido: detiene tanto las esferas como las capas eco. Con
@@ -523,20 +535,31 @@ a:focus {
 	}
 }
 
-/* En pantallas estrechas se aligera el fondo. */
-@media (max-width: 30rem) {
-	.hero-forma--3,
-	.hero-forma--4,
+/* En pantallas estrechas se aligera el fondo. Las capas eco se ocultan
+   antes (40rem): con el panel casi a todo el ancho, su desfase marcado se
+   saldría del hero y quedaría recortado. */
+@media (max-width: 40rem) {
 	.hero-panel-eco {
 		display: none;
 	}
 }
 
-/* Sin soporte de backdrop-filter: paneles con fondo sólido. */
+@media (max-width: 30rem) {
+	.hero-forma--3,
+	.hero-forma--4 {
+		display: none;
+	}
+}
+
+/* Sin soporte de backdrop-filter: paneles con fondo sólido (cada uno con
+   su propio tono). */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.hero-panel-vidrio,
-	.hero-panel-eco {
+	.hero-panel-vidrio {
 		background: var(--color-vidrio);
+	}
+
+	.hero-panel-eco {
+		background: var(--color-vidrio-trasero);
 	}
 }
 
@@ -562,6 +585,7 @@ a:focus {
 	:root {
 		--color-fondo-oscuro: oklch(13% 0.025 258);
 		--color-vidrio: oklch(16% 0.03 258);
+		--color-vidrio-trasero: oklch(28% 0.05 282);
 		--color-acento-violeta: oklch(62% 0.2 305);
 		--color-acento-lavanda: oklch(72% 0.14 282);
 		--color-acento-purpura: oklch(66% 0.17 285);
@@ -581,11 +605,12 @@ a:focus {
 		--hero-forma-lavanda: color-mix(in oklab, var(--color-acento-lavanda) 55%, transparent);
 		--hero-forma-purpura: color-mix(in oklab, var(--color-acento-purpura) 55%, transparent);
 		--hero-vidrio: color-mix(in srgb, var(--color-vidrio) 62%, transparent);
-		--hero-vidrio-eco: color-mix(in srgb, var(--color-vidrio) 32%, transparent);
-		--hero-linea: color-mix(in srgb, var(--color-fondo) 9%, transparent);
 		--hero-texto-tenue: color-mix(in srgb, var(--color-fondo) 78%, transparent);
 		--hero-resplandor-a: color-mix(in oklab, var(--color-primario) 40%, transparent);
 		--hero-resplandor-b: color-mix(in oklab, var(--color-acento-violeta) 28%, transparent);
+		--hero-eco-fondo: color-mix(in srgb, var(--color-vidrio-trasero) 58%, transparent);
+		--hero-eco-borde: color-mix(in srgb, var(--color-acento-lavanda) 65%, var(--color-fondo));
+		--hero-eco-resplandor: color-mix(in oklab, var(--color-acento-purpura) 42%, transparent);
 		--hero-vineta-a: color-mix(in srgb, var(--color-texto) 32%, transparent);
 		--hero-vineta-b: color-mix(in srgb, var(--color-texto) 8%, transparent);
 		--hero-foco: color-mix(in srgb, var(--color-fondo) 80%, transparent);
