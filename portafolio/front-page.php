@@ -3,13 +3,38 @@
  * Portada del sitio (front-page.php).
  *
  * Estructura de secciones: hero, pilares/servicios, proyectos destacados,
- * sobre mí y contacto. El texto es de ejemplo; el contenido real se
- * ajustará más adelante.
+ * sobre mí y contacto.
+ *
+ * El contenido editable (nombre, tagline, botón, datos de contacto y
+ * biografía) vive en el grupo de campos ACF "Datos del sitio", anclado a la
+ * página configurada como portada en Ajustes → Lectura. Se lee con
+ * get_field( 'campo', get_option( 'page_on_front' ) ) para no depender de un
+ * ID fijo. Cada campo tiene un valor de reserva mientras esté vacío.
  *
  * @package Portafolio
  */
 
 get_header();
+
+$portafolio_portada_id = (int) get_option( 'page_on_front' );
+
+$portafolio_nombre       = get_field( 'nombre', $portafolio_portada_id );
+$portafolio_tagline      = get_field( 'tagline', $portafolio_portada_id );
+$portafolio_boton_texto  = get_field( 'boton_contacto_texto', $portafolio_portada_id );
+$portafolio_boton_url    = get_field( 'boton_contacto_enlace', $portafolio_portada_id );
+$portafolio_email        = get_field( 'email', $portafolio_portada_id );
+$portafolio_telefono     = get_field( 'telefono', $portafolio_portada_id );
+$portafolio_ubicacion    = get_field( 'ubicacion', $portafolio_portada_id );
+$portafolio_sobre_mi     = get_field( 'sobre_mi_bio', $portafolio_portada_id );
+
+// Valores de reserva para cuando los campos aún no se han rellenado.
+$portafolio_nombre      = $portafolio_nombre ? $portafolio_nombre : 'Nombre Apellido';
+$portafolio_tagline     = $portafolio_tagline ? $portafolio_tagline : 'Desarrollo WordPress a medida, marketing digital e infraestructura IT para negocios que quieren crecer.';
+$portafolio_boton_texto = $portafolio_boton_texto ? $portafolio_boton_texto : 'Hablemos de tu proyecto';
+$portafolio_boton_url   = $portafolio_boton_url ? $portafolio_boton_url : '#contacto';
+$portafolio_email       = $portafolio_email ? $portafolio_email : 'hola@ejemplo.com';
+$portafolio_telefono    = $portafolio_telefono ? $portafolio_telefono : '+34 600 00 00 00';
+$portafolio_ubicacion   = $portafolio_ubicacion ? $portafolio_ubicacion : 'Ciudad, País';
 ?>
 
 <main id="contenido" class="portada">
@@ -35,13 +60,10 @@ get_header();
 			<div class="hero-panel-marco">
 				<div class="hero-panel-vidrio">
 					<p class="hero-eyebrow">// portafolio</p>
-					<h1 id="hero-titulo" class="hero-nombre">Nombre Apellido</h1>
-					<p class="hero-tagline">
-						Desarrollo WordPress a medida, marketing digital e
-						infraestructura IT para negocios que quieren crecer.
-					</p>
+					<h1 id="hero-titulo" class="hero-nombre"><?php echo esc_html( $portafolio_nombre ); ?></h1>
+					<p class="hero-tagline"><?php echo esc_html( $portafolio_tagline ); ?></p>
 					<p class="hero-accion">
-						<a class="boton boton-primario" href="#contacto">Hablemos de tu proyecto</a>
+						<a class="boton boton-primario" href="<?php echo esc_url( $portafolio_boton_url ); ?>"><?php echo esc_html( $portafolio_boton_texto ); ?></a>
 					</p>
 				</div>
 			</div>
@@ -146,12 +168,18 @@ get_header();
 			// ----------------------------------------------------------- ?>
 		<section class="portada-sobre-mi" aria-labelledby="sobre-mi-titulo">
 			<h2 id="sobre-mi-titulo" class="seccion-titulo">Sobre mí</h2>
-			<p class="sobre-mi-bio">
-				Soy un profesional con experiencia en desarrollo web, marketing
-				digital e infraestructura. Este es un texto de ejemplo que se
-				sustituirá por una biografía real: formación, trayectoria y la
-				forma en la que me gusta trabajar con los clientes.
-			</p>
+			<?php if ( $portafolio_sobre_mi ) : ?>
+				<div class="sobre-mi-bio">
+					<?php echo wp_kses_post( $portafolio_sobre_mi ); ?>
+				</div>
+			<?php else : ?>
+				<p class="sobre-mi-bio">
+					Soy un profesional con experiencia en desarrollo web, marketing
+					digital e infraestructura. Este es un texto de ejemplo que se
+					sustituirá por una biografía real: formación, trayectoria y la
+					forma en la que me gusta trabajar con los clientes.
+				</p>
+			<?php endif; ?>
 		</section>
 
 		<?php // -----------------------------------------------------------
@@ -165,15 +193,15 @@ get_header();
 			<ul class="contacto-datos">
 				<li class="contacto-dato contacto-email">
 					<span class="contacto-etiqueta">Email:</span>
-					<a href="mailto:hola@ejemplo.com">hola@ejemplo.com</a>
+					<a href="mailto:<?php echo antispambot( $portafolio_email ); ?>"><?php echo antispambot( $portafolio_email ); ?></a>
 				</li>
 				<li class="contacto-dato contacto-telefono">
 					<span class="contacto-etiqueta">Teléfono:</span>
-					<a href="tel:+34600000000">+34 600 00 00 00</a>
+					<a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $portafolio_telefono ) ); ?>"><?php echo esc_html( $portafolio_telefono ); ?></a>
 				</li>
 				<li class="contacto-dato contacto-ubicacion">
 					<span class="contacto-etiqueta">Ubicación:</span>
-					<span>Ciudad, País</span>
+					<span><?php echo esc_html( $portafolio_ubicacion ); ?></span>
 				</li>
 			</ul>
 		</section>
