@@ -23,9 +23,32 @@ Text Domain: portafolio
 	--color-primario-oscuro: #1e40af;
 	--color-borde: #e0e0e0;
 
+	/* Colores — superficie oscura (hero).
+	   Tonos nuevos que no derivan de la paleta base: un fondo casi negro
+	   azulado, el vidrio de los paneles y una familia fría de "glows"
+	   (violeta, lavanda, púrpura).
+
+	   Valor por defecto en hex/rgb para navegadores sin oklch()/color-mix().
+	   Más abajo, dos bloques @supports los reescriben a oklch()/color-mix()
+	   cuando el navegador los soporta (equivalentes calculados, no valores
+	   nuevos). Así cualquier var() recibe siempre un color válido. */
+	--color-fondo-oscuro: #030711;
+	--color-vidrio: #060d1a;
+	--color-primario-claro: #9bbcfb;
+	--color-acento-violeta: #a35de4;
+	--color-acento-lavanda: #9798f9;
+	--color-acento-purpura: #8a7ff4;
+
+	/* Derivados de :root con transparencia (sombra y anillo de foco del
+	   botón primario). Mismo esquema de respaldo: rgb() por defecto,
+	   color-mix() más abajo bajo @supports. */
+	--sombra-boton: rgba(37, 99, 235, 0.35);
+	--anillo-foco: rgba(255, 255, 255, 0.6);
+
 	/* Tipografía */
 	--fuente-base: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 	--fuente-titulos: var(--fuente-base);
+	--fuente-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 	--tamano-base: 1rem;
 	--altura-linea: 1.6;
 
@@ -197,6 +220,376 @@ a:focus {
 	max-width: var(--ancho-contenido);
 	margin: 0 auto;
 	padding: var(--espacio-lg) var(--espacio-md);
+}
+
+/* La portada usa el hero a sangre completa, así que el <main> no se limita:
+   es este contenedor el que centra y estrecha el resto de secciones. */
+.portada-cuerpo {
+	max-width: var(--ancho-contenido);
+	margin: 0 auto;
+	padding: var(--espacio-xl) var(--espacio-md);
+}
+
+/* ==========================================================================
+   Botones
+   ========================================================================== */
+.boton {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.875rem 1.75rem;
+	border: 0;
+	border-radius: 0.625rem;
+	font: inherit;
+	font-weight: 600;
+	line-height: 1.2;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.boton-primario {
+	background-color: var(--color-primario);
+	color: var(--color-fondo);
+	box-shadow: 0 8px 24px var(--sombra-boton);
+	transition: background-color 0.2s ease;
+}
+
+.boton-primario:hover,
+.boton-primario:focus {
+	background-color: var(--color-primario-oscuro);
+	color: var(--color-fondo);
+}
+
+.boton-primario:focus-visible {
+	outline: 2px solid var(--anillo-foco);
+	outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Portada — Hero
+   ==========================================================================
+
+   Panel de vidrio centrado sobre cuatro formas de color difuminadas que
+   flotan lentamente (animación CSS pura), más dos capas "eco" tras el
+   panel que le dan profundidad. Todo el fondo es decorativo (aria-hidden
+   en el HTML). Los colores salen de las variables de :root; los tokens
+   --hero-* solo aplican transparencia (rgba por defecto, color-mix bajo
+   @supports al final del archivo).
+   ========================================================================== */
+.portada-hero {
+	/* Derivados con transparencia de las variables de :root. Valor por
+	   defecto en rgba(); el bloque @supports de color-mix() (al final del
+	   archivo) los reescribe a color-mix() cuando está disponible. */
+	--hero-forma-azul: rgba(37, 99, 235, 0.6);
+	--hero-forma-violeta: rgba(163, 93, 228, 0.6);
+	--hero-forma-lavanda: rgba(151, 152, 249, 0.55);
+	--hero-forma-purpura: rgba(138, 127, 244, 0.55);
+	--hero-vidrio: rgba(6, 13, 26, 0.62);
+	--hero-vidrio-eco: rgba(6, 13, 26, 0.32);
+	--hero-linea: rgba(255, 255, 255, 0.09);
+	--hero-texto-tenue: rgba(255, 255, 255, 0.78);
+	--hero-resplandor-a: rgba(37, 99, 235, 0.4);
+	--hero-resplandor-b: rgba(163, 93, 228, 0.28);
+	--hero-vineta-a: rgba(26, 26, 26, 0.32);
+	--hero-vineta-b: rgba(26, 26, 26, 0.08);
+	--hero-foco: rgba(255, 255, 255, 0.8);
+
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: clamp(34rem, 82vh, 48rem);
+	padding: var(--espacio-xl) var(--espacio-md);
+	overflow: hidden;
+	background-color: var(--color-fondo-oscuro);
+	isolation: isolate;
+}
+
+/* --- Formas difuminadas de fondo --- */
+.hero-fondo {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+}
+
+.hero-forma {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(45px);
+}
+
+/* Cada esfera tiene su propia trayectoria (ver @keyframes), una duración
+   distinta dentro de la franja 15–25 s y un retardo negativo para que
+   arranquen desfasadas y el conjunto no se perciba sincronizado. */
+.hero-forma--1 {
+	top: -8rem;
+	left: -6rem;
+	width: 26rem;
+	height: 26rem;
+	background: radial-gradient(circle, var(--hero-forma-azul), transparent 70%);
+	animation: hero-flotar-1 21s ease-in-out -4s infinite;
+}
+
+.hero-forma--2 {
+	right: -7rem;
+	bottom: -9rem;
+	width: 28rem;
+	height: 28rem;
+	background: radial-gradient(circle, var(--hero-forma-violeta), transparent 70%);
+	animation: hero-flotar-2 17s ease-in-out -9s infinite;
+}
+
+.hero-forma--3 {
+	top: 2rem;
+	right: 6rem;
+	width: 12.5rem;
+	height: 12.5rem;
+	background: radial-gradient(circle, var(--hero-forma-lavanda), transparent 72%);
+	animation: hero-flotar-3 25s ease-in-out -6s infinite;
+}
+
+.hero-forma--4 {
+	bottom: 2rem;
+	left: 3rem;
+	width: 10rem;
+	height: 10rem;
+	background: radial-gradient(circle, var(--hero-forma-purpura), transparent 72%);
+	animation: hero-flotar-4 15s ease-in-out -11s infinite;
+}
+
+/* --- Panel de vidrio --- */
+.hero-panel {
+	position: relative;
+	z-index: 1;
+	width: min(28rem, 100%);
+}
+
+/* Capas traseras giradas que asoman por los bordes del panel. La posición
+   base va en las propiedades individuales translate/rotate para que la
+   animación (transform) componga encima sin perder el desfase ni el giro.
+   Su deriva es de pocos píxeles y más lenta que la de las esferas: al ir
+   a distinto ritmo se genera sensación de profundidad (parallax). */
+.hero-panel-eco {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	border-radius: 1.75rem;
+	background: var(--hero-vidrio-eco);
+	border: 1px solid var(--hero-linea);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+}
+
+.hero-panel-eco--1 {
+	translate: -1rem 1.4rem;
+	rotate: 4deg;
+	animation: hero-eco-1 13s ease-in-out infinite;
+}
+
+.hero-panel-eco--2 {
+	translate: 0.9rem -0.8rem;
+	rotate: -3deg;
+	animation: hero-eco-2 19s ease-in-out -7s infinite;
+}
+
+/* Borde degradado: relleno de 2px sobre un gradiente de acentos. */
+.hero-panel-marco {
+	position: relative;
+	z-index: 1;
+	padding: 2px;
+	border-radius: 1.8rem;
+	background: linear-gradient(135deg, var(--color-primario), var(--color-acento-violeta));
+	box-shadow:
+		0 0 50px var(--hero-resplandor-a),
+		0 0 80px var(--hero-resplandor-b);
+}
+
+.hero-panel-vidrio {
+	position: relative;
+	padding: clamp(2rem, 5vw, 2.75rem) clamp(1.5rem, 4vw, 2.25rem);
+	border-radius: 1.7rem;
+	background: var(--hero-vidrio);
+	backdrop-filter: blur(24px) saturate(160%);
+	-webkit-backdrop-filter: blur(24px) saturate(160%);
+	text-align: center;
+	overflow: hidden;
+}
+
+/* Viñeta interior para asentar el texto sobre el vidrio. */
+.hero-panel-vidrio::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: radial-gradient(circle at 50% 35%,
+		var(--hero-vineta-a),
+		var(--hero-vineta-b) 75%);
+	pointer-events: none;
+}
+
+.hero-panel-vidrio > * {
+	position: relative;
+}
+
+/* --- Contenido del hero --- */
+.hero-eyebrow {
+	margin: 0;
+	font-family: var(--fuente-mono);
+	font-size: 0.8125rem;
+	letter-spacing: 0.05em;
+	color: var(--color-primario-claro);
+}
+
+.hero-nombre {
+	margin: 0.75rem 0 0.5rem;
+	font-size: clamp(2rem, 5vw, 3.25rem);
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--color-fondo);
+}
+
+.hero-tagline {
+	margin: 0 auto;
+	max-width: 34ch;
+	font-size: clamp(1rem, 2vw, 1.125rem);
+	line-height: var(--altura-linea);
+	color: var(--hero-texto-tenue);
+}
+
+.hero-accion {
+	margin: 2rem 0 0;
+}
+
+/* El botón va sobre fondo oscuro: el foco se aclara para que se vea. */
+.hero-accion .boton-primario:focus-visible {
+	outline-color: var(--hero-foco);
+}
+
+/* --- Animación del fondo (CSS puro, sin JavaScript) ---
+
+   Cada esfera recorre un lazo cerrado y asimétrico por una zona amplia del
+   hero, en una dirección distinta y con los puntos clave en porcentajes
+   diferentes, para que no lleguen a los extremos a la vez. Las dos capas
+   "eco" del panel derivan solo unos píxeles, a otro ritmo (parallax). */
+@keyframes hero-flotar-1 {
+	0%   { transform: translate(0, 0) scale(1); }
+	30%  { transform: translate(13rem, 4rem) scale(1.1); }
+	55%  { transform: translate(8rem, 10rem) scale(1.16); }
+	80%  { transform: translate(-4rem, 6rem) scale(1.06); }
+	100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes hero-flotar-2 {
+	0%   { transform: translate(0, 0) scale(1); }
+	25%  { transform: translate(-11rem, -3rem) scale(1.12); }
+	50%  { transform: translate(-15rem, 4rem) scale(1.05); }
+	75%  { transform: translate(-6rem, -7rem) scale(1.15); }
+	100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes hero-flotar-3 {
+	0%   { transform: translate(0, 0) scale(1); }
+	20%  { transform: translate(-9rem, 7rem) scale(1.14); }
+	45%  { transform: translate(-16rem, 2rem) scale(1.08); }
+	70%  { transform: translate(-11rem, 12rem) scale(1.2); }
+	100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes hero-flotar-4 {
+	0%   { transform: translate(0, 0) scale(1); }
+	30%  { transform: translate(9rem, -6rem) scale(1.16); }
+	60%  { transform: translate(15rem, -2rem) scale(1.1); }
+	85%  { transform: translate(6rem, -9rem) scale(1.18); }
+	100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes hero-eco-1 {
+	0%, 100% { transform: translate(0, 0); }
+	50% { transform: translate(7px, -5px); }
+}
+
+@keyframes hero-eco-2 {
+	0%, 100% { transform: translate(0, 0); }
+	50% { transform: translate(-6px, 6px); }
+}
+
+/* Movimiento reducido: detiene tanto las esferas como las capas eco. Con
+   animation:none cada capa eco conserva su translate/rotate base. */
+@media (prefers-reduced-motion: reduce) {
+	.hero-forma,
+	.hero-panel-eco {
+		animation: none;
+	}
+}
+
+/* En pantallas estrechas se aligera el fondo. */
+@media (max-width: 30rem) {
+	.hero-forma--3,
+	.hero-forma--4,
+	.hero-panel-eco {
+		display: none;
+	}
+}
+
+/* Sin soporte de backdrop-filter: paneles con fondo sólido. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.hero-panel-vidrio,
+	.hero-panel-eco {
+		background: var(--color-vidrio);
+	}
+}
+
+/* ==========================================================================
+   Mejora progresiva del color (oklch / color-mix)
+   ==========================================================================
+
+   :root ya define todos estos tokens en hex/rgb, así que cualquier var()
+   del archivo recibe un color válido aunque el navegador no soporte estas
+   funciones. Estos bloques solo los ELEVAN al espacio de color moderno
+   cuando hay soporte; los valores son equivalentes calculados, no colores
+   nuevos.
+
+   Van al final del archivo a propósito: como las custom properties se
+   aceptan en el parseo aunque su valor sea desconocido, una redefinición
+   debe ir DESPUÉS de la definición por defecto para ganar la cascada.
+
+   Se separan en dos consultas porque Safari 15.4–16.1 soporta oklch()
+   pero no color-mix(): en ese rango se aplica el primer bloque y no el
+   segundo, y el hero sigue siendo válido con las mezclas en rgba(). */
+
+@supports (color: oklch(50% 0 0)) {
+	:root {
+		--color-fondo-oscuro: oklch(13% 0.025 258);
+		--color-vidrio: oklch(16% 0.03 258);
+		--color-acento-violeta: oklch(62% 0.2 305);
+		--color-acento-lavanda: oklch(72% 0.14 282);
+		--color-acento-purpura: oklch(66% 0.17 285);
+	}
+}
+
+@supports (color: color-mix(in srgb, red, blue)) {
+	:root {
+		--color-primario-claro: color-mix(in oklab, var(--color-primario) 45%, var(--color-fondo));
+		--sombra-boton: color-mix(in srgb, var(--color-primario) 35%, transparent);
+		--anillo-foco: color-mix(in srgb, var(--color-fondo) 60%, transparent);
+	}
+
+	.portada-hero {
+		--hero-forma-azul: color-mix(in oklab, var(--color-primario) 60%, transparent);
+		--hero-forma-violeta: color-mix(in oklab, var(--color-acento-violeta) 60%, transparent);
+		--hero-forma-lavanda: color-mix(in oklab, var(--color-acento-lavanda) 55%, transparent);
+		--hero-forma-purpura: color-mix(in oklab, var(--color-acento-purpura) 55%, transparent);
+		--hero-vidrio: color-mix(in srgb, var(--color-vidrio) 62%, transparent);
+		--hero-vidrio-eco: color-mix(in srgb, var(--color-vidrio) 32%, transparent);
+		--hero-linea: color-mix(in srgb, var(--color-fondo) 9%, transparent);
+		--hero-texto-tenue: color-mix(in srgb, var(--color-fondo) 78%, transparent);
+		--hero-resplandor-a: color-mix(in oklab, var(--color-primario) 40%, transparent);
+		--hero-resplandor-b: color-mix(in oklab, var(--color-acento-violeta) 28%, transparent);
+		--hero-vineta-a: color-mix(in srgb, var(--color-texto) 32%, transparent);
+		--hero-vineta-b: color-mix(in srgb, var(--color-texto) 8%, transparent);
+		--hero-foco: color-mix(in srgb, var(--color-fondo) 80%, transparent);
+	}
 }
 
 /* ==========================================================================
