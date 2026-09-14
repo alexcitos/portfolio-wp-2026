@@ -77,12 +77,61 @@ function portafolio_registrar_cpt_proyectos() {
 		'menu_icon'    => 'dashicons-portfolio',
 		'rewrite'      => array( 'slug' => 'proyectos' ),
 		'show_in_rest' => true,
-		'supports'     => array( 'title', 'editor', 'thumbnail' ),
+		'supports'     => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
 	);
 
 	register_post_type( 'proyectos', $argumentos );
 }
 add_action( 'init', 'portafolio_registrar_cpt_proyectos' );
+
+/**
+ * Registra la taxonomía "categoria_proyecto" para el CPT "proyectos".
+ */
+function portafolio_registrar_taxonomia_categoria_proyecto() {
+	$etiquetas = array(
+		'name'              => __( 'Categorías de proyecto', 'portafolio' ),
+		'singular_name'     => __( 'Categoría de proyecto', 'portafolio' ),
+		'menu_name'         => __( 'Categorías', 'portafolio' ),
+		'all_items'         => __( 'Todas las categorías', 'portafolio' ),
+		'edit_item'         => __( 'Editar categoría', 'portafolio' ),
+		'view_item'         => __( 'Ver categoría', 'portafolio' ),
+		'update_item'       => __( 'Actualizar categoría', 'portafolio' ),
+		'add_new_item'      => __( 'Añadir nueva categoría', 'portafolio' ),
+		'new_item_name'     => __( 'Nombre de la nueva categoría', 'portafolio' ),
+		'search_items'      => __( 'Buscar categorías', 'portafolio' ),
+		'not_found'         => __( 'No se encontraron categorías', 'portafolio' ),
+	);
+
+	register_taxonomy(
+		'categoria_proyecto',
+		'proyectos',
+		array(
+			'labels'            => $etiquetas,
+			'public'            => true,
+			'hierarchical'      => true,
+			'show_in_rest'      => true,
+			'show_admin_column' => true,
+			'rewrite'           => array( 'slug' => 'categoria-proyecto' ),
+		)
+	);
+}
+add_action( 'init', 'portafolio_registrar_taxonomia_categoria_proyecto' );
+
+/**
+ * Crea los términos iniciales de "categoria_proyecto" si aún no existen.
+ *
+ * Se comprueba con term_exists() para no duplicar términos en cada carga.
+ */
+function portafolio_crear_terminos_categoria_proyecto() {
+	$terminos_iniciales = array( 'WordPress', 'Marketing Digital', 'Infraestructura y Automatización' );
+
+	foreach ( $terminos_iniciales as $termino ) {
+		if ( ! term_exists( $termino, 'categoria_proyecto' ) ) {
+			wp_insert_term( $termino, 'categoria_proyecto' );
+		}
+	}
+}
+add_action( 'init', 'portafolio_crear_terminos_categoria_proyecto', 11 );
 
 /**
  * Registra por código el grupo de campos "Datos del sitio".
@@ -213,3 +262,49 @@ function portafolio_registrar_campos_datos_del_sitio() {
 	);
 }
 add_action( 'acf/init', 'portafolio_registrar_campos_datos_del_sitio' );
+
+/**
+ * Registra por código el grupo de campos "Detalles del proyecto".
+ *
+ * Asociado al CPT "proyectos" (location: Post Type == proyectos).
+ */
+function portafolio_registrar_campos_detalles_proyecto() {
+	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
+		return;
+	}
+
+	acf_add_local_field_group(
+		array(
+			'key'         => 'group_detalles_proyecto',
+			'title'       => __( 'Detalles del proyecto', 'portafolio' ),
+			'location'    => array(
+				array(
+					array(
+						'param'    => 'post_type',
+						'operator' => '==',
+						'value'    => 'proyectos',
+					),
+				),
+			),
+			'menu_order'  => 0,
+			'active'      => true,
+			'description' => __( 'Información adicional del proyecto.', 'portafolio' ),
+			'fields'      => array(
+				array(
+					'key'   => 'field_dp_tecnologias_usadas',
+					'label' => __( 'Tecnologías usadas', 'portafolio' ),
+					'name'  => 'tecnologias_usadas',
+					'type'  => 'text',
+				),
+				array(
+					'key'          => 'field_dp_enlace_repositorio_demo',
+					'label'        => __( 'Enlace a repositorio o demo', 'portafolio' ),
+					'name'         => 'enlace_repositorio_demo',
+					'type'         => 'url',
+					'instructions' => __( 'Para proyectos sin sitio público (p. ej. automatizaciones de n8n), puede apuntar a un repositorio de GitHub con el JSON exportado del workflow.', 'portafolio' ),
+				),
+			),
+		)
+	);
+}
+add_action( 'acf/init', 'portafolio_registrar_campos_detalles_proyecto' );

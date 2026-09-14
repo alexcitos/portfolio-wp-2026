@@ -127,6 +127,7 @@ $portafolio_ubicacion   = $portafolio_ubicacion ? $portafolio_ubicacion : 'Ciuda
 					while ( $proyectos_destacados->have_posts() ) :
 						$proyectos_destacados->the_post();
 						?>
+						<?php $portafolio_categoria_proyecto = get_the_terms( get_the_ID(), 'categoria_proyecto' ); ?>
 						<li <?php post_class( 'proyecto' ); ?>>
 							<article>
 								<?php if ( has_post_thumbnail() ) : ?>
@@ -135,6 +136,18 @@ $portafolio_ubicacion   = $portafolio_ubicacion ? $portafolio_ubicacion : 'Ciuda
 											<?php the_post_thumbnail( 'medium_large' ); ?>
 										</a>
 									</figure>
+								<?php endif; ?>
+
+								<?php if ( $portafolio_categoria_proyecto && ! is_wp_error( $portafolio_categoria_proyecto ) ) : ?>
+									<ul class="proyecto-categorias">
+										<?php foreach ( $portafolio_categoria_proyecto as $portafolio_categoria ) : ?>
+											<li class="proyecto-categoria">
+												<a href="<?php echo esc_url( get_term_link( $portafolio_categoria ) ); ?>">
+													<?php echo esc_html( $portafolio_categoria->name ); ?>
+												</a>
+											</li>
+										<?php endforeach; ?>
+									</ul>
 								<?php endif; ?>
 
 								<h3 class="proyecto-titulo">
