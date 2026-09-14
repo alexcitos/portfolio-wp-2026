@@ -40,69 +40,111 @@ $portafolio_ubicacion   = $portafolio_ubicacion ? $portafolio_ubicacion : 'Ciuda
 <main id="contenido" class="portada">
 
 	<?php // ---------------------------------------------------------------
-		// Hero: sección a sangre completa con un panel de vidrio sobre
-		// formas difuminadas que flotan de fondo. Las formas y las capas
-		// "eco" del panel son puramente decorativas (aria-hidden).
+		// Zona oscura (Hero + Pilares): comparten un único fondo y las
+		// mismas esferas animadas, concentradas arriba y desvanecidas hacia
+		// abajo con una máscara, para que no haya corte entre ambas
+		// secciones. Las esferas y las capas "eco" del panel son
+		// puramente decorativas (aria-hidden).
 		// --------------------------------------------------------------- ?>
-	<section class="portada-hero" aria-labelledby="hero-titulo">
+	<div class="portada-oscura">
 
-		<div class="hero-fondo" aria-hidden="true">
+		<div class="portada-oscura-fondo" aria-hidden="true">
 			<span class="hero-forma hero-forma--1"></span>
 			<span class="hero-forma hero-forma--2"></span>
 			<span class="hero-forma hero-forma--3"></span>
 			<span class="hero-forma hero-forma--4"></span>
 		</div>
 
-		<div class="hero-panel">
-			<span class="hero-panel-eco hero-panel-eco--1" aria-hidden="true"></span>
-			<span class="hero-panel-eco hero-panel-eco--2" aria-hidden="true"></span>
+		<section class="portada-hero" aria-labelledby="hero-titulo">
 
-			<div class="hero-panel-marco">
-				<div class="hero-panel-vidrio">
-					<p class="hero-eyebrow">// portafolio</p>
-					<h1 id="hero-titulo" class="hero-nombre"><?php echo esc_html( $portafolio_nombre ); ?></h1>
-					<p class="hero-tagline"><?php echo esc_html( $portafolio_tagline ); ?></p>
-					<p class="hero-accion">
-						<a class="boton boton-primario" href="<?php echo esc_url( $portafolio_boton_url ); ?>"><?php echo esc_html( $portafolio_boton_texto ); ?></a>
-					</p>
+			<div class="hero-panel">
+				<span class="hero-panel-eco hero-panel-eco--1" aria-hidden="true"></span>
+				<span class="hero-panel-eco hero-panel-eco--2" aria-hidden="true"></span>
+
+				<div class="hero-panel-marco">
+					<div class="hero-panel-vidrio">
+						<p class="hero-eyebrow">// portafolio</p>
+						<h1 id="hero-titulo" class="hero-nombre"><?php echo esc_html( $portafolio_nombre ); ?></h1>
+						<p class="hero-tagline"><?php echo esc_html( $portafolio_tagline ); ?></p>
+						<p class="hero-accion">
+							<a class="boton boton-primario" href="<?php echo esc_url( $portafolio_boton_url ); ?>"><?php echo esc_html( $portafolio_boton_texto ); ?></a>
+						</p>
+					</div>
 				</div>
 			</div>
-		</div>
 
-	</section>
-
-	<div class="portada-cuerpo">
+		</section>
 
 		<?php // -----------------------------------------------------------
-			// Pilares / servicios
+			// Pilares / servicios: mismas secciones dentro de la zona
+			// oscura, con las tarjetas de vidrio de cada pilar. Los iconos
+			// también son decorativos (aria-hidden) porque el título ya
+			// identifica el pilar.
 			// ----------------------------------------------------------- ?>
 		<section class="portada-pilares" aria-labelledby="pilares-titulo">
-			<h2 id="pilares-titulo" class="seccion-titulo">Lo que hago</h2>
 
-			<ul class="pilares-lista">
-				<li class="pilar pilar-wordpress">
-					<h3 class="pilar-titulo">WordPress</h3>
-					<p class="pilar-descripcion">
-						Temas y sitios construidos desde cero, sin page builders:
-						código limpio, rápido y mantenible.
-					</p>
-				</li>
-				<li class="pilar pilar-marketing">
-					<h3 class="pilar-titulo">Marketing Digital</h3>
-					<p class="pilar-descripcion">
-						Estrategia de contenidos, SEO técnico y campañas medibles
-						enfocadas en resultados.
-					</p>
-				</li>
-				<li class="pilar pilar-infraestructura">
-					<h3 class="pilar-titulo">Infraestructura IT</h3>
-					<p class="pilar-descripcion">
-						Despliegue en VPS, contenedores con Docker, copias de
-						seguridad y monitorización.
-					</p>
-				</li>
-			</ul>
+			<div class="pilares-fondo" aria-hidden="true">
+				<span class="pilares-forma pilares-forma--1"></span>
+				<span class="pilares-forma pilares-forma--2"></span>
+				<span class="pilares-forma pilares-forma--3"></span>
+			</div>
+
+			<div class="pilares-contenedor">
+				<div class="pilares-cabecera">
+					<p class="pilares-eyebrow">// pilares</p>
+					<h2 id="pilares-titulo" class="pilares-titulo">Construyo, escalo, automatizo</h2>
+				</div>
+
+				<ul class="pilares-lista">
+					<li class="pilar pilar-wordpress">
+						<span class="pilar-icono" aria-hidden="true">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="8 6 3 12 8 18"></polyline>
+								<polyline points="16 6 21 12 16 18"></polyline>
+							</svg>
+						</span>
+						<h3 class="pilar-titulo">WordPress</h3>
+						<p class="pilar-descripcion">
+							Temas y sitios construidos desde cero, sin page builders:
+							código limpio, rápido y mantenible.
+						</p>
+					</li>
+					<li class="pilar pilar-marketing">
+						<span class="pilar-icono" aria-hidden="true">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="3 17 9 11 13 15 21 6"></polyline>
+								<polyline points="15 6 21 6 21 12"></polyline>
+							</svg>
+						</span>
+						<h3 class="pilar-titulo">Marketing Digital</h3>
+						<p class="pilar-descripcion">
+							Estrategia de contenidos, SEO técnico y campañas medibles
+							enfocadas en resultados.
+						</p>
+					</li>
+					<li class="pilar pilar-infraestructura">
+						<span class="pilar-icono" aria-hidden="true">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<rect x="3" y="4" width="18" height="6" rx="1"></rect>
+								<rect x="3" y="14" width="18" height="6" rx="1"></rect>
+								<line x1="7" y1="7" x2="7" y2="7"></line>
+								<line x1="7" y1="17" x2="7" y2="17"></line>
+							</svg>
+						</span>
+						<h3 class="pilar-titulo">Infraestructura IT</h3>
+						<p class="pilar-descripcion">
+							Despliegue en VPS, contenedores con Docker, copias de
+							seguridad, monitorización y automatización de procesos
+							con n8n.
+						</p>
+					</li>
+				</ul>
+			</div>
 		</section>
+
+	</div><?php // Fin .portada-oscura ?>
+
+	<div class="portada-cuerpo">
 
 		<?php // -----------------------------------------------------------
 			// Proyectos destacados (últimos 4 del CPT "proyectos")

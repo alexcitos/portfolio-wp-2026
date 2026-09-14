@@ -40,8 +40,28 @@ add_action( 'after_setup_theme', 'portafolio_setup' );
 function portafolio_assets() {
 	$version = wp_get_theme()->get( 'Version' );
 
-	// Hoja de estilos principal.
-	wp_enqueue_style( 'portafolio-style', get_stylesheet_uri(), array(), $version );
+	// Hoja de estilos principal: version = fecha de modificación del archivo,
+	// para que el navegador la recargue en cada cambio durante el desarrollo
+	// sin depender de subir la versión del tema a mano.
+	wp_enqueue_style( 'portafolio-style', get_stylesheet_uri(), array(), filemtime( get_stylesheet_directory() . '/style.css' ) );
+
+	// Muestra el borde/sombra de la cabecera sticky solo tras hacer scroll.
+	wp_enqueue_script(
+		'portafolio-cabecera-scroll',
+		get_template_directory_uri() . '/js/cabecera-scroll.js',
+		array(),
+		$version,
+		true
+	);
+
+	// Botón hamburguesa: abre/cierra la navegación principal en mobile.
+	wp_enqueue_script(
+		'portafolio-menu-movil',
+		get_template_directory_uri() . '/js/menu-movil.js',
+		array(),
+		$version,
+		true
+	);
 }
 add_action( 'wp_enqueue_scripts', 'portafolio_assets' );
 
