@@ -63,6 +63,16 @@ function portafolio_assets() {
 		true
 	);
 
+	// Desplazamiento animado al pulsar enlaces de ancla internos (p. ej. el
+	// botón de contacto del hero, que apunta a #contacto).
+	wp_enqueue_script(
+		'portafolio-scroll-suave',
+		get_template_directory_uri() . '/js/scroll-suave.js',
+		array(),
+		$version,
+		true
+	);
+
 	// Envío por AJAX del formulario de contacto (solo existe en portada).
 	// Ver portafolio_ajax_enviar_contacto() más abajo.
 	if ( is_front_page() ) {

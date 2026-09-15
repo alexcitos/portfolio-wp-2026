@@ -115,6 +115,27 @@ body {
 	line-height: var(--altura-linea);
 	color: var(--color-texto);
 	background-color: var(--color-fondo);
+
+	/* Fundido de entrada al cargar el sitio. "both" mantiene opacity:0
+	   antes de que arranque la animación, evitando un parpadeo del
+	   contenido a opacidad completa en el primer frame. */
+	animation: portafolio-fundido-entrada 0.7s ease both;
+}
+
+@keyframes portafolio-fundido-entrada {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	body {
+		animation: none;
+	}
 }
 
 h1,
