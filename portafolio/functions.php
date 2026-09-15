@@ -260,7 +260,7 @@ function portafolio_registrar_campos_datos_del_sitio() {
 					'key'          => 'field_dds_boton_enlace',
 					'label'        => __( 'Enlace del botón', 'portafolio' ),
 					'name'         => 'boton_contacto_enlace',
-					'type'         => 'url',
+					'type'         => 'text',
 					'instructions' => __( 'URL completa o ancla interna, p. ej. #contacto.', 'portafolio' ),
 				),
 
@@ -344,6 +344,38 @@ function portafolio_registrar_campos_datos_del_sitio() {
 	);
 }
 add_action( 'acf/init', 'portafolio_registrar_campos_datos_del_sitio' );
+
+/**
+ * Valida "Enlace del botón" (boton_contacto_enlace).
+ *
+ * El campo es de tipo Texto (no URL) precisamente para admitir anclas
+ * internas como "#contacto", que la validación nativa de un campo URL de
+ * ACF rechaza por no ser una URL completa. Aquí se reimplementa a mano lo
+ * que ese tipo de campo perdía: solo se acepta una ancla interna (empieza
+ * por "#") o una URL completa (empieza por "http://" o "https://").
+ *
+ * @param bool|string $valid Resultado de validación hasta ahora.
+ * @param mixed        $value Valor enviado para el campo.
+ * @return bool|string
+ */
+function portafolio_validar_boton_contacto_enlace( $valid, $value ) {
+	if ( true !== $valid ) {
+		return $valid;
+	}
+
+	$value = trim( (string) $value );
+
+	if ( '' === $value || str_starts_with( $value, '#' ) ) {
+		return $valid;
+	}
+
+	if ( str_starts_with( $value, 'http://' ) || str_starts_with( $value, 'https://' ) ) {
+		return $valid;
+	}
+
+	return __( 'Introduce una URL completa (empezando por http:// o https://) o una ancla interna (empezando por #).', 'portafolio' );
+}
+add_filter( 'acf/validate_value/name=boton_contacto_enlace', 'portafolio_validar_boton_contacto_enlace', 10, 2 );
 
 /**
  * Registra por código el grupo de campos "Detalles del proyecto".
