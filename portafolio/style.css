@@ -463,15 +463,16 @@ a:focus {
 	--hero-forma-lavanda: rgba(151, 152, 249, 0.55);
 	--hero-forma-purpura: rgba(138, 127, 244, 0.55);
 
-	/* Tres tonos cálidos, fuera de la familia azul-violeta: contrastan a
+	/* Tonos cálidos/vivos, fuera de la familia azul-violeta: contrastan a
 	   propósito con el fondo (frío, oklch 13% 0.025 258) y entre sí con las
-	   otras seis esferas, para que el fondo no se lea monocromático en un
+	   otras esferas, para que el fondo no se lea monocromático en un
 	   recorrido tan largo. Colores nuevos (no derivados de --color-*), así
 	   que su mejora a oklch() más abajo son valores literales, no
 	   color-mix(). */
 	--hero-forma-ambar: rgba(245, 166, 35, 0.55);
 	--hero-forma-cian: rgba(34, 211, 238, 0.5);
 	--hero-forma-rosa: rgba(236, 72, 153, 0.5);
+	--hero-forma-esmeralda: rgba(34, 197, 94, 0.5);
 
 	/* Sin isolation: isolate a propósito. Esa propiedad crea un nuevo
 	   "backdrop root" y le impediría a .sitio-cabecera (fuera de este
@@ -502,13 +503,17 @@ a:focus {
 	filter: blur(45px);
 }
 
-/* Doce esferas en top:% (no rem), para repartirse solas por toda la altura
-   de la zona oscura sea cual sea el contenido real. Nueve reutilizan los
-   cuatro colores azul/violeta/lavanda/púrpura en ciclo; las tres últimas
-   (--10/11/12) usan los tonos cálidos de contraste (ámbar, cian, rosa),
-   intercaladas en los huecos del reparto para que la variedad de color se
-   note en todo el recorrido, no solo al principio. Cada esfera tiene su
-   propia trayectoria (ver @keyframes hero-flotar-*), una duración distinta
+/* Dieciocho esferas en top:% (no rem), para repartirse solas por toda la
+   altura de la zona oscura sea cual sea el contenido real (sigue creciendo:
+   Sobre mí y Contacto se sumaron después que Hero/Pilares/Proyectos, y las
+   posiciones en % ya se reacomodan solas). Nueve reutilizan los cuatro
+   colores azul/violeta/lavanda/púrpura en ciclo; las nueve restantes
+   (--10 a --18) usan los tonos de contraste —ámbar, cian, rosa,
+   esmeralda—, intercaladas en los huecos del reparto para que la variedad
+   de color se note en todo el recorrido, no solo al principio. El tamaño
+   también varía a propósito, de 7rem a 30rem, para que no se lea como una
+   fila pareja de círculos. Cada esfera tiene su propia trayectoria (ver
+   @keyframes hero-flotar-*), una duración distinta
    dentro de la franja 15–25 s y un retardo negativo para que arranquen
    desfasadas y el conjunto no se perciba sincronizado ni repetitivo pese a
    reutilizar las mismas cuatro animaciones. */
@@ -618,6 +623,60 @@ a:focus {
 	height: 19rem;
 	background: radial-gradient(circle, var(--hero-forma-rosa), transparent 72%);
 	animation: hero-flotar-1 18s ease-in-out -12s infinite;
+}
+
+.hero-forma--13 {
+	top: 11%;
+	left: 7%;
+	width: 9rem;
+	height: 9rem;
+	background: radial-gradient(circle, var(--hero-forma-esmeralda), transparent 72%);
+	animation: hero-flotar-3 19s ease-in-out -3s infinite;
+}
+
+.hero-forma--14 {
+	top: 26%;
+	right: -6rem;
+	width: 7rem;
+	height: 7rem;
+	background: radial-gradient(circle, var(--hero-forma-ambar), transparent 72%);
+	animation: hero-flotar-4 14s ease-in-out -6s infinite;
+}
+
+.hero-forma--15 {
+	top: 37%;
+	right: 6rem;
+	width: 8rem;
+	height: 8rem;
+	background: radial-gradient(circle, var(--hero-forma-rosa), transparent 72%);
+	animation: hero-flotar-4 17s ease-in-out -14s infinite;
+}
+
+.hero-forma--16 {
+	top: 65%;
+	left: -8rem;
+	width: 30rem;
+	height: 30rem;
+	background: radial-gradient(circle, var(--hero-forma-azul), transparent 70%);
+	animation: hero-flotar-1 26s ease-in-out -8s infinite;
+}
+
+.hero-forma--17 {
+	top: 91%;
+	left: 8%;
+	width: 14rem;
+	height: 14rem;
+	background: radial-gradient(circle, var(--hero-forma-esmeralda), transparent 72%);
+	animation: hero-flotar-2 21s ease-in-out -4s infinite;
+}
+
+.hero-forma--18 {
+	top: 95%;
+	right: -7rem;
+	width: 10rem;
+	height: 10rem;
+	background: radial-gradient(circle, var(--hero-forma-cian), transparent 72%);
+	animation: hero-flotar-3 15s ease-in-out -9s infinite;
 }
 
 /* ==========================================================================
@@ -842,7 +901,11 @@ a:focus {
 @media (max-width: 30rem) {
 	.hero-forma--3,
 	.hero-forma--4,
-	.hero-forma--7 {
+	.hero-forma--7,
+	.hero-forma--13,
+	.hero-forma--14,
+	.hero-forma--15,
+	.hero-forma--18 {
 		display: none;
 	}
 }
@@ -1248,55 +1311,314 @@ a:focus {
 }
 
 /* ==========================================================================
-   Portada — Sobre mí / Contacto (provisional)
+   Portada — Sobre mí
    ==========================================================================
 
-   Todavía sin diseño propio (sin tarjetas, esferas ni maquetación
-   particular) — ya forman parte de .portada-oscura para no repetir la
-   costura de la zona oscura cuando se diseñen, pero por ahora solo llevan
-   el ancho de contenido habitual y el color de texto necesario para
-   leerse sobre el fondo compartido. Sustituir este bloque al diseñarlas.
+   Última sección "de contenido" de la zona oscura: una sola tarjeta de
+   vidrio con foto redonda (opcional) y biografía. Sin fondo ni esferas
+   propias —usa las de .portada-oscura-fondo—, igual que Pilares y
+   Proyectos. Sin encabezado visible: la tarjeta ya se explica sola: el
+   <h2> queda como .screen-reader-text solo para el nombre accesible de la
+   sección (ver aria-labelledby en front-page.php).
    ========================================================================== */
-.portada-sobre-mi,
-.portada-contacto {
+.portada-sobre-mi {
 	position: relative;
 	max-width: var(--ancho-contenido);
 	margin: 0 auto;
 	padding: clamp(3rem, 8vw, 6rem) var(--espacio-md);
 }
 
-.portada-sobre-mi .seccion-titulo,
-.portada-contacto .seccion-titulo {
-	margin: 0 0 1rem;
-	font-size: clamp(1.75rem, 4vw, 2.5rem);
+.sobre-mi-eyebrow {
+	margin: 0 0 1.5rem;
+	font-family: var(--fuente-mono);
+	font-size: 0.8125rem;
+	letter-spacing: 0.05em;
+	color: var(--color-primario-claro);
+	text-align: center;
+}
+
+.sobre-mi-tarjeta {
+	--sobre-mi-tarjeta-fondo: rgba(6, 13, 26, 0.55);
+	--sobre-mi-tarjeta-borde: rgba(255, 255, 255, 0.12);
+
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: clamp(1.75rem, 4vw, 3rem);
+	border-radius: 1.5rem;
+	background: var(--sobre-mi-tarjeta-fondo);
+	border: 1px solid var(--sobre-mi-tarjeta-borde);
+	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(20px) saturate(150%);
+	-webkit-backdrop-filter: blur(20px) saturate(150%);
+	padding: clamp(1.75rem, 4vw, 3rem);
+}
+
+/* --- Foto: anillo degradado + resplandor, mismos tonos que el marco del
+   hero (--color-primario → --color-acento-purpura) --- */
+.sobre-mi-foto {
+	/* Derivados con transparencia; valor por defecto en rgba(), reescritos a
+	   color-mix() bajo @supports al final del archivo. */
+	--sobre-mi-foto-resplandor-a: rgba(37, 99, 235, 0.5);
+	--sobre-mi-foto-resplandor-b: rgba(138, 127, 244, 0.35);
+
+	flex: 0 0 auto;
+	width: 15.625rem;
+	max-width: 100%;
+	margin: 0 auto;
+	padding: 5px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, var(--color-primario), var(--color-acento-purpura));
+	animation: sobre-mi-foto-brillo 3s ease-in-out infinite;
+}
+
+@keyframes sobre-mi-foto-brillo {
+	0%, 100% { box-shadow: 0 0 30px var(--sobre-mi-foto-resplandor-a); }
+	50% { box-shadow: 0 0 50px var(--sobre-mi-foto-resplandor-b); }
+}
+
+.sobre-mi-foto img,
+.sobre-mi-foto-marcador {
+	display: block;
+	width: 100%;
+	aspect-ratio: 1 / 1;
+	object-fit: cover;
+	border-radius: 50%;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	box-shadow:
+		0 0 0 1px rgba(255, 255, 255, 0.08),
+		0 0 55px var(--sobre-mi-foto-resplandor-a),
+		0 0 90px var(--sobre-mi-foto-resplandor-b);
+}
+
+/* Marcador mientras no haya foto real (ver front-page.php): mismo anillo y
+   resplandor que la foto, para que la tarjeta no se vea a medio terminar
+   antes de subir una desde ACF. */
+.sobre-mi-foto-marcador {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.06);
+	color: rgba(255, 255, 255, 0.45);
+}
+
+.sobre-mi-texto {
+	flex: 1 1 20rem;
+	max-width: 42ch;
+	margin: 0 auto;
+	font-size: 1.0625rem;
+	line-height: 1.75;
+	color: rgba(255, 255, 255, 0.82);
+}
+
+.sobre-mi-texto p {
+	margin: 0 0 1.1rem;
+}
+
+.sobre-mi-texto p:last-child {
+	margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sobre-mi-foto {
+		animation: none;
+	}
+}
+
+/* Sin soporte de backdrop-filter: tarjeta con fondo sólido. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.sobre-mi-tarjeta {
+		background: var(--color-vidrio);
+	}
+}
+
+/* ==========================================================================
+   Portada — Contacto
+   ==========================================================================
+
+   Última sección de la portada: una tarjeta de vidrio a dos columnas —
+   datos de contacto con icono a la izquierda, formulario real a la
+   derecha (envía correo vía wp_mail(), ver
+   portafolio_procesar_formulario_contacto() en functions.php)—, que se
+   apilan en pantallas estrechas. Sin fondo ni esferas propias —usa las de
+   .portada-oscura-fondo—, igual que el resto de la zona oscura.
+   ========================================================================== */
+.portada-contacto {
+	position: relative;
+	max-width: var(--ancho-contenido);
+	margin: 0 auto;
+	padding: clamp(4rem, 10vw, 7rem) var(--espacio-md);
+}
+
+.contacto-tarjeta {
+	--contacto-tarjeta-fondo: rgba(6, 13, 26, 0.55);
+	--contacto-tarjeta-borde: rgba(255, 255, 255, 0.14);
+
+	position: relative;
+	max-width: 56rem;
+	margin: 0 auto;
+	display: flex;
+	flex-wrap: wrap;
+	gap: clamp(2rem, 5vw, 3rem);
+	border-radius: 1.75rem;
+	background: var(--contacto-tarjeta-fondo);
+	border: 1px solid var(--contacto-tarjeta-borde);
+	box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(24px) saturate(160%);
+	-webkit-backdrop-filter: blur(24px) saturate(160%);
+	padding: clamp(2.25rem, 5vw, 3.5rem);
+}
+
+/* --- Columna izquierda: título + datos --- */
+.contacto-info {
+	flex: 1 1 16rem;
+}
+
+.contacto-eyebrow {
+	margin: 0;
+	font-family: var(--fuente-mono);
+	font-size: 0.8125rem;
+	letter-spacing: 0.05em;
+	color: var(--color-primario-claro);
+}
+
+.contacto-titulo {
+	margin: 0.75rem 0 2rem;
+	font-size: clamp(1.75rem, 4vw, 2.25rem);
 	font-weight: 700;
 	letter-spacing: -0.01em;
 	color: var(--color-fondo);
 }
 
-.sobre-mi-bio,
-.contacto-intro,
-.contacto-etiqueta {
-	color: rgba(255, 255, 255, 0.78);
-}
-
 .contacto-datos {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
 	list-style: none;
-	margin: 1rem 0 0;
+	margin: 0;
 	padding: 0;
 }
 
-.contacto-dato + .contacto-dato {
-	margin-top: 0.5rem;
+.contacto-dato {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	font-size: 1rem;
+	color: rgba(255, 255, 255, 0.85);
+}
+
+/* Los iconos son aria-hidden en el HTML; la etiqueta ("Email:", etc.) va
+   como .screen-reader-text justo después, así que el icono no necesita
+   texto alternativo propio. */
+.contacto-dato svg {
+	flex: none;
+	color: var(--color-primario-claro);
 }
 
 .contacto-dato a {
-	color: var(--color-primario-claro);
+	color: inherit;
+	text-decoration: none;
 }
 
 .contacto-dato a:hover,
 .contacto-dato a:focus {
 	color: var(--color-fondo);
+	text-decoration: underline;
+}
+
+/* --- Columna derecha: formulario --- */
+.formulario-contacto {
+	flex: 1 1 18rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.formulario-campo {
+	margin: 0;
+}
+
+/* Honeypot: campo trampa para bots, oculto visualmente pero presente en el
+   DOM (a diferencia de display:none, los rastreadores más simples sí lo
+   rellenan). Ver portafolio_procesar_formulario_contacto() en
+   functions.php. */
+.formulario-honeypot {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.formulario-contacto input[type="text"],
+.formulario-contacto input[type="email"],
+.formulario-contacto textarea {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.8rem 1rem;
+	border-radius: 0.625rem;
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	color: var(--color-fondo);
+	font-size: 0.9375rem;
+	font-family: inherit;
+	outline: none;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.formulario-contacto textarea {
+	resize: vertical;
+}
+
+.formulario-contacto input::placeholder,
+.formulario-contacto textarea::placeholder {
+	color: rgba(255, 255, 255, 0.45);
+}
+
+.formulario-contacto input:focus-visible,
+.formulario-contacto textarea:focus-visible {
+	border-color: var(--color-primario-claro);
+	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+.formulario-contacto .boton {
+	align-self: flex-start;
+}
+
+/* Confirmación de envío/error: colores semánticos de estado (verde/rojo),
+   deliberadamente fuera de la paleta de marca — aquí no comunican
+   identidad visual, comunican un resultado, y ese es el par de colores
+   que cualquier persona espera para "correcto/incorrecto". */
+.formulario-mensaje {
+	margin: 0;
+	padding: 0.75rem 1rem;
+	border-radius: 0.625rem;
+	font-size: 0.9375rem;
+}
+
+.formulario-mensaje--exito {
+	background: rgba(34, 197, 94, 0.15);
+	border: 1px solid rgba(34, 197, 94, 0.4);
+	color: #bbf7d0;
+}
+
+.formulario-mensaje--error {
+	background: rgba(239, 68, 68, 0.15);
+	border: 1px solid rgba(239, 68, 68, 0.4);
+	color: #fecaca;
+}
+
+/* Sin soporte de backdrop-filter: tarjeta con fondo sólido. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.contacto-tarjeta {
+		background: var(--color-vidrio);
+	}
 }
 
 /* ==========================================================================
@@ -1334,6 +1656,7 @@ a:focus {
 		--hero-forma-ambar: oklch(76% 0.17 70 / 0.55);
 		--hero-forma-cian: oklch(80% 0.14 200 / 0.5);
 		--hero-forma-rosa: oklch(62% 0.21 350 / 0.5);
+		--hero-forma-esmeralda: oklch(74% 0.18 152 / 0.5);
 	}
 }
 
@@ -1412,6 +1735,19 @@ a:focus {
 
 	.proyecto:nth-child(3n+3) {
 		--proyecto-acento-resplandor: color-mix(in oklab, var(--color-acento-purpura) 35%, transparent);
+	}
+
+	.sobre-mi-tarjeta {
+		--sobre-mi-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 55%, transparent);
+	}
+
+	.sobre-mi-foto {
+		--sobre-mi-foto-resplandor-a: color-mix(in oklab, var(--color-primario) 50%, transparent);
+		--sobre-mi-foto-resplandor-b: color-mix(in oklab, var(--color-acento-purpura) 35%, transparent);
+	}
+
+	.contacto-tarjeta {
+		--contacto-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 55%, transparent);
 	}
 }
 

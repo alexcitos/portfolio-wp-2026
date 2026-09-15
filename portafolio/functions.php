@@ -277,6 +277,15 @@ function portafolio_registrar_campos_datos_del_sitio() {
 					'media_upload' => 0,
 					'instructions' => __( 'Texto de la sección "Sobre mí".', 'portafolio' ),
 				),
+				array(
+					'key'           => 'field_dds_sobre_mi_foto',
+					'label'         => __( 'Foto', 'portafolio' ),
+					'name'          => 'sobre_mi_foto',
+					'type'          => 'image',
+					'return_format' => 'array',
+					'preview_size'  => 'medium',
+					'instructions'  => __( 'Foto redonda junto a la biografía. Si se deja vacía, la sección se muestra sin foto.', 'portafolio' ),
+				),
 			),
 		)
 	);
@@ -328,3 +337,71 @@ function portafolio_registrar_campos_detalles_proyecto() {
 	);
 }
 add_action( 'acf/init', 'portafolio_registrar_campos_detalles_proyecto' );
+
+/**
+ * Procesa el envío del formulario de contacto de la portada.
+ *
+ * Patrón Post-Redirect-Get: valida nonce y honeypot, envía el correo con
+ * wp_mail() y redirige de vuelta a #contacto con un parámetro de estado en
+ * la URL — así, recargar la página tras enviar no vuelve a reenviar el
+ * formulario. No depende de ningún plugin de formularios: el tema entero
+ * está construido sin dependencias más allá de ACF (ver CLAUDE.md).
+ */
+function portafolio_procesar_formulario_contacto() {
+	if ( ! is_front_page() || ! isset( $_POST['portafolio_contacto_enviado'] ) ) {
+		return;
+	}
+
+	$nonce_valido = isset( $_POST['portafolio_contacto_nonce'] )
+		&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['portafolio_contacto_nonce'] ) ), 'portafolio_contacto' );
+
+	// Honeypot: campo oculto (ver formulario-honeypot en style.css) que un
+	// humano nunca rellena. Si viene relleno, respondemos como si hubiera
+	// ido bien para no delatarle el filtro al bot.
+	$es_spam = ! empty( $_POST['portafolio_web'] );
+
+	if ( $es_spam ) {
+		wp_safe_redirect( home_url( '/?contacto=enviado#contacto' ) );
+		exit;
+	}
+
+	if ( ! $nonce_valido ) {
+		wp_safe_redirect( home_url( '/?contacto=error#contacto' ) );
+		exit;
+	}
+
+	$nombre  = isset( $_POST['contacto_nombre'] ) ? sanitize_text_field( wp_unslash( $_POST['contacto_nombre'] ) ) : '';
+	$email   = isset( $_POST['contacto_email'] ) ? sanitize_email( wp_unslash( $_POST['contacto_email'] ) ) : '';
+	$mensaje = isset( $_POST['contacto_mensaje'] ) ? sanitize_textarea_field( wp_unslash( $_POST['contacto_mensaje'] ) ) : '';
+
+	if ( '' === $nombre || ! is_email( $email ) || '' === $mensaje ) {
+		wp_safe_redirect( home_url( '/?contacto=error#contacto' ) );
+		exit;
+	}
+
+	$portada_id = (int) get_option( 'page_on_front' );
+	$destino    = get_field( 'email', $portada_id );
+	$destino    = $destino ? $destino : get_option( 'admin_email' );
+
+	$asunto = sprintf(
+		/* translators: %s: nombre de quien escribe. */
+		__( 'Nuevo mensaje de contacto de %s', 'portafolio' ),
+		$nombre
+	);
+	$cuerpo = sprintf(
+		"%1\$s\n\n— %2\$s <%3\$s>",
+		$mensaje,
+		$nombre,
+		$email
+	);
+	// Reply-To (no From): que el remitente real sea del propio dominio
+	// evita que servidores de correo rechacen o marquen como spam un From
+	// con un dominio ajeno.
+	$cabeceras = array( 'Reply-To: ' . $nombre . ' <' . $email . '>' );
+
+	$enviado = wp_mail( $destino, $asunto, $cuerpo, $cabeceras );
+
+	wp_safe_redirect( home_url( '/?contacto=' . ( $enviado ? 'enviado' : 'error' ) . '#contacto' ) );
+	exit;
+}
+add_action( 'template_redirect', 'portafolio_procesar_formulario_contacto' );
