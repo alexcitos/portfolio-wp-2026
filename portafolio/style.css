@@ -40,6 +40,17 @@ Text Domain: portafolio
 	--color-acento-lavanda: #9798f9;
 	--color-acento-purpura: #8a7ff4;
 
+	/* Alerta (validación de formularios): un rojo con un 30% de
+	   --color-acento-violeta mezclado dentro, para que el error se lea
+	   emparentado con el violeta de la marca en vez de un rojo puro y
+	   genérico. Mismo esquema de respaldo que el resto del archivo: hex/rgba
+	   aquí, color-mix() bajo @supports más abajo (mismos valores, calculados
+	   en oklab en vez de aproximados a mano). */
+	--color-alerta: #d84c74;
+	--color-alerta-claro: #f3c9d5; /* --color-alerta aclarado, para texto legible sobre el panel oscuro. */
+	--color-alerta-fondo: rgba(216, 76, 116, 0.15);
+	--color-alerta-borde: rgba(216, 76, 116, 0.4);
+
 	/* Derivados de :root con transparencia (sombra y anillo de foco del
 	   botón primario). Mismo esquema de respaldo: rgb() por defecto,
 	   color-mix() más abajo bajo @supports. */
@@ -1657,19 +1668,21 @@ a:focus {
 }
 
 .formulario-mensaje--error {
-	background: rgba(239, 68, 68, 0.15);
-	border: 1px solid rgba(239, 68, 68, 0.4);
-	color: #fecaca;
+	background: var(--color-alerta-fondo);
+	border: 1px solid var(--color-alerta-borde);
+	color: var(--color-alerta-claro);
 }
 
-/* Error específico junto a cada campo (ver mostrarErroresCampos() en
+/* Error específico junto a cada campo (ver mostrarErrorCampo() en
    js/formulario-contacto.js), no solo el mensaje general de arriba. Vacío
-   por defecto y oculto con :empty, igual que .formulario-mensaje. */
+   por defecto y oculto con :empty, igual que .formulario-mensaje. Mismo
+   --color-alerta-* que el mensaje general de error, para que ambos se
+   lean como el mismo lenguaje de "error" en vez de dos rojos distintos. */
 .formulario-campo-error {
 	display: block;
 	margin-top: 0.375rem;
 	font-size: 0.8125rem;
-	color: #fecaca;
+	color: var(--color-alerta-claro);
 }
 
 .formulario-campo-error:empty {
@@ -1678,7 +1691,16 @@ a:focus {
 
 .formulario-contacto input[aria-invalid="true"],
 .formulario-contacto textarea[aria-invalid="true"] {
-	border-color: rgba(239, 68, 68, 0.6);
+	border-color: var(--color-alerta);
+}
+
+/* Foco sobre un campo inválido: mismo anillo que el foco normal pero
+   teñido de --color-alerta en vez de --color-primario-claro, para no
+   perder la señal de error al tabular hasta el campo. */
+.formulario-contacto input[aria-invalid="true"]:focus-visible,
+.formulario-contacto textarea[aria-invalid="true"]:focus-visible {
+	border-color: var(--color-alerta);
+	box-shadow: 0 0 0 3px var(--color-alerta-fondo);
 }
 
 /* Sin soporte de backdrop-filter: tarjeta con fondo sólido. */
@@ -1732,6 +1754,13 @@ a:focus {
 		--color-primario-claro: color-mix(in oklab, var(--color-primario) 45%, var(--color-fondo));
 		--sombra-boton: color-mix(in srgb, var(--color-primario) 35%, transparent);
 		--anillo-foco: color-mix(in srgb, var(--color-fondo) 60%, transparent);
+
+		/* Mismos valores que el respaldo de arriba, calculados en oklab en
+		   vez de aproximados a mano. */
+		--color-alerta: color-mix(in oklab, var(--color-acento-violeta) 30%, #ef4444);
+		--color-alerta-claro: color-mix(in oklab, var(--color-alerta) 30%, white);
+		--color-alerta-fondo: color-mix(in srgb, var(--color-alerta) 15%, transparent);
+		--color-alerta-borde: color-mix(in srgb, var(--color-alerta) 40%, transparent);
 	}
 
 	.sitio-cabecera {

@@ -73,6 +73,22 @@ function portafolio_assets() {
 			$version,
 			true
 		);
+
+		// La URL de admin-ajax.php se pasa por wp_localize_script() en vez
+		// de leerla del propio <form> con formulario.action: el formulario
+		// tiene un <input type="hidden" name="action" ...> (obligatorio
+		// para que admin-ajax.php enrute a la acción correcta) y, por las
+		// "named form controls", un control con name="action" tapa la
+		// propiedad nativa HTMLFormElement.action —formulario.action deja
+		// de devolver la URL como texto y pasa a devolver ese <input>—. Ver
+		// js/formulario-contacto.js.
+		wp_localize_script(
+			'portafolio-formulario-contacto',
+			'portafolioContacto',
+			array(
+				'urlAjax' => admin_url( 'admin-ajax.php' ),
+			)
+		);
 	}
 }
 add_action( 'wp_enqueue_scripts', 'portafolio_assets' );
@@ -477,19 +493,26 @@ function portafolio_ajax_enviar_contacto() {
 	$mensaje = isset( $_POST['contacto_mensaje'] ) ? sanitize_textarea_field( wp_unslash( $_POST['contacto_mensaje'] ) ) : '';
 
 	// Errores por campo (no un mensaje genérico): la clave es el "name" del
-	// input, para que el JS los asocie al campo correspondiente.
+	// input, para que el JS los asocie al campo correspondiente. Mismo
+	// texto que la validación en vivo de js/formulario-contacto.js, para
+	// que el mensaje no cambie según si lo atrapó el cliente o el
+	// servidor (defensa en profundidad: el JS ya filtra estos casos antes
+	// de enviar, esto cubre a quien tenga JavaScript desactivado o
+	// manipule la petición).
 	$errores = array();
 
 	if ( '' === $nombre ) {
-		$errores['contacto_nombre'] = __( 'Escribe tu nombre.', 'portafolio' );
+		$errores['contacto_nombre'] = __( 'Este campo es obligatorio.', 'portafolio' );
 	}
 
-	if ( '' === $email || ! is_email( $email ) ) {
-		$errores['contacto_email'] = __( 'Escribe un email válido.', 'portafolio' );
+	if ( '' === $email ) {
+		$errores['contacto_email'] = __( 'Este campo es obligatorio.', 'portafolio' );
+	} elseif ( ! is_email( $email ) ) {
+		$errores['contacto_email'] = __( 'Ingresa un email válido.', 'portafolio' );
 	}
 
 	if ( '' === $mensaje ) {
-		$errores['contacto_mensaje'] = __( 'Escribe un mensaje.', 'portafolio' );
+		$errores['contacto_mensaje'] = __( 'Este campo es obligatorio.', 'portafolio' );
 	}
 
 	if ( ! empty( $errores ) ) {

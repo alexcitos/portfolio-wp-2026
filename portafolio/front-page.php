@@ -341,7 +341,11 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 					// el navegador igualmente hace POST a admin-ajax.php y el
 					// correo se envía (degradación aceptable: sin JS solo se ve
 					// la respuesta JSON en vez del panel con el mensaje). ?>
-				<form class="formulario-contacto" method="post" action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>">
+				<?php // novalidate: la validación la controla js/formulario-contacto.js
+				// (borde de alerta + mensaje junto al campo); sin esto, el
+				// navegador mostraría además su propio globo de validación
+				// nativo, fuera del panel de vidrio y con su propio estilo. ?>
+			<form class="formulario-contacto" method="post" action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" novalidate>
 					<?php wp_nonce_field( 'portafolio_contacto', 'portafolio_contacto_nonce' ); ?>
 					<input type="hidden" name="action" value="portafolio_enviar_contacto">
 
