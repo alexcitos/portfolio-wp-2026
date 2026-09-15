@@ -758,8 +758,8 @@ a:focus {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	min-height: clamp(34rem, 82vh, 48rem);
-	padding: var(--espacio-xl) var(--espacio-md);
+	min-height: clamp(28rem, 68vh, 40rem);
+	padding: clamp(2.5rem, 6vw, var(--espacio-xl)) var(--espacio-md);
 }
 
 /* --- Panel de vidrio --- */
@@ -941,6 +941,15 @@ a:focus {
 @media (max-width: 40rem) {
 	.hero-panel-eco {
 		display: none;
+	}
+
+	/* En móvil el panel es angosto y bastante más bajo que 68vh: con la
+	   sección centrada verticalmente eso dejaba un hueco enorme por encima
+	   y por debajo del panel. Se quita el min-height (la sección pasa a
+	   medir lo que ocupa el panel + su padding) y se recorta el padding. */
+	.portada-hero {
+		min-height: auto;
+		padding: 2.5rem var(--espacio-md) 1.75rem;
 	}
 }
 
