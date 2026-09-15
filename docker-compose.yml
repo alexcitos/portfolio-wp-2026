@@ -60,6 +60,19 @@ services:
       PMA_PORT: 3306
       UPLOAD_LIMIT: 64M
 
+  # Servidor SMTP de pruebas: atrapa todo el correo saliente de WordPress
+  # (ver hook phpmailer_init en functions.php) sin entregarlo de verdad, así
+  # se puede revisar el envío del formulario de contacto en local. Interfaz
+  # web en http://localhost:8025; el puerto SMTP (1025) también se publica
+  # al host por si hace falta apuntarle algo desde fuera de Docker.
+  mailpit:
+    image: axllent/mailpit:v1.31.1
+    container_name: portafolio_mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
 volumes:
   db_data:
   wp_core:

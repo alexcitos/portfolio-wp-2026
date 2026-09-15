@@ -1626,15 +1626,28 @@ a:focus {
 	align-self: flex-start;
 }
 
+/* Botón mientras se envía (ver js/formulario-contacto.js): deshabilitado
+   para evitar doble envío, con la misma opacidad reducida que el resto del
+   sitio usa para estados inactivos. */
+.formulario-contacto .boton:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
 /* Confirmación de envío/error: colores semánticos de estado (verde/rojo),
    deliberadamente fuera de la paleta de marca — aquí no comunican
    identidad visual, comunican un resultado, y ese es el par de colores
-   que cualquier persona espera para "correcto/incorrecto". */
+   que cualquier persona espera para "correcto/incorrecto". Región
+   aria-live (ver formulario en front-page.php): vacía al cargar, así que
+   :empty la oculta para no dejar una caja en blanco.  */
 .formulario-mensaje {
 	margin: 0;
-	padding: 0.75rem 1rem;
 	border-radius: 0.625rem;
 	font-size: 0.9375rem;
+}
+
+.formulario-mensaje:not(:empty) {
+	padding: 0.75rem 1rem;
 }
 
 .formulario-mensaje--exito {
@@ -1647,6 +1660,25 @@ a:focus {
 	background: rgba(239, 68, 68, 0.15);
 	border: 1px solid rgba(239, 68, 68, 0.4);
 	color: #fecaca;
+}
+
+/* Error específico junto a cada campo (ver mostrarErroresCampos() en
+   js/formulario-contacto.js), no solo el mensaje general de arriba. Vacío
+   por defecto y oculto con :empty, igual que .formulario-mensaje. */
+.formulario-campo-error {
+	display: block;
+	margin-top: 0.375rem;
+	font-size: 0.8125rem;
+	color: #fecaca;
+}
+
+.formulario-campo-error:empty {
+	display: none;
+}
+
+.formulario-contacto input[aria-invalid="true"],
+.formulario-contacto textarea[aria-invalid="true"] {
+	border-color: rgba(239, 68, 68, 0.6);
 }
 
 /* Sin soporte de backdrop-filter: tarjeta con fondo sólido. */

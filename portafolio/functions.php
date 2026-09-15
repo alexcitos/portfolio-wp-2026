@@ -62,6 +62,18 @@ function portafolio_assets() {
 		$version,
 		true
 	);
+
+	// Envío por AJAX del formulario de contacto (solo existe en portada).
+	// Ver portafolio_ajax_enviar_contacto() más abajo.
+	if ( is_front_page() ) {
+		wp_enqueue_script(
+			'portafolio-formulario-contacto',
+			get_template_directory_uri() . '/js/formulario-contacto.js',
+			array(),
+			$version,
+			true
+		);
+	}
 }
 add_action( 'wp_enqueue_scripts', 'portafolio_assets' );
 
@@ -364,44 +376,124 @@ function portafolio_registrar_campos_detalles_proyecto() {
 add_action( 'acf/init', 'portafolio_registrar_campos_detalles_proyecto' );
 
 /**
- * Procesa el envío del formulario de contacto de la portada.
+ * En local, envía todo el correo saliente al SMTP de Mailpit en vez de
+ * intentar entregarlo de verdad.
  *
- * Patrón Post-Redirect-Get: valida nonce y honeypot, envía el correo con
- * wp_mail() y redirige de vuelta a #contacto con un parámetro de estado en
- * la URL — así, recargar la página tras enviar no vuelve a reenviar el
- * formulario. No depende de ningún plugin de formularios: el tema entero
- * está construido sin dependencias más allá de ACF (ver CLAUDE.md).
+ * Sin este hook, wp_mail() usa PHP mail(), que en el contenedor de
+ * WordPress no tiene ningún MTA configurado y siempre falla en silencio
+ * (ver portafolio_procesar_formulario_contacto() más abajo). Mailpit
+ * (servicio "mailpit" en docker-compose.yml) atrapa el correo y lo muestra
+ * en http://localhost:8025 sin enviarlo de verdad — así se puede probar el
+ * formulario de contacto sin plugins de SMTP ni un servidor de correo real.
+ *
+ * "mailpit" como host (no "localhost") porque en la red interna de Docker
+ * Compose los contenedores se resuelven entre sí por nombre de servicio.
+ *
+ * Restringido a WP_DEBUG (activo en docker-compose.yml vía
+ * WORDPRESS_DEBUG) para que esto nunca se active fuera de local: en un
+ * VPS de producción no existe ningún host "mailpit" y WP_DEBUG estará
+ * apagado, así que wp_mail() vuelve a su comportamiento normal.
+ *
+ * @param PHPMailer $phpmailer Instancia de PHPMailer, por referencia.
  */
-function portafolio_procesar_formulario_contacto() {
-	if ( ! is_front_page() || ! isset( $_POST['portafolio_contacto_enviado'] ) ) {
+function portafolio_smtp_mailpit( $phpmailer ) {
+	if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
 		return;
 	}
 
+	$phpmailer->isSMTP();
+	$phpmailer->Host        = 'mailpit';
+	$phpmailer->Port        = 1025;
+	$phpmailer->SMTPAuth    = false;
+	$phpmailer->SMTPSecure  = '';
+	$phpmailer->SMTPAutoTLS = false;
+}
+add_action( 'phpmailer_init', 'portafolio_smtp_mailpit' );
+
+/**
+ * Acompaña a portafolio_smtp_mailpit(): en local, WordPress arma el
+ * remitente por defecto como wordpress@<host de home_url()>, y ese host es
+ * "localhost" —sin punto—, que PHPMailer rechaza como dirección inválida
+ * antes de intentar nada (Mailpit nunca llega a recibir el correo). Un
+ * dominio con punto, aunque no exista de verdad, basta para pasar esa
+ * validación. Mismo guard de WP_DEBUG que el hook de arriba: en
+ * producción, home_url() ya tiene un dominio real y esto no hace falta.
+ *
+ * @param string $correo_remitente Remitente por defecto de wp_mail().
+ * @return string
+ */
+function portafolio_smtp_mailpit_from( $correo_remitente ) {
+	if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+		return $correo_remitente;
+	}
+
+	return 'wordpress@portafolio.test';
+}
+add_filter( 'wp_mail_from', 'portafolio_smtp_mailpit_from' );
+
+/**
+ * Procesa el envío del formulario de contacto de la portada vía AJAX.
+ *
+ * Endpoint elegido: admin-ajax.php con las acciones wp_ajax_nopriv_* /
+ * wp_ajax_* (en vez de una ruta REST personalizada), porque no hace falta
+ * autenticación ni un formato de recurso propio: es un único endpoint de
+ * "acción" que valida, sanitiza y envía correo, justo el caso de uso para
+ * el que admin-ajax.php existe. No depende de ningún plugin de
+ * formularios: el tema entero está construido sin dependencias más allá de
+ * ACF (ver CLAUDE.md).
+ *
+ * El JavaScript (js/formulario-contacto.js) intercepta el submit del
+ * formulario y hace fetch() contra esta acción; la respuesta siempre es
+ * JSON vía wp_send_json_success()/wp_send_json_error(), con:
+ * - éxito: { mensaje: string }
+ * - error de validación: { errores: { <name-del-campo>: string } }
+ * - error genérico (nonce caducado, fallo de wp_mail): { mensaje: string }
+ */
+function portafolio_ajax_enviar_contacto() {
 	$nonce_valido = isset( $_POST['portafolio_contacto_nonce'] )
 		&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['portafolio_contacto_nonce'] ) ), 'portafolio_contacto' );
 
-	// Honeypot: campo oculto (ver formulario-honeypot en style.css) que un
-	// humano nunca rellena. Si viene relleno, respondemos como si hubiera
-	// ido bien para no delatarle el filtro al bot.
+	// Honeypot: campo oculto con CSS (ver .formulario-honeypot en
+	// style.css, clip en vez de display:none) que un humano nunca rellena.
+	// Si viene relleno, respondemos como si hubiera ido bien —sin enviar
+	// el correo— para no delatarle el filtro al bot.
 	$es_spam = ! empty( $_POST['portafolio_web'] );
 
 	if ( $es_spam ) {
-		wp_safe_redirect( home_url( '/?contacto=enviado#contacto' ) );
-		exit;
+		wp_send_json_success(
+			array( 'mensaje' => __( 'Gracias, tu mensaje se envió correctamente. Te responderé pronto.', 'portafolio' ) )
+		);
 	}
 
 	if ( ! $nonce_valido ) {
-		wp_safe_redirect( home_url( '/?contacto=error#contacto' ) );
-		exit;
+		wp_send_json_error(
+			array( 'mensaje' => __( 'Tu sesión caducó. Recarga la página e inténtalo de nuevo.', 'portafolio' ) ),
+			403
+		);
 	}
 
 	$nombre  = isset( $_POST['contacto_nombre'] ) ? sanitize_text_field( wp_unslash( $_POST['contacto_nombre'] ) ) : '';
 	$email   = isset( $_POST['contacto_email'] ) ? sanitize_email( wp_unslash( $_POST['contacto_email'] ) ) : '';
 	$mensaje = isset( $_POST['contacto_mensaje'] ) ? sanitize_textarea_field( wp_unslash( $_POST['contacto_mensaje'] ) ) : '';
 
-	if ( '' === $nombre || ! is_email( $email ) || '' === $mensaje ) {
-		wp_safe_redirect( home_url( '/?contacto=error#contacto' ) );
-		exit;
+	// Errores por campo (no un mensaje genérico): la clave es el "name" del
+	// input, para que el JS los asocie al campo correspondiente.
+	$errores = array();
+
+	if ( '' === $nombre ) {
+		$errores['contacto_nombre'] = __( 'Escribe tu nombre.', 'portafolio' );
+	}
+
+	if ( '' === $email || ! is_email( $email ) ) {
+		$errores['contacto_email'] = __( 'Escribe un email válido.', 'portafolio' );
+	}
+
+	if ( '' === $mensaje ) {
+		$errores['contacto_mensaje'] = __( 'Escribe un mensaje.', 'portafolio' );
+	}
+
+	if ( ! empty( $errores ) ) {
+		wp_send_json_error( array( 'errores' => $errores ), 422 );
 	}
 
 	$portada_id = (int) get_option( 'page_on_front' );
@@ -426,7 +518,16 @@ function portafolio_procesar_formulario_contacto() {
 
 	$enviado = wp_mail( $destino, $asunto, $cuerpo, $cabeceras );
 
-	wp_safe_redirect( home_url( '/?contacto=' . ( $enviado ? 'enviado' : 'error' ) . '#contacto' ) );
-	exit;
+	if ( ! $enviado ) {
+		wp_send_json_error(
+			array( 'mensaje' => __( 'No se pudo enviar el mensaje. Inténtalo de nuevo en unos minutos.', 'portafolio' ) ),
+			500
+		);
+	}
+
+	wp_send_json_success(
+		array( 'mensaje' => __( 'Gracias, tu mensaje se envió correctamente. Te responderé pronto.', 'portafolio' ) )
+	);
 }
-add_action( 'template_redirect', 'portafolio_procesar_formulario_contacto' );
+add_action( 'wp_ajax_portafolio_enviar_contacto', 'portafolio_ajax_enviar_contacto' );
+add_action( 'wp_ajax_nopriv_portafolio_enviar_contacto', 'portafolio_ajax_enviar_contacto' );

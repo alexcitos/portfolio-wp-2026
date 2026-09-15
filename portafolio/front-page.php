@@ -294,9 +294,11 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 			// los datos de contacto (con icono, sin etiqueta visible —el
 			// icono ya la transmite; queda como texto para lectores de
 			// pantalla) y un formulario real que envía correo por
-			// wp_mail() vía portafolio_procesar_formulario_contacto() en
-			// functions.php (patrón Post-Redirect-Get: el estado del envío
-			// llega como ?contacto=enviado|error en la URL).
+			// wp_mail() vía portafolio_ajax_enviar_contacto() en
+			// functions.php. El envío lo intercepta js/formulario-
+			// contacto.js con fetch() contra admin-ajax.php: sin recarga
+			// de página, botón deshabilitado mientras envía y mensajes
+			// (generales y por campo) inyectados en el propio panel.
 			// ----------------------------------------------------------- ?>
 		<section id="contacto" class="portada-contacto" aria-labelledby="contacto-titulo">
 			<div class="contacto-tarjeta">
@@ -332,36 +334,48 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 					</ul>
 				</div>
 
-				<form class="formulario-contacto" method="post" action="<?php echo esc_url( home_url( '/#contacto' ) ); ?>">
+				<?php // action="admin-ajax.php" + campo oculto "action": es el
+					// endpoint estándar de WordPress para peticiones AJAX propias
+					// del tema (sin ruta REST personalizada). El submit lo
+					// intercepta js/formulario-contacto.js; si JavaScript falla,
+					// el navegador igualmente hace POST a admin-ajax.php y el
+					// correo se envía (degradación aceptable: sin JS solo se ve
+					// la respuesta JSON en vez del panel con el mensaje). ?>
+				<form class="formulario-contacto" method="post" action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>">
 					<?php wp_nonce_field( 'portafolio_contacto', 'portafolio_contacto_nonce' ); ?>
-					<input type="hidden" name="portafolio_contacto_enviado" value="1">
+					<input type="hidden" name="action" value="portafolio_enviar_contacto">
 
+					<?php // Honeypot: oculto con CSS mediante recorte (clip), no con
+						// display:none —ver .formulario-honeypot en style.css—, para
+						// que los rastreadores más simples sí lo detecten como campo
+						// "normal" y lo rellenen. Se valida en
+						// portafolio_ajax_enviar_contacto() (functions.php). ?>
 					<p class="formulario-honeypot" aria-hidden="true">
 						<label for="portafolio_web">No rellenar este campo</label>
 						<input type="text" id="portafolio_web" name="portafolio_web" tabindex="-1" autocomplete="off">
 					</p>
 
-					<?php if ( isset( $_GET['contacto'] ) && 'enviado' === $_GET['contacto'] ) : ?>
-						<p class="formulario-mensaje formulario-mensaje--exito" role="status">
-							Gracias, tu mensaje se envió correctamente. Te responderé pronto.
-						</p>
-					<?php elseif ( isset( $_GET['contacto'] ) && 'error' === $_GET['contacto'] ) : ?>
-						<p class="formulario-mensaje formulario-mensaje--error" role="alert">
-							No se pudo enviar el mensaje. Revisa los datos e inténtalo de nuevo.
-						</p>
-					<?php endif; ?>
+					<?php // Región con aria-live="polite": el JS escribe aquí el
+						// mensaje general de éxito/error tras el fetch(), y un
+						// lector de pantalla lo anuncia solo. Vacío al cargar la
+						// página —.formulario-mensaje:empty la oculta en
+						// style.css— para no dejar una caja vacía visible. ?>
+					<p class="formulario-mensaje" aria-live="polite"></p>
 
 					<p class="formulario-campo">
 						<label class="screen-reader-text" for="contacto-nombre">Nombre</label>
-						<input type="text" id="contacto-nombre" name="contacto_nombre" placeholder="Nombre" required>
+						<input type="text" id="contacto-nombre" name="contacto_nombre" placeholder="Nombre" aria-describedby="contacto-nombre-error" required>
+						<span class="formulario-campo-error" id="contacto-nombre-error"></span>
 					</p>
 					<p class="formulario-campo">
 						<label class="screen-reader-text" for="contacto-email">Email</label>
-						<input type="email" id="contacto-email" name="contacto_email" placeholder="Email" required>
+						<input type="email" id="contacto-email" name="contacto_email" placeholder="Email" aria-describedby="contacto-email-error" required>
+						<span class="formulario-campo-error" id="contacto-email-error"></span>
 					</p>
 					<p class="formulario-campo">
 						<label class="screen-reader-text" for="contacto-mensaje">Mensaje</label>
-						<textarea id="contacto-mensaje" name="contacto_mensaje" rows="4" placeholder="Mensaje" required></textarea>
+						<textarea id="contacto-mensaje" name="contacto_mensaje" rows="4" placeholder="Mensaje" aria-describedby="contacto-mensaje-error" required></textarea>
+						<span class="formulario-campo-error" id="contacto-mensaje-error"></span>
 					</p>
 					<button type="submit" class="boton boton-primario">Enviar mensaje</button>
 				</form>
