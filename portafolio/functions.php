@@ -427,6 +427,35 @@ function portafolio_registrar_campos_detalles_proyecto() {
 					'type'         => 'url',
 					'instructions' => __( 'Para proyectos sin sitio público (p. ej. automatizaciones de n8n), puede apuntar a un repositorio de GitHub con el JSON exportado del workflow.', 'portafolio' ),
 				),
+				array(
+					'key'           => 'field_dp_contexto_proyecto',
+					'label'         => __( 'Contexto del proyecto', 'portafolio' ),
+					'name'          => 'contexto_proyecto',
+					'type'          => 'select',
+					'choices'       => array(
+						'personal' => __( 'Proyecto personal', 'portafolio' ),
+						'cliente'  => __( 'Cliente/Empresa', 'portafolio' ),
+					),
+					'default_value' => 'personal',
+					'allow_null'    => 0,
+					'ui'            => 1,
+				),
+				array(
+					'key'               => 'field_dp_nombre_cliente',
+					'label'             => __( 'Nombre del cliente', 'portafolio' ),
+					'name'              => 'nombre_cliente',
+					'type'              => 'text',
+					'instructions'      => __( 'Se muestra como "Cliente: [nombre]" debajo del título del proyecto.', 'portafolio' ),
+					'conditional_logic' => array(
+						array(
+							array(
+								'field'    => 'field_dp_contexto_proyecto',
+								'operator' => '==',
+								'value'    => 'cliente',
+							),
+						),
+					),
+				),
 			),
 		)
 	);

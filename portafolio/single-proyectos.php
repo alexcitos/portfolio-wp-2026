@@ -2,9 +2,9 @@
 /**
  * Plantilla de entrada individual del CPT "proyectos".
  *
- * Muestra título, imagen destacada, contenido completo, la categoría de
- * proyecto asignada, las tecnologías usadas y el enlace a repositorio/demo
- * cuando existe.
+ * Muestra título, contexto del proyecto (personal o cliente/empresa),
+ * imagen destacada, contenido completo, la categoría de proyecto asignada,
+ * las tecnologías usadas y el enlace a repositorio/demo cuando existe.
  *
  * @package Portafolio
  */
@@ -17,6 +17,8 @@ while ( have_posts() ) :
 	$portafolio_categorias         = get_the_terms( get_the_ID(), 'categoria_proyecto' );
 	$portafolio_tecnologias        = get_field( 'tecnologias_usadas' );
 	$portafolio_enlace_repo_demo   = get_field( 'enlace_repositorio_demo' );
+	$portafolio_contexto_proyecto  = get_field( 'contexto_proyecto' );
+	$portafolio_nombre_cliente     = get_field( 'nombre_cliente' );
 	?>
 
 	<main id="contenido" class="sitio-contenido">
@@ -24,6 +26,24 @@ while ( have_posts() ) :
 
 			<header class="proyecto-single-cabecera">
 				<h1 class="proyecto-single-titulo"><?php the_title(); ?></h1>
+
+				<?php if ( $portafolio_contexto_proyecto ) : ?>
+					<p class="proyecto-single-contexto">
+						<?php if ( 'cliente' === $portafolio_contexto_proyecto && $portafolio_nombre_cliente ) : ?>
+							<?php
+							printf(
+								/* translators: %s: nombre del cliente o empresa. */
+								esc_html__( 'Cliente: %s', 'portafolio' ),
+								esc_html( $portafolio_nombre_cliente )
+							);
+							?>
+						<?php elseif ( 'cliente' === $portafolio_contexto_proyecto ) : ?>
+							<?php esc_html_e( 'Cliente/Empresa', 'portafolio' ); ?>
+						<?php else : ?>
+							<?php esc_html_e( 'Proyecto personal', 'portafolio' ); ?>
+						<?php endif; ?>
+					</p>
+				<?php endif; ?>
 
 				<?php if ( $portafolio_categorias && ! is_wp_error( $portafolio_categorias ) ) : ?>
 					<ul class="proyecto-single-categorias">
