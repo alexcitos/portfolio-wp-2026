@@ -40,11 +40,11 @@ $portafolio_ubicacion   = $portafolio_ubicacion ? $portafolio_ubicacion : 'Ciuda
 <main id="contenido" class="portada">
 
 	<?php // ---------------------------------------------------------------
-		// Zona oscura (Hero + Pilares): comparten un único fondo y las
-		// mismas esferas animadas, concentradas arriba y desvanecidas hacia
-		// abajo con una máscara, para que no haya corte entre ambas
-		// secciones. Las esferas y las capas "eco" del panel son
-		// puramente decorativas (aria-hidden).
+		// Zona oscura (Hero + Pilares + Proyectos + Sobre mí + Contacto):
+		// toda la portada comparte un único fondo y las mismas esferas
+		// animadas, concentradas arriba y desvanecidas hacia abajo con una
+		// máscara, para que no haya corte entre secciones. Las esferas y
+		// las capas "eco" del panel son puramente decorativas (aria-hidden).
 		// --------------------------------------------------------------- ?>
 	<div class="portada-oscura">
 
@@ -53,6 +53,14 @@ $portafolio_ubicacion   = $portafolio_ubicacion ? $portafolio_ubicacion : 'Ciuda
 			<span class="hero-forma hero-forma--2"></span>
 			<span class="hero-forma hero-forma--3"></span>
 			<span class="hero-forma hero-forma--4"></span>
+			<span class="hero-forma hero-forma--5"></span>
+			<span class="hero-forma hero-forma--6"></span>
+			<span class="hero-forma hero-forma--7"></span>
+			<span class="hero-forma hero-forma--8"></span>
+			<span class="hero-forma hero-forma--9"></span>
+			<span class="hero-forma hero-forma--10"></span>
+			<span class="hero-forma hero-forma--11"></span>
+			<span class="hero-forma hero-forma--12"></span>
 		</div>
 
 		<section class="portada-hero" aria-labelledby="hero-titulo">
@@ -82,12 +90,6 @@ $portafolio_ubicacion   = $portafolio_ubicacion ? $portafolio_ubicacion : 'Ciuda
 			// identifica el pilar.
 			// ----------------------------------------------------------- ?>
 		<section class="portada-pilares" aria-labelledby="pilares-titulo">
-
-			<div class="pilares-fondo" aria-hidden="true">
-				<span class="pilares-forma pilares-forma--1"></span>
-				<span class="pilares-forma pilares-forma--2"></span>
-				<span class="pilares-forma pilares-forma--3"></span>
-			</div>
 
 			<div class="pilares-contenedor">
 				<div class="pilares-cabecera">
@@ -142,84 +144,102 @@ $portafolio_ubicacion   = $portafolio_ubicacion ? $portafolio_ubicacion : 'Ciuda
 			</div>
 		</section>
 
-	</div><?php // Fin .portada-oscura ?>
-
-	<div class="portada-cuerpo">
-
 		<?php // -----------------------------------------------------------
-			// Proyectos destacados (últimos 4 del CPT "proyectos")
+			// Proyectos destacados (últimos 4 del CPT "proyectos"): tercera
+			// sección dentro de la misma zona oscura que Hero y Pilares. Sin
+			// fondo ni esferas propias —usa las de .portada-oscura-fondo—;
+			// debe quedar anidada aquí, no como hermana suelta después de
+			// .portada-oscura (ver comentario en .portada-oscura, en
+			// style.css).
 			// ----------------------------------------------------------- ?>
 		<section class="portada-proyectos" aria-labelledby="proyectos-titulo">
-			<h2 id="proyectos-titulo" class="seccion-titulo">Proyectos destacados</h2>
 
-			<?php
-			$proyectos_destacados = new WP_Query(
-				array(
-					'post_type'           => 'proyectos',
-					'posts_per_page'      => 4,
-					'ignore_sticky_posts' => true,
-					'no_found_rows'       => true,
-				)
-			);
+			<div class="proyectos-contenedor">
+				<div class="proyectos-cabecera">
+					<p class="proyectos-eyebrow">// proyectos</p>
+					<h2 id="proyectos-titulo" class="proyectos-titulo">Proyectos destacados</h2>
+				</div>
 
-			if ( $proyectos_destacados->have_posts() ) :
-				?>
-				<ul class="proyectos-lista">
-					<?php
-					while ( $proyectos_destacados->have_posts() ) :
-						$proyectos_destacados->the_post();
-						?>
-						<?php $portafolio_categoria_proyecto = get_the_terms( get_the_ID(), 'categoria_proyecto' ); ?>
-						<li <?php post_class( 'proyecto' ); ?>>
-							<article>
-								<?php if ( has_post_thumbnail() ) : ?>
-									<figure class="proyecto-imagen">
-										<a href="<?php the_permalink(); ?>">
-											<?php the_post_thumbnail( 'medium_large' ); ?>
-										</a>
-									</figure>
-								<?php endif; ?>
+				<?php
+				$proyectos_destacados = new WP_Query(
+					array(
+						'post_type'           => 'proyectos',
+						'posts_per_page'      => 4,
+						'ignore_sticky_posts' => true,
+						'no_found_rows'       => true,
+					)
+				);
 
-								<?php if ( $portafolio_categoria_proyecto && ! is_wp_error( $portafolio_categoria_proyecto ) ) : ?>
-									<ul class="proyecto-categorias">
-										<?php foreach ( $portafolio_categoria_proyecto as $portafolio_categoria ) : ?>
-											<li class="proyecto-categoria">
-												<a href="<?php echo esc_url( get_term_link( $portafolio_categoria ) ); ?>">
-													<?php echo esc_html( $portafolio_categoria->name ); ?>
-												</a>
-											</li>
-										<?php endforeach; ?>
-									</ul>
-								<?php endif; ?>
-
-								<h3 class="proyecto-titulo">
-									<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-								</h3>
-
-								<div class="proyecto-extracto">
-									<?php the_excerpt(); ?>
-								</div>
-							</article>
-						</li>
-						<?php
-					endwhile;
+				if ( $proyectos_destacados->have_posts() ) :
 					?>
-				</ul>
-				<?php
-				wp_reset_postdata();
-			else :
+					<ul class="proyectos-lista">
+						<?php
+						while ( $proyectos_destacados->have_posts() ) :
+							$proyectos_destacados->the_post();
+							?>
+							<?php $portafolio_categoria_proyecto = get_the_terms( get_the_ID(), 'categoria_proyecto' ); ?>
+							<li <?php post_class( 'proyecto' ); ?>>
+								<article>
+									<?php if ( has_post_thumbnail() ) : ?>
+										<figure class="proyecto-imagen">
+											<a href="<?php the_permalink(); ?>">
+												<?php the_post_thumbnail( 'medium_large' ); ?>
+											</a>
+										</figure>
+									<?php endif; ?>
+
+									<div class="proyecto-contenido">
+										<?php if ( $portafolio_categoria_proyecto && ! is_wp_error( $portafolio_categoria_proyecto ) ) : ?>
+											<ul class="proyecto-categorias">
+												<?php foreach ( $portafolio_categoria_proyecto as $portafolio_categoria ) : ?>
+													<li class="proyecto-categoria">
+														<a href="<?php echo esc_url( get_term_link( $portafolio_categoria ) ); ?>">
+															<?php echo esc_html( $portafolio_categoria->name ); ?>
+														</a>
+													</li>
+												<?php endforeach; ?>
+											</ul>
+										<?php endif; ?>
+
+										<h3 class="proyecto-titulo">
+											<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+										</h3>
+
+										<div class="proyecto-extracto">
+											<?php the_excerpt(); ?>
+										</div>
+									</div>
+								</article>
+							</li>
+							<?php
+						endwhile;
+						?>
+					</ul>
+					<p class="proyectos-cta">
+						<a class="boton boton-primario" href="<?php echo esc_url( get_post_type_archive_link( 'proyectos' ) ); ?>">Ver todos los proyectos</a>
+					</p>
+					<?php
+					wp_reset_postdata();
+				else :
+					?>
+					<p class="proyectos-vacio">
+						Todavía no hay proyectos publicados. Añade algunos desde el
+						panel de administración.
+					</p>
+					<?php
+				endif;
 				?>
-				<p class="proyectos-vacio">
-					Todavía no hay proyectos publicados. Añade algunos desde el
-					panel de administración.
-				</p>
-				<?php
-			endif;
-			?>
+			</div>
 		</section>
 
 		<?php // -----------------------------------------------------------
-			// Sobre mí
+			// Sobre mí: cuarta sección de la misma zona oscura. El diseño
+			// visual definitivo (tarjeta, formas propias, etc.) todavía está
+			// por hacer —de momento solo lleva el color de texto necesario
+			// para leerse sobre el fondo oscuro compartido—, pero ya vive
+			// dentro de .portada-oscura para no repetir la costura que
+			// causaba tenerla como sección suelta (ver comentario en
+			// .portada-oscura, en style.css).
 			// ----------------------------------------------------------- ?>
 		<section class="portada-sobre-mi" aria-labelledby="sobre-mi-titulo">
 			<h2 id="sobre-mi-titulo" class="seccion-titulo">Sobre mí</h2>
@@ -238,7 +258,8 @@ $portafolio_ubicacion   = $portafolio_ubicacion ? $portafolio_ubicacion : 'Ciuda
 		</section>
 
 		<?php // -----------------------------------------------------------
-			// Contacto
+			// Contacto: última sección, misma zona oscura (ver nota en
+			// Sobre mí sobre el diseño pendiente).
 			// ----------------------------------------------------------- ?>
 		<section id="contacto" class="portada-contacto" aria-labelledby="contacto-titulo">
 			<h2 id="contacto-titulo" class="seccion-titulo">Contacto</h2>
@@ -261,7 +282,7 @@ $portafolio_ubicacion   = $portafolio_ubicacion ? $portafolio_ubicacion : 'Ciuda
 			</ul>
 		</section>
 
-	</div><?php // Fin .portada-cuerpo ?>
+	</div><?php // Fin .portada-oscura ?>
 
 </main>
 

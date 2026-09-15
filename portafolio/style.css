@@ -173,7 +173,7 @@ a:focus {
    aparecen cuando la página se ha desplazado —clase .sitio-cabecera--flotando,
    añadida por JS al hacer scroll (ver js/cabecera-scroll.js)— para separarla
    del contenido solo mientras flota sobre él. Los tokens --cabecera-* solo
-   aplican transparencia a variables de :root ya existentes (rgba por
+   combinan/dan transparencia a variables de :root ya existentes (rgba por
    defecto, color-mix bajo @supports al final del archivo); no se introduce
    ningún color nuevo.
 
@@ -182,13 +182,18 @@ a:focus {
    es quien centra y alinea el título/nav con el resto del sitio.
    ========================================================================== */
 .sitio-cabecera {
-	/* Vidrio con tinte azul→violeta (mismos tonos que las esferas del hero,
-	   --color-primario y --color-acento-violeta) en vez de un gris neutro:
-	   así la cabecera combina con el resto de la identidad visual desde el
-	   primer render, sin esperar al estado --flotando. */
-	--cabecera-fondo: linear-gradient(135deg, rgba(37, 99, 235, 0.68), rgba(163, 93, 228, 0.68));
-	--cabecera-borde: rgba(255, 255, 255, 0.14);
-	--cabecera-sombra: rgba(3, 7, 17, 0.35);
+	/* --color-primario domina el fondo (~5.17:1 de contraste con el texto
+	   blanco del título/nav) con solo un 20% de --color-acento-violeta
+	   mezclado ANTES de aplicar la transparencia —no como capa translúcida
+	   aparte— para que el contraste no varíe según lo que el blur deje
+	   traslucir detrás. La personalidad de la cabecera no depende del
+	   fondo: vive en el borde y la sombra, un resplandor lavanda que usa
+	   el mismo vocabulario que --hero-resplandor-a/b y
+	   --pilar-acento-resplandor, para que combine con el hero y los
+	   pilares (y con las secciones que vengan después). */
+	--cabecera-fondo: linear-gradient(135deg, rgba(37, 99, 235, 0.8), rgba(62, 98, 234, 0.8));
+	--cabecera-borde: rgba(151, 152, 249, 0.55);
+	--cabecera-sombra: 0 8px 24px rgba(3, 7, 17, 0.35), 0 0 32px rgba(151, 152, 249, 0.25);
 
 	position: sticky;
 	top: 0;
@@ -203,14 +208,15 @@ a:focus {
 
 .sitio-cabecera--flotando {
 	border-bottom-color: var(--cabecera-borde);
-	box-shadow: 0 8px 24px var(--cabecera-sombra);
+	box-shadow: var(--cabecera-sombra);
 }
 
-/* Sin soporte de backdrop-filter: mismo gradiente pero opaco (sin alfa),
-   ya que aquí no hay blur que disimule la transparencia. */
+/* Sin soporte de backdrop-filter: mismo reparto azul-dominante/violeta-acento
+   pero opaco (sin alfa), ya que aquí no hay blur que disimule la
+   transparencia. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
 	.sitio-cabecera {
-		background: linear-gradient(135deg, var(--color-primario), var(--color-acento-violeta));
+		background: linear-gradient(135deg, var(--color-primario) 0%, var(--color-primario) 55%, var(--color-acento-violeta) 100%);
 	}
 }
 
@@ -392,14 +398,6 @@ a:focus {
 	padding: var(--espacio-lg) var(--espacio-md);
 }
 
-/* La portada usa el hero a sangre completa, así que el <main> no se limita:
-   es este contenedor el que centra y estrecha el resto de secciones. */
-.portada-cuerpo {
-	max-width: var(--ancho-contenido);
-	margin: 0 auto;
-	padding: var(--espacio-xl) var(--espacio-md);
-}
-
 /* ==========================================================================
    Botones
    ========================================================================== */
@@ -436,16 +434,22 @@ a:focus {
 }
 
 /* ==========================================================================
-   Portada — Zona oscura (Hero + Pilares)
+   Portada — Zona oscura (Hero + Pilares + Proyectos + Sobre mí + Contacto)
    ==========================================================================
 
-   Hero y Pilares comparten un único fondo oscuro y las mismas esferas de
-   color difuminadas, para que no haya un corte visual entre ambas
-   secciones. Las esferas se concentran cerca de la parte superior y se
-   desvanecen hacia abajo con una máscara de opacidad (mask-image), en vez
-   de recortarse en seco al llegar al fondo plano del resto de la página.
-   Todo el fondo es decorativo (aria-hidden en el HTML). Los colores salen
-   de las variables de :root; los tokens --hero-forma-* solo aplican
+   Toda la portada comparte un único fondo oscuro y UNA sola familia de
+   esferas difuminadas (.portada-oscura-fondo): nueve esferas repartidas por
+   porcentaje de alto a lo largo de todo el contenedor, no una por sección.
+   Antes cada sección (Hero, Pilares, Proyectos) tenía su propio grupo de
+   esferas más una máscara que solo mantenía visible el tramo superior del
+   conjunto; eso dejaba tramos enteros del fondo totalmente planos entre
+   secciones —sobre todo cuanto más larga se hacía la página— y se leía
+   como un corte, aunque el color de fondo fuera idéntico en toda la zona.
+   Usar porcentajes (top: N%) en vez de rem hace que las nueve esferas se
+   redistribuyan solas sea cual sea la altura total, así que no hay que
+   recalibrar nada al añadir contenido (más proyectos, texto de "Sobre mí",
+   etc.). Todo el fondo es decorativo (aria-hidden en el HTML). Los colores
+   salen de las variables de :root; los tokens --hero-forma-* solo aplican
    transparencia (rgba por defecto, color-mix bajo @supports al final del
    archivo). Cada <section> interior queda con fondo transparente: el color
    de base vive únicamente aquí.
@@ -459,6 +463,16 @@ a:focus {
 	--hero-forma-lavanda: rgba(151, 152, 249, 0.55);
 	--hero-forma-purpura: rgba(138, 127, 244, 0.55);
 
+	/* Tres tonos cálidos, fuera de la familia azul-violeta: contrastan a
+	   propósito con el fondo (frío, oklch 13% 0.025 258) y entre sí con las
+	   otras seis esferas, para que el fondo no se lea monocromático en un
+	   recorrido tan largo. Colores nuevos (no derivados de --color-*), así
+	   que su mejora a oklch() más abajo son valores literales, no
+	   color-mix(). */
+	--hero-forma-ambar: rgba(245, 166, 35, 0.55);
+	--hero-forma-cian: rgba(34, 211, 238, 0.5);
+	--hero-forma-rosa: rgba(236, 72, 153, 0.5);
+
 	/* Sin isolation: isolate a propósito. Esa propiedad crea un nuevo
 	   "backdrop root" y le impediría a .sitio-cabecera (fuera de este
 	   contenedor, con su propio backdrop-filter) desenfocar el contenido de
@@ -470,17 +484,16 @@ a:focus {
 	background-color: var(--color-fondo-oscuro);
 }
 
-/* --- Formas difuminadas de fondo, compartidas por Hero y Pilares --- */
+/* --- Formas difuminadas de fondo, compartidas por toda la zona oscura --- */
 .portada-oscura-fondo {
 	position: absolute;
 	inset: 0;
 	z-index: 0;
 	pointer-events: none;
-	/* Degradado de opacidad: opaco arriba (donde están las esferas) y
-	   transparente a partir de un punto intermedio, para que el área con
-	   movimiento se funda en el fondo plano en vez de cortarse en seco. */
-	-webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 75%);
-	mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 75%);
+	/* Opaco casi toda la altura; solo se desvanece en el último tramo, para
+	   fundirse con el pie de página (claro) en vez de cortarse en seco. */
+	-webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 88%, transparent 100%);
+	mask-image: linear-gradient(to bottom, #000 0%, #000 88%, transparent 100%);
 }
 
 .hero-forma {
@@ -489,14 +502,18 @@ a:focus {
 	filter: blur(45px);
 }
 
-/* Las cuatro esferas se concentran cerca de la parte superior de la zona
-   oscura (anclaje "top" en vez de "bottom"), para que queden dentro del
-   tramo opaco de la máscara sea cual sea la altura total de Hero + Pilares.
-   Cada una tiene su propia trayectoria (ver @keyframes), una duración
-   distinta dentro de la franja 15–25 s y un retardo negativo para que
-   arranquen desfasadas y el conjunto no se perciba sincronizado. */
+/* Doce esferas en top:% (no rem), para repartirse solas por toda la altura
+   de la zona oscura sea cual sea el contenido real. Nueve reutilizan los
+   cuatro colores azul/violeta/lavanda/púrpura en ciclo; las tres últimas
+   (--10/11/12) usan los tonos cálidos de contraste (ámbar, cian, rosa),
+   intercaladas en los huecos del reparto para que la variedad de color se
+   note en todo el recorrido, no solo al principio. Cada esfera tiene su
+   propia trayectoria (ver @keyframes hero-flotar-*), una duración distinta
+   dentro de la franja 15–25 s y un retardo negativo para que arranquen
+   desfasadas y el conjunto no se perciba sincronizado ni repetitivo pese a
+   reutilizar las mismas cuatro animaciones. */
 .hero-forma--1 {
-	top: -8rem;
+	top: -4%;
 	left: -6rem;
 	width: 26rem;
 	height: 26rem;
@@ -505,7 +522,7 @@ a:focus {
 }
 
 .hero-forma--2 {
-	top: 20rem;
+	top: 6%;
 	right: -7rem;
 	width: 28rem;
 	height: 28rem;
@@ -514,7 +531,7 @@ a:focus {
 }
 
 .hero-forma--3 {
-	top: 2rem;
+	top: 2%;
 	right: 6rem;
 	width: 12.5rem;
 	height: 12.5rem;
@@ -523,12 +540,84 @@ a:focus {
 }
 
 .hero-forma--4 {
-	top: 28rem;
+	top: 16%;
 	left: 3rem;
 	width: 10rem;
 	height: 10rem;
 	background: radial-gradient(circle, var(--hero-forma-purpura), transparent 72%);
 	animation: hero-flotar-4 15s ease-in-out -11s infinite;
+}
+
+.hero-forma--5 {
+	top: 30%;
+	right: -8rem;
+	width: 25rem;
+	height: 25rem;
+	background: radial-gradient(circle, var(--hero-forma-azul), transparent 70%);
+	animation: hero-flotar-2 19s ease-in-out -2s infinite;
+}
+
+.hero-forma--6 {
+	top: 44%;
+	left: -7rem;
+	width: 23rem;
+	height: 23rem;
+	background: radial-gradient(circle, var(--hero-forma-violeta), transparent 70%);
+	animation: hero-flotar-1 23s ease-in-out -13s infinite;
+}
+
+.hero-forma--7 {
+	top: 58%;
+	right: 8%;
+	width: 11rem;
+	height: 11rem;
+	background: radial-gradient(circle, var(--hero-forma-lavanda), transparent 72%);
+	animation: hero-flotar-3 18s ease-in-out -8s infinite;
+}
+
+.hero-forma--8 {
+	top: 72%;
+	left: 5%;
+	width: 21rem;
+	height: 21rem;
+	background: radial-gradient(circle, var(--hero-forma-purpura), transparent 72%);
+	animation: hero-flotar-4 20s ease-in-out -5s infinite;
+}
+
+.hero-forma--9 {
+	top: 85%;
+	right: -7rem;
+	width: 22rem;
+	height: 22rem;
+	background: radial-gradient(circle, var(--hero-forma-azul), transparent 70%);
+	animation: hero-flotar-2 16s ease-in-out -10s infinite;
+}
+
+.hero-forma--10 {
+	top: 22%;
+	right: 4rem;
+	width: 16rem;
+	height: 16rem;
+	background: radial-gradient(circle, var(--hero-forma-ambar), transparent 72%);
+	animation: hero-flotar-3 20s ease-in-out -9s infinite;
+}
+
+.hero-forma--11 {
+	top: 50%;
+	left: 6%;
+	width: 18rem;
+	height: 18rem;
+	background: radial-gradient(circle, var(--hero-forma-cian), transparent 72%);
+	animation: hero-flotar-4 24s ease-in-out -6s infinite;
+}
+
+.hero-forma--12 {
+	top: 78%;
+	right: -6rem;
+	width: 19rem;
+	height: 19rem;
+	background: radial-gradient(circle, var(--hero-forma-rosa), transparent 72%);
+	animation: hero-flotar-1 18s ease-in-out -12s infinite;
 }
 
 /* ==========================================================================
@@ -752,7 +841,8 @@ a:focus {
 
 @media (max-width: 30rem) {
 	.hero-forma--3,
-	.hero-forma--4 {
+	.hero-forma--4,
+	.hero-forma--7 {
 		display: none;
 	}
 }
@@ -773,18 +863,15 @@ a:focus {
    Portada — Pilares
    ==========================================================================
 
-   Franja a sangre completa que retoma el fondo oscuro y las formas
-   flotantes del hero (reutiliza sus @keyframes) para presentar los tres
-   pilares como tarjetas de vidrio con icono. El fondo decorativo y los
-   iconos son aria-hidden en el HTML.
+   Franja a sangre completa, dentro de la zona oscura compartida (ver
+   .portada-oscura): sin fondo ni esferas propias —usa las de
+   .portada-oscura-fondo—, solo las tarjetas de vidrio con icono de cada
+   pilar. Los iconos son aria-hidden en el HTML.
    ========================================================================== */
 .portada-pilares {
 	/* Derivados con transparencia; valor por defecto en rgba(), reescritos a
 	   color-mix() bajo @supports al final del archivo (mismo esquema que
 	   .portada-hero). */
-	--pilares-forma-azul: rgba(37, 99, 235, 0.5);
-	--pilares-forma-violeta: rgba(163, 93, 228, 0.5);
-	--pilares-forma-lavanda: rgba(151, 152, 249, 0.45);
 	--pilares-tarjeta-fondo: rgba(6, 13, 26, 0.55);
 	--pilares-tarjeta-borde: rgba(255, 255, 255, 0.12);
 	--pilares-texto-tenue: rgba(255, 255, 255, 0.78);
@@ -793,49 +880,7 @@ a:focus {
 	   tarjetas de pilar también deben poder desenfocarse a través de la
 	   cabecera sticky cuando pasan por debajo al hacer scroll. */
 	position: relative;
-	overflow: hidden;
 	padding: clamp(3rem, 8vw, 6rem) var(--espacio-md);
-}
-
-/* --- Formas difuminadas de fondo (mismas animaciones que el hero) --- */
-.pilares-fondo {
-	position: absolute;
-	inset: 0;
-	z-index: 0;
-	pointer-events: none;
-}
-
-.pilares-forma {
-	position: absolute;
-	border-radius: 50%;
-	filter: blur(60px);
-}
-
-.pilares-forma--1 {
-	top: -5rem;
-	left: -5rem;
-	width: 26rem;
-	height: 26rem;
-	background: radial-gradient(circle, var(--pilares-forma-azul), transparent 72%);
-	animation: hero-flotar-1 22s ease-in-out -3s infinite;
-}
-
-.pilares-forma--2 {
-	right: -6rem;
-	bottom: -7rem;
-	width: 28rem;
-	height: 28rem;
-	background: radial-gradient(circle, var(--pilares-forma-violeta), transparent 72%);
-	animation: hero-flotar-2 19s ease-in-out -8s infinite;
-}
-
-.pilares-forma--3 {
-	top: 20%;
-	right: 15%;
-	width: 14rem;
-	height: 14rem;
-	background: radial-gradient(circle, var(--pilares-forma-lavanda), transparent 75%);
-	animation: hero-flotar-3 16s ease-in-out -5s infinite;
 }
 
 .pilares-contenedor {
@@ -961,7 +1006,6 @@ a:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.pilares-forma,
 	.pilar-icono svg {
 		animation: none;
 	}
@@ -972,17 +1016,287 @@ a:focus {
 	}
 }
 
-@media (max-width: 40rem) {
-	.pilares-forma--3 {
-		display: none;
-	}
-}
-
 /* Sin soporte de backdrop-filter: tarjetas con fondo sólido. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
 	.pilar {
 		background: var(--color-vidrio);
 	}
+}
+
+/* ==========================================================================
+   Portada — Proyectos
+   ==========================================================================
+
+   Tercera sección dentro de .portada-oscura (junto a Hero y Pilares): sin
+   fondo ni esferas propias —usa las de .portada-oscura-fondo—, solo las
+   tarjetas de vidrio de los proyectos destacados. Debe quedar anidada
+   dentro de .portada-oscura, no como sección suelta después: el color de
+   fondo vive únicamente en ese contenedor compartido (ver comentario en
+   .portada-oscura) y dos secciones con el mismo color pero en contenedores
+   independientes generan una costura visible en el borde.
+   ========================================================================== */
+.portada-proyectos {
+	--proyectos-tarjeta-fondo: rgba(6, 13, 26, 0.55);
+	--proyectos-tarjeta-borde: rgba(255, 255, 255, 0.12);
+	--proyectos-texto-tenue: rgba(255, 255, 255, 0.78);
+
+	position: relative;
+	padding: clamp(3rem, 8vw, 6rem) var(--espacio-md);
+}
+
+.proyectos-contenedor {
+	position: relative;
+	z-index: 1;
+	max-width: var(--ancho-contenido);
+	margin: 0 auto;
+}
+
+.proyectos-cabecera {
+	max-width: 40rem;
+	margin: 0 auto clamp(2rem, 5vw, 3rem);
+	text-align: center;
+}
+
+.proyectos-eyebrow {
+	margin: 0;
+	font-family: var(--fuente-mono);
+	font-size: 0.8125rem;
+	letter-spacing: 0.05em;
+	color: var(--color-primario-claro);
+}
+
+.proyectos-titulo {
+	margin: 0.75rem 0 0;
+	font-size: clamp(1.75rem, 4vw, 2.5rem);
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--color-fondo);
+}
+
+/* --- Tarjetas de proyecto --- */
+.proyectos-lista {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr));
+	gap: var(--espacio-lg);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.proyecto {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	border-radius: 1.25rem;
+	background: var(--proyectos-tarjeta-fondo);
+	border: 1px solid var(--proyectos-tarjeta-borde);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+	backdrop-filter: blur(20px) saturate(150%);
+	-webkit-backdrop-filter: blur(20px) saturate(150%);
+	overflow: hidden;
+	transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+/* El <article> es un envoltorio puramente semántico: sus hijos (imagen y
+   contenido) pasan a ser hijos flex directos de .proyecto (el <li>), que es
+   quien controla la tarjeta. */
+.proyecto > article {
+	display: contents;
+}
+
+.proyecto:hover,
+.proyecto:focus-within {
+	transform: translateY(-6px);
+	border-color: rgba(255, 255, 255, 0.22);
+	box-shadow:
+		0 26px 60px rgba(0, 0, 0, 0.45),
+		0 0 40px var(--proyecto-acento-resplandor);
+}
+
+/* Acento de color por tarjeta, rotando entre los tres tonos del hero: los
+   proyectos no tienen una taxonomía de tres valores fijos como los
+   pilares, así que el acento va por posición en la lista. */
+.proyecto:nth-child(3n+1) {
+	--proyecto-acento-resplandor: rgba(37, 99, 235, 0.35);
+}
+
+.proyecto:nth-child(3n+2) {
+	--proyecto-acento-resplandor: rgba(163, 93, 228, 0.35);
+}
+
+.proyecto:nth-child(3n+3) {
+	--proyecto-acento-resplandor: rgba(138, 127, 244, 0.35);
+}
+
+.proyecto-imagen {
+	aspect-ratio: 16 / 10;
+	overflow: hidden;
+}
+
+.proyecto-imagen a {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.proyecto-imagen img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.4s ease;
+}
+
+.proyecto:hover .proyecto-imagen img {
+	transform: scale(1.05);
+}
+
+.proyecto-contenido {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	padding: 1.5rem 1.5rem 1.75rem;
+}
+
+.proyecto-categorias {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-family: var(--fuente-mono);
+	font-size: 0.75rem;
+	letter-spacing: 0.05em;
+	color: var(--color-primario-claro);
+}
+
+.proyecto-categoria:not(:last-child)::after {
+	content: "·";
+	margin-left: 0.4rem;
+	opacity: 0.6;
+}
+
+.proyecto-categoria a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.proyecto-categoria a:hover,
+.proyecto-categoria a:focus {
+	text-decoration: underline;
+}
+
+.proyecto-titulo {
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 700;
+	line-height: 1.3;
+}
+
+.proyecto-titulo a {
+	color: var(--color-fondo);
+	text-decoration: none;
+}
+
+.proyecto-titulo a:hover,
+.proyecto-titulo a:focus {
+	color: var(--color-primario-claro);
+}
+
+.proyecto-extracto {
+	margin: 0;
+	font-size: 0.9375rem;
+	line-height: 1.6;
+	color: var(--proyectos-texto-tenue);
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.proyecto-extracto p {
+	margin: 0;
+}
+
+.proyectos-vacio {
+	max-width: 32rem;
+	margin: 0 auto;
+	text-align: center;
+	color: var(--proyectos-texto-tenue);
+}
+
+.proyectos-cta {
+	margin: clamp(2rem, 5vw, 3rem) 0 0;
+	text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.proyecto,
+	.proyecto-imagen img {
+		transition: none;
+	}
+}
+
+/* Sin soporte de backdrop-filter: tarjetas con fondo sólido. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.proyecto {
+		background: var(--color-vidrio);
+	}
+}
+
+/* ==========================================================================
+   Portada — Sobre mí / Contacto (provisional)
+   ==========================================================================
+
+   Todavía sin diseño propio (sin tarjetas, esferas ni maquetación
+   particular) — ya forman parte de .portada-oscura para no repetir la
+   costura de la zona oscura cuando se diseñen, pero por ahora solo llevan
+   el ancho de contenido habitual y el color de texto necesario para
+   leerse sobre el fondo compartido. Sustituir este bloque al diseñarlas.
+   ========================================================================== */
+.portada-sobre-mi,
+.portada-contacto {
+	position: relative;
+	max-width: var(--ancho-contenido);
+	margin: 0 auto;
+	padding: clamp(3rem, 8vw, 6rem) var(--espacio-md);
+}
+
+.portada-sobre-mi .seccion-titulo,
+.portada-contacto .seccion-titulo {
+	margin: 0 0 1rem;
+	font-size: clamp(1.75rem, 4vw, 2.5rem);
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--color-fondo);
+}
+
+.sobre-mi-bio,
+.contacto-intro,
+.contacto-etiqueta {
+	color: rgba(255, 255, 255, 0.78);
+}
+
+.contacto-datos {
+	list-style: none;
+	margin: 1rem 0 0;
+	padding: 0;
+}
+
+.contacto-dato + .contacto-dato {
+	margin-top: 0.5rem;
+}
+
+.contacto-dato a {
+	color: var(--color-primario-claro);
+}
+
+.contacto-dato a:hover,
+.contacto-dato a:focus {
+	color: var(--color-fondo);
 }
 
 /* ==========================================================================
@@ -1012,6 +1326,15 @@ a:focus {
 		--color-acento-lavanda: oklch(72% 0.14 282);
 		--color-acento-purpura: oklch(66% 0.17 285);
 	}
+
+	/* Tonos de contraste de las esferas --10/11/12: no derivan de ningún
+	   --color-* de :root, así que aquí van como literales oklch() (con
+	   alfa) en vez de color-mix(). */
+	.portada-oscura {
+		--hero-forma-ambar: oklch(76% 0.17 70 / 0.55);
+		--hero-forma-cian: oklch(80% 0.14 200 / 0.5);
+		--hero-forma-rosa: oklch(62% 0.21 350 / 0.5);
+	}
 }
 
 @supports (color: color-mix(in srgb, red, blue)) {
@@ -1024,11 +1347,13 @@ a:focus {
 	.sitio-cabecera {
 		--cabecera-fondo: linear-gradient(
 			135deg,
-			color-mix(in oklab, var(--color-primario) 68%, transparent),
-			color-mix(in oklab, var(--color-acento-violeta) 68%, transparent)
+			color-mix(in oklab, var(--color-primario) 80%, transparent),
+			color-mix(in oklab, color-mix(in oklab, var(--color-primario) 80%, var(--color-acento-violeta) 20%) 80%, transparent)
 		);
-		--cabecera-borde: color-mix(in srgb, var(--color-fondo) 14%, transparent);
-		--cabecera-sombra: color-mix(in srgb, var(--color-fondo-oscuro) 35%, transparent);
+		--cabecera-borde: color-mix(in oklab, var(--color-acento-lavanda) 55%, transparent);
+		--cabecera-sombra:
+			0 8px 24px color-mix(in srgb, var(--color-fondo-oscuro) 35%, transparent),
+			0 0 32px color-mix(in oklab, var(--color-acento-lavanda) 25%, transparent);
 	}
 
 	.portada-oscura {
@@ -1052,9 +1377,6 @@ a:focus {
 	}
 
 	.portada-pilares {
-		--pilares-forma-azul: color-mix(in oklab, var(--color-primario) 55%, transparent);
-		--pilares-forma-violeta: color-mix(in oklab, var(--color-acento-violeta) 55%, transparent);
-		--pilares-forma-lavanda: color-mix(in oklab, var(--color-acento-lavanda) 50%, transparent);
 		--pilares-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 55%, transparent);
 	}
 
@@ -1074,6 +1396,22 @@ a:focus {
 		--pilar-acento-fondo: color-mix(in oklab, var(--color-acento-purpura) 25%, transparent);
 		--pilar-acento-color: color-mix(in oklab, var(--color-acento-purpura) 55%, var(--color-fondo));
 		--pilar-acento-resplandor: color-mix(in oklab, var(--color-acento-purpura) 35%, transparent);
+	}
+
+	.portada-proyectos {
+		--proyectos-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 55%, transparent);
+	}
+
+	.proyecto:nth-child(3n+1) {
+		--proyecto-acento-resplandor: color-mix(in oklab, var(--color-primario) 35%, transparent);
+	}
+
+	.proyecto:nth-child(3n+2) {
+		--proyecto-acento-resplandor: color-mix(in oklab, var(--color-acento-violeta) 35%, transparent);
+	}
+
+	.proyecto:nth-child(3n+3) {
+		--proyecto-acento-resplandor: color-mix(in oklab, var(--color-acento-purpura) 35%, transparent);
 	}
 }
 
