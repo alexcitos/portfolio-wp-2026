@@ -259,21 +259,35 @@ a:focus {
 	list-style: none;
 }
 
+/* El fondo de la cabecera es azul medio (--cabecera-fondo, ver
+   .sitio-cabecera): frente a un fondo de luminosidad media, --color-acento-
+   violeta y --color-acento-lavanda —pensados para leerse sobre el fondo
+   casi negro del hero— pierden casi todo el contraste (~1.3:1 y ~2:1
+   respectivamente, muy por debajo del 4.5:1 de AA), así que hover y
+   "página activa" quedaban prácticamente invisibles. En vez de perseguir
+   un color de texto que sí contraste con un azul medio (difícil: los tonos
+   muy saturados quedan igual de cerca en luminosidad), ambos estados se
+   resuelven con blanco —ya probado, ~4.6:1 mínimo— más una pastilla de
+   fondo: transparente y sutil en hover, sólida y con negrita en la página
+   activa, para que no dependan de acertarle a un matiz. */
 .sitio-navegacion a {
 	display: block;
 	padding: var(--espacio-xs) var(--espacio-sm);
+	border-radius: 0.5rem;
 	color: var(--color-fondo);
 	text-decoration: none;
-	transition: color 0.2s ease;
+	transition: background-color 0.2s ease;
 }
 
 .sitio-navegacion a:hover,
 .sitio-navegacion a:focus {
-	color: var(--color-acento-violeta);
+	background-color: rgba(255, 255, 255, 0.16);
 }
 
 .sitio-navegacion .current-menu-item > a {
-	color: var(--color-acento-lavanda);
+	font-weight: 700;
+	background-color: rgba(255, 255, 255, 0.24);
+	box-shadow: inset 0 -2px 0 rgba(245, 166, 35, 0.9);
 }
 
 /* ==========================================================================
@@ -357,26 +371,47 @@ a:focus {
 		display: inline-flex;
 	}
 
-	/* .sitio-navegacion pasa a ser el contenedor grid que anima su alto;
-	   .menu es su única fila, colapsada a 0 mientras el menú está cerrado. */
+	/* La primera versión animaba el ALTO del contenedor (grid-template-rows
+	   0fr→1fr) con el menú ya en flujo, empujando el resto de la página.
+	   Eso obliga al navegador a recalcular en cada fotograma cómo se
+	   acomoda el <ul> en columna dentro de una fila que todavía está
+	   creciendo —esa recomposición continua del flex es justo lo que se
+	   percibía como salto ("de horizontal a vertical"), no la altura en
+	   sí—. Ahora el panel es un overlay con position:absolute, anclado al
+	   <header> (position:sticky, que ya actúa como contenedor de
+	   posicionamiento): su columna queda armada de una sola vez, fuera del
+	   flujo, y lo único que se anima es opacidad + un desplazamiento corto
+	   (translateY), que el navegador compone sin volver a calcular layout
+	   en cada paso. De paso, no empuja el contenido de abajo al abrir. */
 	.sitio-navegacion {
-		display: grid;
-		grid-template-rows: 0fr;
-		flex-basis: 100%;
-		order: 3;
-		transition: grid-template-rows 0.3s ease;
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		background: var(--cabecera-fondo);
+		backdrop-filter: blur(60px) saturate(300%);
+		-webkit-backdrop-filter: blur(60px) saturate(300%);
+		border-bottom: 1px solid var(--cabecera-borde);
+		box-shadow: var(--cabecera-sombra);
+		opacity: 0;
+		transform: translateY(-0.5rem);
+		visibility: hidden;
+		pointer-events: none;
+		transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
 	}
 
 	.sitio-navegacion > .menu {
 		flex-direction: column;
 		gap: 0;
-		min-height: 0;
-		overflow: hidden;
-		padding-top: var(--espacio-sm);
+		padding: var(--espacio-sm) var(--espacio-md) var(--espacio-md);
 	}
 
 	.sitio-navegacion--abierta {
-		grid-template-rows: 1fr;
+		opacity: 1;
+		transform: translateY(0);
+		visibility: visible;
+		pointer-events: auto;
+		transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0s;
 	}
 }
 
@@ -969,8 +1004,8 @@ a:focus {
 
 .pilares-titulo {
 	margin: 0.75rem 0 0;
-	font-size: clamp(1.75rem, 4vw, 2.5rem);
-	font-weight: 700;
+	font-size: clamp(1.875rem, 4.2vw, 2.625rem);
+	font-weight: 800;
 	letter-spacing: -0.01em;
 	color: var(--color-fondo);
 }
@@ -1130,8 +1165,8 @@ a:focus {
 
 .proyectos-titulo {
 	margin: 0.75rem 0 0;
-	font-size: clamp(1.75rem, 4vw, 2.5rem);
-	font-weight: 700;
+	font-size: clamp(1.875rem, 4.2vw, 2.625rem);
+	font-weight: 800;
 	letter-spacing: -0.01em;
 	color: var(--color-fondo);
 }
@@ -1486,8 +1521,8 @@ a:focus {
 
 .contacto-titulo {
 	margin: 0.75rem 0 2rem;
-	font-size: clamp(1.75rem, 4vw, 2.25rem);
-	font-weight: 700;
+	font-size: clamp(1.875rem, 4.2vw, 2.375rem);
+	font-weight: 800;
 	letter-spacing: -0.01em;
 	color: var(--color-fondo);
 }
@@ -1781,17 +1816,22 @@ a:focus {
 .sitio-pie-interior {
 	max-width: var(--ancho-contenido);
 	margin: 0 auto;
-	padding: var(--espacio-lg) var(--espacio-md);
+	padding: clamp(2rem, 5vw, 2.75rem) var(--espacio-md);
+	text-align: center;
 }
 
 /* Frase principal: mismo tono "tenue" (blanco al 78%) que usa el resto del
    sitio para texto de cuerpo sobre fondo oscuro (p. ej. .hero-tagline,
    .pilar-descripcion) — no blanco puro, que aquí se reserva para títulos.
-   Contraste verificado contra --pie-fondo: ~11.8:1 (AA exige 4.5:1). */
+   Contraste verificado contra --pie-fondo: ~11.8:1 (AA exige 4.5:1). Ancho
+   limitado y centrado (en vez de estirarse a los 70rem de
+   .sitio-pie-interior) para que la frase no forme una línea larguísima en
+   pantallas anchas. */
 .sitio-pie-texto {
-	margin: 0;
+	max-width: 34rem;
+	margin: 0 auto;
 	font-size: 0.875rem;
-	line-height: 1.6;
+	line-height: 1.7;
 	color: rgba(255, 255, 255, 0.78);
 }
 
@@ -1801,7 +1841,7 @@ a:focus {
    4.5:1 aunque el navegador use la versión oklch() de --color-vidrio en
    vez del rgb() de respaldo. */
 .sitio-pie-actualizado {
-	margin: 0.375rem 0 0;
+	margin: 0.5rem 0 0;
 	font-size: 0.75rem;
 	color: rgba(255, 255, 255, 0.5);
 }
