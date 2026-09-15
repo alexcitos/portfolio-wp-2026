@@ -1753,12 +1753,70 @@ a:focus {
 
 /* ==========================================================================
    Pie del sitio
-   ========================================================================== */
+   ==========================================================================
+
+   .portada-oscura termina en Contacto: si el <footer> se quedara con el
+   fondo claro por defecto (--color-fondo, heredado de <body>), habría un
+   corte brusco blanco justo debajo de esa última tarjeta de vidrio. En vez
+   de eso, el pie usa --color-vidrio —el mismo tono de la zona oscura, pero
+   un punto más claro que --color-fondo-oscuro (ver :root)— para leerse
+   emparentado sin ser un calco exacto, más un borde superior con
+   resplandor lavanda (mismo lenguaje que --cabecera-borde/--cabecera-sombra
+   de .sitio-cabecera, pero apuntando hacia arriba) que separa el pie de
+   Contacto sin depender solo del cambio de tono.
+
+   El <footer> exterior queda a ancho completo para que el fondo cubra toda
+   la pantalla (igual que .sitio-cabecera); .sitio-pie-interior es quien
+   centra y limita el contenido. */
 .sitio-pie {
+	--pie-fondo: var(--color-vidrio);
+	--pie-borde: rgba(151, 152, 249, 0.5);
+	--pie-resplandor: 0 -10px 28px rgba(3, 7, 17, 0.35), 0 -1px 36px rgba(151, 152, 249, 0.16);
+
+	background-color: var(--pie-fondo);
+	border-top: 1px solid var(--pie-borde);
+	box-shadow: var(--pie-resplandor);
+}
+
+.sitio-pie-interior {
 	max-width: var(--ancho-contenido);
 	margin: 0 auto;
 	padding: var(--espacio-lg) var(--espacio-md);
-	border-top: 1px solid var(--color-borde);
-	color: #555555;
+}
+
+/* Frase principal: mismo tono "tenue" (blanco al 78%) que usa el resto del
+   sitio para texto de cuerpo sobre fondo oscuro (p. ej. .hero-tagline,
+   .pilar-descripcion) — no blanco puro, que aquí se reserva para títulos.
+   Contraste verificado contra --pie-fondo: ~11.8:1 (AA exige 4.5:1). */
+.sitio-pie-texto {
+	margin: 0;
 	font-size: 0.875rem;
+	line-height: 1.6;
+	color: rgba(255, 255, 255, 0.78);
+}
+
+/* Línea secundaria: más pequeña y más tenue que la principal a propósito
+   (es un dato de "casa", no el mensaje central), pero sin bajar de AA:
+   blanco al 50% contra --pie-fondo da ~5.3:1, con margen sobre el mínimo
+   4.5:1 aunque el navegador use la versión oklch() de --color-vidrio en
+   vez del rgb() de respaldo. */
+.sitio-pie-actualizado {
+	margin: 0.375rem 0 0;
+	font-size: 0.75rem;
+	color: rgba(255, 255, 255, 0.5);
+}
+
+/* Mejora oklch/color-mix de --pie-*, en su propio bloque @supports (en vez
+   de sumarla al de "Mejora progresiva del color" más arriba): esa sección
+   entera es, a propósito, la última del archivo —el pie va después de
+   todo lo demás—, así que una redefinición de --pie-* tendría que ir
+   DESPUÉS de esta sección para ganar la cascada frente a la rgba() de
+   respaldo (mismo motivo explicado en el bloque de más arriba). */
+@supports (color: color-mix(in srgb, red, blue)) {
+	.sitio-pie {
+		--pie-borde: color-mix(in oklab, var(--color-acento-lavanda) 50%, transparent);
+		--pie-resplandor:
+			0 -10px 28px color-mix(in srgb, var(--color-fondo-oscuro) 35%, transparent),
+			0 -1px 36px color-mix(in oklab, var(--color-acento-lavanda) 16%, transparent);
+	}
 }

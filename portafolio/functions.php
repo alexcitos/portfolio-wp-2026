@@ -286,6 +286,31 @@ function portafolio_registrar_campos_datos_del_sitio() {
 					'preview_size'  => 'medium',
 					'instructions'  => __( 'Foto redonda junto a la biografía. Si se deja vacía, la sección se muestra sin foto.', 'portafolio' ),
 				),
+
+				// --- Pie de página -------------------------------------------
+				array(
+					'key'   => 'field_dds_tab_pie',
+					'label' => __( 'Pie de página', 'portafolio' ),
+					'type'  => 'tab',
+				),
+				array(
+					'key'          => 'field_dds_tokens_usados',
+					'label'        => __( 'Tokens de IA usados', 'portafolio' ),
+					'name'         => 'tokens_usados',
+					'type'         => 'number',
+					'min'          => 0,
+					'step'         => 1,
+					'instructions' => __( 'Se muestra en el pie con separador de miles, p. ej. 1.234.567.', 'portafolio' ),
+				),
+				array(
+					'key'             => 'field_dds_tokens_actualizado',
+					'label'           => __( 'Tokens actualizado el', 'portafolio' ),
+					'name'            => 'tokens_actualizado',
+					'type'            => 'date_picker',
+					'display_format'  => 'j/n/Y',
+					'return_format'   => 'Ymd',
+					'instructions'    => __( 'Fecha del último conteo. Si se deja vacía, la línea "actualizado…" no se muestra.', 'portafolio' ),
+				),
 			),
 		)
 	);
