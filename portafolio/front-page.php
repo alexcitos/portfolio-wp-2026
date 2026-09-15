@@ -119,8 +119,10 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 						</span>
 						<h3 class="pilar-titulo">WordPress</h3>
 						<p class="pilar-descripcion">
-							Temas y sitios construidos desde cero, sin page builders:
-							código limpio, rápido y mantenible.
+							Sitios WordPress construidos a medida — domino tanto la
+							maquetación desde cero (sin builders, como este mismo
+							portafolio) como Elementor Pro y Divi, para entregar
+							rápido cuando el proyecto lo pide.
 						</p>
 					</li>
 					<li class="pilar pilar-marketing">
@@ -132,8 +134,10 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 						</span>
 						<h3 class="pilar-titulo">Marketing Digital</h3>
 						<p class="pilar-descripcion">
-							Estrategia de contenidos, SEO técnico y campañas medibles
-							enfocadas en resultados.
+							Marketing digital basado en datos: gestión de campañas
+							en Google Ads y Meta Ads, análisis con GA4 y Search
+							Console, con fundamentos de SEO on-page que refuerzan
+							cada estrategia.
 						</p>
 					</li>
 					<li class="pilar pilar-infraestructura">
@@ -147,9 +151,11 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 						</span>
 						<h3 class="pilar-titulo">Infraestructura IT</h3>
 						<p class="pilar-descripcion">
-							Despliegue en VPS, contenedores con Docker, copias de
-							seguridad, monitorización y automatización de procesos
-							con n8n.
+							Servidores Linux en VPS, contenedores Docker,
+							instalación y configuración de herramientas open
+							source, seguridad con UFW y Fail2Ban, y automatización
+							de procesos con n8n — para que la infraestructura
+							funcione sola y de forma segura.
 						</p>
 					</li>
 				</ul>
