@@ -14,6 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 // (SVG de terceros), no lógica del tema.
 require get_template_directory() . '/inc/iconos-tecnologia.php';
 
+// Catálogo de iconos de redes sociales (ver template-parts/redes-sociales.php
+// y portafolio_obtener_redes_sociales() más abajo). Misma razón que el
+// require anterior: son datos, no lógica del tema.
+require get_template_directory() . '/inc/redes-sociales.php';
+
 /**
  * Soporte de características del tema.
  */
@@ -352,6 +357,55 @@ function portafolio_registrar_campos_datos_del_sitio() {
 					'type'  => 'text',
 				),
 
+				// --- Redes sociales ------------------------------------------
+				// Se muestran en la barra flotante de todo el sitio (ver
+				// header.php) y en la columna de contacto del home (ver
+				// front-page.php), a través de template-parts/redes-sociales.php
+				// y portafolio_obtener_redes_sociales() más abajo. Una red se
+				// deja de mostrar en ambos sitios en cuanto su campo queda
+				// vacío.
+				array(
+					'key'   => 'field_dds_tab_redes',
+					'label' => __( 'Redes sociales', 'portafolio' ),
+					'type'  => 'tab',
+				),
+				array(
+					'key'           => 'field_dds_red_linkedin',
+					'label'         => __( 'LinkedIn', 'portafolio' ),
+					'name'          => 'red_linkedin',
+					'type'          => 'url',
+					'default_value' => 'https://www.linkedin.com/in/alexrodriguezp/',
+				),
+				array(
+					'key'           => 'field_dds_red_github',
+					'label'         => __( 'GitHub', 'portafolio' ),
+					'name'          => 'red_github',
+					'type'          => 'url',
+					'default_value' => 'https://github.com/alexcitos',
+				),
+				array(
+					'key'           => 'field_dds_red_instagram',
+					'label'         => __( 'Instagram', 'portafolio' ),
+					'name'          => 'red_instagram',
+					'type'          => 'url',
+					'default_value' => 'https://www.instagram.com/alex_rope/',
+				),
+				array(
+					'key'           => 'field_dds_red_strava',
+					'label'         => __( 'Strava', 'portafolio' ),
+					'name'          => 'red_strava',
+					'type'          => 'url',
+					'default_value' => 'https://www.strava.com/athletes/125816005',
+				),
+				array(
+					'key'           => 'field_dds_red_whatsapp',
+					'label'         => __( 'WhatsApp', 'portafolio' ),
+					'name'          => 'red_whatsapp',
+					'type'          => 'text',
+					'default_value' => '+573114411916',
+					'instructions'  => __( 'Número con código de país (admite espacios, guiones o paréntesis: se limpia solo). Genera un enlace a wa.me, igual que el WhatsApp de la sección Contacto.', 'portafolio' ),
+				),
+
 				// --- Sobre mí --------------------------------------------------
 				array(
 					'key'   => 'field_dds_tab_sobre_mi',
@@ -455,6 +509,54 @@ function portafolio_registrar_campos_datos_del_sitio() {
 	);
 }
 add_action( 'acf/init', 'portafolio_registrar_campos_datos_del_sitio' );
+
+/**
+ * Redes sociales configuradas en "Datos del sitio" → "Redes sociales",
+ * listas para pintar: combina portafolio_catalogo_redes_sociales()
+ * (icono, en inc/redes-sociales.php) con la URL guardada en cada campo.
+ * Usada por template-parts/redes-sociales.php, tanto en la barra flotante
+ * (header.php) como en la columna de contacto del home (front-page.php).
+ *
+ * Una red solo aparece en la lista si su campo tiene un valor; así, dejar
+ * un campo vacío la quita de los dos sitios a la vez.
+ *
+ * @return array<int, array{clave: string, nombre: string, url: string, viewbox: string, path: string}>
+ */
+function portafolio_obtener_redes_sociales() {
+	$portada_id = (int) get_option( 'page_on_front' );
+	$catalogo   = portafolio_catalogo_redes_sociales();
+
+	// Mismo orden en el que deben aparecer los botones.
+	$campos = array(
+		'linkedin'  => get_field( 'red_linkedin', $portada_id ),
+		'github'    => get_field( 'red_github', $portada_id ),
+		'instagram' => get_field( 'red_instagram', $portada_id ),
+		'strava'    => get_field( 'red_strava', $portada_id ),
+		'whatsapp'  => get_field( 'red_whatsapp', $portada_id ),
+	);
+
+	$redes = array();
+
+	foreach ( $campos as $clave => $valor ) {
+		$valor = trim( (string) $valor );
+
+		if ( '' === $valor || ! isset( $catalogo[ $clave ] ) ) {
+			continue;
+		}
+
+		// WhatsApp se guarda como número de teléfono (con o sin espacios,
+		// guiones o paréntesis), no como URL: aquí se convierte en enlace
+		// a wa.me, igual que el WhatsApp de la sección Contacto (ver
+		// front-page.php).
+		$url = ( 'whatsapp' === $clave )
+			? 'https://wa.me/' . preg_replace( '/[^0-9]/', '', $valor )
+			: $valor;
+
+		$redes[] = array_merge( $catalogo[ $clave ], array( 'url' => $url ) );
+	}
+
+	return $redes;
+}
 
 /**
  * Valida "Enlace del botón" (boton_contacto_enlace).

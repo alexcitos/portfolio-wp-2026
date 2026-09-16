@@ -1989,6 +1989,152 @@ a:focus {
 }
 
 /* ==========================================================================
+   Redes sociales
+   ==========================================================================
+
+   Un solo template-part (template-parts/redes-sociales.php) en dos
+   contextos, con las mismas tarjetas de icono redondas: la barra flotante
+   de todo el sitio (.redes-sociales--flotante, incluida en header.php,
+   fuera de .portada-oscura) y la columna de contacto del home
+   (.redes-sociales--contacto, dentro de .contacto-info en front-page.php).
+   Los enlaces y su orden salen de portafolio_obtener_redes_sociales()
+   (functions.php): una red solo aparece si su campo en "Datos del sitio" →
+   "Redes sociales" tiene valor.
+   ========================================================================== */
+.redes-sociales-lista {
+	display: flex;
+	gap: 0.6rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.red-social-enlace {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	color: var(--color-fondo);
+	transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
+}
+
+.red-social-enlace svg {
+	width: 1.125rem;
+	height: 1.125rem;
+	fill: currentColor;
+	transition: filter 0.25s ease;
+}
+
+/* Mismo efecto llamativo que .pilar-tecnologia (flota + se ilumina), pero
+   con el acento de la marca en vez del acento del pilar: cada red define
+   --red-social-color/--red-social-resplandor (ver más abajo), y aquí solo
+   se consumen con un valor de reserva neutro para cuando falte alguna. */
+.red-social-enlace:hover,
+.red-social-enlace:focus-visible {
+	transform: translateY(-3px) scale(1.12);
+	background: rgba(255, 255, 255, 0.12);
+	border-color: var(--red-social-color, rgba(255, 255, 255, 0.4));
+	color: var(--red-social-color, var(--color-fondo));
+	box-shadow: 0 10px 24px var(--red-social-resplandor, rgba(255, 255, 255, 0.25));
+	outline: none;
+}
+
+.red-social-enlace:hover svg,
+.red-social-enlace:focus-visible svg {
+	filter: drop-shadow(0 0 8px currentColor);
+}
+
+/* Acento de marca por red. Colores literales (no se derivan de --color-*
+   del tema): son la identidad visual de cada red, no la paleta del sitio,
+   así que no pasan por la mejora oklch()/color-mix() del resto del
+   archivo. */
+.red-social--linkedin {
+	--red-social-color: #0a66c2;
+	--red-social-resplandor: rgba(10, 102, 194, 0.45);
+}
+
+.red-social--github {
+	--red-social-color: #f0f6fc;
+	--red-social-resplandor: rgba(240, 246, 252, 0.3);
+}
+
+.red-social--instagram {
+	--red-social-color: #e1306c;
+	--red-social-resplandor: rgba(225, 48, 108, 0.45);
+}
+
+.red-social--strava {
+	--red-social-color: #fc4c02;
+	--red-social-resplandor: rgba(252, 76, 2, 0.45);
+}
+
+.red-social--whatsapp {
+	--red-social-color: #25d366;
+	--red-social-resplandor: rgba(37, 211, 102, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.red-social-enlace {
+		transition: none;
+	}
+
+	.red-social-enlace:hover,
+	.red-social-enlace:focus-visible {
+		transform: none;
+	}
+}
+
+/* --- Barra flotante (todo el sitio; ver header.php) ---
+   Fuera de .portada-oscura, así que necesita su propio fondo de vidrio en
+   vez de heredarlo; funciona igual de bien sobre la cabecera, el hero
+   oscuro o el pie, porque los tres son oscuros. z-index por debajo de
+   .sitio-cabecera (500) para que la cabecera sticky pase por encima al
+   hacer scroll en vez de solaparse. */
+.redes-sociales--flotante {
+	position: fixed;
+	left: 0;
+	top: 50%;
+	z-index: 450;
+	transform: translateY(-50%);
+	padding: 0.75rem 0.5rem;
+	border-radius: 0 1rem 1rem 0;
+	background: rgba(6, 13, 26, 0.55);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-left: 0;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+	backdrop-filter: blur(20px) saturate(150%);
+	-webkit-backdrop-filter: blur(20px) saturate(150%);
+}
+
+.redes-sociales--flotante .redes-sociales-lista {
+	flex-direction: column;
+}
+
+/* En pantallas estrechas la barra vertical resta ancho al contenido y
+   queda muy cerca del borde donde el dedo hace scroll: se retira y basta
+   con los botones de la columna de contacto. */
+@media (max-width: 40rem) {
+	.redes-sociales--flotante {
+		display: none;
+	}
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.redes-sociales--flotante {
+		background: var(--color-vidrio);
+	}
+}
+
+/* --- Columna de contacto (home; dentro de .contacto-info) --- */
+.redes-sociales--contacto {
+	margin-top: 1.75rem;
+}
+
+/* ==========================================================================
    Ficha de proyecto (single-proyectos.php)
    ==========================================================================
 

@@ -305,6 +305,17 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 							<span><?php echo esc_html( $portafolio_ubicacion ); ?></span>
 						</li>
 					</ul>
+
+					<?php
+					get_template_part(
+						'template-parts/redes-sociales',
+						null,
+						array(
+							'clase'    => 'redes-sociales--contacto',
+							'etiqueta' => __( 'Redes sociales de contacto', 'portafolio' ),
+						)
+					);
+					?>
 				</div>
 
 				<?php // action="admin-ajax.php" + campo oculto "action": es el

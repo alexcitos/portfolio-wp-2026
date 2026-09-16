@@ -20,6 +20,22 @@
 	<?php esc_html_e( 'Saltar al contenido', 'portafolio' ); ?>
 </a>
 
+<?php // Barra flotante de redes sociales: fija a un lado, en todas las
+	// páginas del sitio (ver .redes-sociales--flotante en style.css). No
+	// depende de la portada: usa portafolio_obtener_redes_sociales(), que
+	// lee "Datos del sitio" → "Redes sociales" sin importar en qué
+	// plantilla se esté. ?>
+<?php
+get_template_part(
+	'template-parts/redes-sociales',
+	null,
+	array(
+		'clase'    => 'redes-sociales--flotante',
+		'etiqueta' => __( 'Redes sociales (barra flotante)', 'portafolio' ),
+	)
+);
+?>
+
 <header class="sitio-cabecera">
 	<?php // Contenedor interior: centra título/nav con el resto del sitio,
 	// mientras el <header> exterior queda a ancho completo (ver style.css). ?>
