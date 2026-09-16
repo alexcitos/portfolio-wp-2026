@@ -385,22 +385,70 @@ function portafolio_registrar_campos_datos_del_sitio() {
 					'type'  => 'tab',
 				),
 				array(
-					'key'          => 'field_dds_tokens_usados',
-					'label'        => __( 'Tokens de IA usados', 'portafolio' ),
-					'name'         => 'tokens_usados',
-					'type'         => 'number',
-					'min'          => 0,
-					'step'         => 1,
-					'instructions' => __( 'Se muestra en el pie con separador de miles, p. ej. 1.234.567.', 'portafolio' ),
+					'key'           => 'field_dds_tokens_mostrar_contador',
+					'label'         => __( 'Mostrar contador de tokens', 'portafolio' ),
+					'name'          => 'tokens_mostrar_contador',
+					'type'          => 'true_false',
+					'default_value' => 1,
+					'ui'            => 1,
+					'instructions'  => __( 'Activado: el pie muestra el número de "Tokens de IA usados". Desactivado: muestra el "Texto alternativo" en su lugar.', 'portafolio' ),
 				),
 				array(
-					'key'             => 'field_dds_tokens_actualizado',
-					'label'           => __( 'Tokens actualizado el', 'portafolio' ),
-					'name'            => 'tokens_actualizado',
-					'type'            => 'date_picker',
-					'display_format'  => 'j/n/Y',
-					'return_format'   => 'Ymd',
-					'instructions'    => __( 'Fecha del último conteo. Si se deja vacía, la línea "actualizado…" no se muestra.', 'portafolio' ),
+					// Tipo "text" (no "number"): un <input type="number"> nativo
+					// no admite el punto como separador de miles al escribir
+					// (ni "1.234.567" ni pegarlo), así que aquí se acepta el
+					// número con o sin separadores y se limpia al guardar (ver
+					// portafolio_sanear_tokens_usados() más abajo); en el pie
+					// siempre se formatea con number_format_i18n().
+					'key'               => 'field_dds_tokens_usados',
+					'label'             => __( 'Tokens de IA usados', 'portafolio' ),
+					'name'              => 'tokens_usados',
+					'type'              => 'text',
+					'instructions'      => __( 'Solo números; puedes escribirlo con puntos de miles (1.234.567) o sin ellos, se guarda y se muestra igual.', 'portafolio' ),
+					'conditional_logic' => array(
+						array(
+							array(
+								'field'    => 'field_dds_tokens_mostrar_contador',
+								'operator' => '==',
+								'value'    => '1',
+							),
+						),
+					),
+				),
+				array(
+					'key'               => 'field_dds_tokens_texto_alternativo',
+					'label'             => __( 'Texto alternativo', 'portafolio' ),
+					'name'              => 'tokens_texto_alternativo',
+					'type'              => 'text',
+					'default_value'     => __( 'muchísimos', 'portafolio' ),
+					'instructions'      => __( 'Sustituye al número cuando el contador está desactivado, en el mismo lugar de la frase: "... junto con Claude Code, [este texto] tokens de IA...".', 'portafolio' ),
+					'conditional_logic' => array(
+						array(
+							array(
+								'field'    => 'field_dds_tokens_mostrar_contador',
+								'operator' => '==',
+								'value'    => '0',
+							),
+						),
+					),
+				),
+				array(
+					'key'               => 'field_dds_tokens_actualizado',
+					'label'             => __( 'Tokens actualizado el', 'portafolio' ),
+					'name'              => 'tokens_actualizado',
+					'type'              => 'date_picker',
+					'display_format'    => 'j/n/Y',
+					'return_format'     => 'Ymd',
+					'instructions'      => __( 'Fecha del último conteo. Si se deja vacía, la línea "actualizado…" no se muestra.', 'portafolio' ),
+					'conditional_logic' => array(
+						array(
+							array(
+								'field'    => 'field_dds_tokens_mostrar_contador',
+								'operator' => '==',
+								'value'    => '1',
+							),
+						),
+					),
 				),
 			),
 		)
@@ -439,6 +487,54 @@ function portafolio_validar_boton_contacto_enlace( $valid, $value ) {
 	return __( 'Introduce una URL completa (empezando por http:// o https://) o una ancla interna (empezando por #).', 'portafolio' );
 }
 add_filter( 'acf/validate_value/name=boton_contacto_enlace', 'portafolio_validar_boton_contacto_enlace', 10, 2 );
+
+/**
+ * Valida "Tokens de IA usados" (tokens_usados).
+ *
+ * El campo es de tipo Texto (no Número): un <input type="number"> nativo
+ * no deja escribir ni pegar el punto de los miles ("1.234.567"), que es
+ * justo el formato en el que se piensa este dato. Aquí se acepta el número
+ * con o sin separadores de miles (punto, coma o espacio) y solo se
+ * rechaza si, quitándolos, queda algo que no son dígitos.
+ *
+ * @param bool|string $valid Resultado de validación hasta ahora.
+ * @param mixed        $value Valor enviado para el campo.
+ * @return bool|string
+ */
+function portafolio_validar_tokens_usados( $valid, $value ) {
+	if ( true !== $valid ) {
+		return $valid;
+	}
+
+	$value = trim( (string) $value );
+
+	if ( '' === $value ) {
+		return $valid;
+	}
+
+	$solo_digitos = str_replace( array( '.', ',', ' ' ), '', $value );
+
+	if ( ! ctype_digit( $solo_digitos ) ) {
+		return __( 'Introduce solo números, con o sin puntos de miles (p. ej. 1.234.567).', 'portafolio' );
+	}
+
+	return $valid;
+}
+add_filter( 'acf/validate_value/name=tokens_usados', 'portafolio_validar_tokens_usados', 10, 2 );
+
+/**
+ * Guarda "Tokens de IA usados" (tokens_usados) sin los separadores de
+ * miles con los que se haya escrito, para que el valor almacenado sea
+ * siempre un número limpio y portafolio_pie_tokens_usados_texto()
+ * (footer.php) lo formatee con number_format_i18n() sin sorpresas.
+ *
+ * @param mixed $value Valor a guardar.
+ * @return string
+ */
+function portafolio_sanear_tokens_usados( $value ) {
+	return str_replace( array( '.', ',', ' ' ), '', trim( (string) $value ) );
+}
+add_filter( 'acf/update_value/name=tokens_usados', 'portafolio_sanear_tokens_usados' );
 
 /**
  * Registra por código el grupo de campos "Detalles del proyecto".
