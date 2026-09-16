@@ -192,6 +192,54 @@ function portafolio_crear_terminos_categoria_proyecto() {
 add_action( 'init', 'portafolio_crear_terminos_categoria_proyecto', 11 );
 
 /**
+ * Ordena términos de "categoria_proyecto" según la prioridad de negocio
+ * (WordPress > Marketing Digital > Infraestructura y Automatización) en
+ * vez del orden alfabético que devuelve WordPress por defecto (get_terms()
+ * y get_the_terms() ordenan por "name"), que dejaría "Infraestructura..."
+ * primero.
+ *
+ * @param WP_Term[] $terminos Términos a ordenar.
+ * @return WP_Term[] Mismos términos, reordenados.
+ */
+function portafolio_ordenar_categorias_proyecto( array $terminos ) {
+	$orden_prioridad = array( 'WordPress', 'Marketing Digital', 'Infraestructura y Automatización' );
+
+	usort(
+		$terminos,
+		static function ( $a, $b ) use ( $orden_prioridad ) {
+			$posicion_a = array_search( $a->name, $orden_prioridad, true );
+			$posicion_b = array_search( $b->name, $orden_prioridad, true );
+
+			$posicion_a = false === $posicion_a ? count( $orden_prioridad ) : $posicion_a;
+			$posicion_b = false === $posicion_b ? count( $orden_prioridad ) : $posicion_b;
+
+			return $posicion_a <=> $posicion_b;
+		}
+	);
+
+	return $terminos;
+}
+
+/**
+ * Términos de "categoria_proyecto" de una entrada del CPT "proyectos", ya
+ * ordenados con portafolio_ordenar_categorias_proyecto(). Usado por
+ * template-parts/tarjeta-proyecto.php y single-proyectos.php para que las
+ * etiquetas de categoría se muestren siempre en el mismo orden.
+ *
+ * @param int $post_id ID de la entrada.
+ * @return WP_Term[] Términos ordenados, o un array vacío si no tiene.
+ */
+function portafolio_obtener_categorias_proyecto( $post_id ) {
+	$terminos = get_the_terms( $post_id, 'categoria_proyecto' );
+
+	if ( ! $terminos || is_wp_error( $terminos ) ) {
+		return array();
+	}
+
+	return portafolio_ordenar_categorias_proyecto( $terminos );
+}
+
+/**
  * Registra por código el grupo de campos "Datos del sitio".
  *
  * Contenido único y global del sitio (identidad, contacto, biografía). No

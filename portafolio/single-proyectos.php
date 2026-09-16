@@ -2,9 +2,12 @@
 /**
  * Plantilla de entrada individual del CPT "proyectos".
  *
- * Muestra título, contexto del proyecto (personal o cliente/empresa),
- * imagen destacada, contenido completo, la categoría de proyecto asignada,
- * las tecnologías usadas y el enlace a repositorio/demo cuando existe.
+ * Mismo lenguaje visual del home (zona oscura con esferas + tarjetas de
+ * vidrio): cabecera con categorías (en el orden de negocio, ver
+ * portafolio_obtener_categorias_proyecto() en functions.php) y contexto
+ * del proyecto (personal o cliente/empresa), imagen destacada, contenido
+ * completo dentro de una tarjeta de vidrio, y las tecnologías usadas y el
+ * enlace a repositorio/demo cuando existen.
  *
  * @package Portafolio
  */
@@ -14,80 +17,94 @@ get_header();
 while ( have_posts() ) :
 	the_post();
 
-	$portafolio_categorias         = get_the_terms( get_the_ID(), 'categoria_proyecto' );
-	$portafolio_tecnologias        = get_field( 'tecnologias_usadas' );
-	$portafolio_enlace_repo_demo   = get_field( 'enlace_repositorio_demo' );
-	$portafolio_contexto_proyecto  = get_field( 'contexto_proyecto' );
-	$portafolio_nombre_cliente     = get_field( 'nombre_cliente' );
+	$portafolio_categorias        = portafolio_obtener_categorias_proyecto( get_the_ID() );
+	$portafolio_tecnologias       = get_field( 'tecnologias_usadas' );
+	$portafolio_enlace_repo_demo  = get_field( 'enlace_repositorio_demo' );
+	$portafolio_contexto_proyecto = get_field( 'contexto_proyecto' );
+	$portafolio_nombre_cliente    = get_field( 'nombre_cliente' );
 	?>
 
-	<main id="contenido" class="sitio-contenido">
+	<main id="contenido" class="portada-oscura">
+
+		<?php get_template_part( 'template-parts/fondo-esferas' ); ?>
+
 		<article <?php post_class( 'proyecto-single' ); ?>>
+			<div class="proyecto-single-contenedor">
 
-			<header class="proyecto-single-cabecera">
-				<h1 class="proyecto-single-titulo"><?php the_title(); ?></h1>
+				<header class="proyecto-single-cabecera">
+					<?php if ( $portafolio_categorias ) : ?>
+						<ul class="proyecto-single-categorias">
+							<?php foreach ( $portafolio_categorias as $portafolio_categoria ) : ?>
+								<li class="proyecto-single-categoria">
+									<a href="<?php echo esc_url( get_term_link( $portafolio_categoria ) ); ?>">
+										<?php echo esc_html( $portafolio_categoria->name ); ?>
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					<?php endif; ?>
 
-				<?php if ( $portafolio_contexto_proyecto ) : ?>
-					<p class="proyecto-single-contexto">
-						<?php if ( 'cliente' === $portafolio_contexto_proyecto && $portafolio_nombre_cliente ) : ?>
-							<?php
-							printf(
-								/* translators: %s: nombre del cliente o empresa. */
-								esc_html__( 'Cliente: %s', 'portafolio' ),
-								esc_html( $portafolio_nombre_cliente )
-							);
-							?>
-						<?php elseif ( 'cliente' === $portafolio_contexto_proyecto ) : ?>
-							<?php esc_html_e( 'Cliente/Empresa', 'portafolio' ); ?>
-						<?php else : ?>
-							<?php esc_html_e( 'Proyecto personal', 'portafolio' ); ?>
-						<?php endif; ?>
-					</p>
+					<h1 class="proyecto-single-titulo"><?php the_title(); ?></h1>
+
+					<?php if ( $portafolio_contexto_proyecto ) : ?>
+						<p class="proyecto-single-contexto">
+							<?php if ( 'cliente' === $portafolio_contexto_proyecto && $portafolio_nombre_cliente ) : ?>
+								<?php
+								printf(
+									/* translators: %s: nombre del cliente o empresa. */
+									esc_html__( 'Cliente: %s', 'portafolio' ),
+									esc_html( $portafolio_nombre_cliente )
+								);
+								?>
+							<?php elseif ( 'cliente' === $portafolio_contexto_proyecto ) : ?>
+								<?php esc_html_e( 'Cliente/Empresa', 'portafolio' ); ?>
+							<?php else : ?>
+								<?php esc_html_e( 'Proyecto personal', 'portafolio' ); ?>
+							<?php endif; ?>
+						</p>
+					<?php endif; ?>
+				</header>
+
+				<?php if ( has_post_thumbnail() ) : ?>
+					<figure class="proyecto-single-imagen">
+						<?php the_post_thumbnail( 'large' ); ?>
+					</figure>
 				<?php endif; ?>
 
-				<?php if ( $portafolio_categorias && ! is_wp_error( $portafolio_categorias ) ) : ?>
-					<ul class="proyecto-single-categorias">
-						<?php foreach ( $portafolio_categorias as $portafolio_categoria ) : ?>
-							<li class="proyecto-categoria">
-								<a href="<?php echo esc_url( get_term_link( $portafolio_categoria ) ); ?>">
-									<?php echo esc_html( $portafolio_categoria->name ); ?>
-								</a>
-							</li>
-						<?php endforeach; ?>
-					</ul>
-				<?php endif; ?>
-			</header>
+				<div class="proyecto-single-panel">
+					<div class="proyecto-single-contenido">
+						<?php the_content(); ?>
+					</div>
 
-			<?php if ( has_post_thumbnail() ) : ?>
-				<figure class="proyecto-single-imagen">
-					<?php the_post_thumbnail( 'large' ); ?>
-				</figure>
-			<?php endif; ?>
+					<?php if ( $portafolio_tecnologias || $portafolio_enlace_repo_demo ) : ?>
+						<aside class="proyecto-single-detalles">
+							<?php if ( $portafolio_tecnologias ) : ?>
+								<p class="proyecto-single-tecnologias">
+									<span class="proyecto-detalle-etiqueta"><?php esc_html_e( 'Tecnologías usadas:', 'portafolio' ); ?></span>
+									<?php echo esc_html( $portafolio_tecnologias ); ?>
+								</p>
+							<?php endif; ?>
 
-			<div class="proyecto-single-contenido">
-				<?php the_content(); ?>
+							<?php if ( $portafolio_enlace_repo_demo ) : ?>
+								<p class="proyecto-single-enlace">
+									<a class="boton boton-primario" href="<?php echo esc_url( $portafolio_enlace_repo_demo ); ?>" target="_blank" rel="noopener noreferrer">
+										<?php esc_html_e( 'Ver repositorio / demo', 'portafolio' ); ?>
+									</a>
+								</p>
+							<?php endif; ?>
+						</aside>
+					<?php endif; ?>
+				</div>
+
+				<p class="proyecto-single-volver">
+					<a href="<?php echo esc_url( get_post_type_archive_link( 'proyectos' ) ); ?>">
+						&larr; <?php esc_html_e( 'Volver a todos los proyectos', 'portafolio' ); ?>
+					</a>
+				</p>
+
 			</div>
-
-			<?php if ( $portafolio_tecnologias || $portafolio_enlace_repo_demo ) : ?>
-				<aside class="proyecto-single-detalles">
-					<?php if ( $portafolio_tecnologias ) : ?>
-						<p class="proyecto-single-tecnologias">
-							<span class="proyecto-detalle-etiqueta"><?php esc_html_e( 'Tecnologías usadas:', 'portafolio' ); ?></span>
-							<?php echo esc_html( $portafolio_tecnologias ); ?>
-						</p>
-					<?php endif; ?>
-
-					<?php if ( $portafolio_enlace_repo_demo ) : ?>
-						<p class="proyecto-single-enlace">
-							<a class="boton boton-primario" href="<?php echo esc_url( $portafolio_enlace_repo_demo ); ?>" target="_blank" rel="noopener noreferrer">
-								<?php esc_html_e( 'Ver repositorio / demo', 'portafolio' ); ?>
-							</a>
-						</p>
-					<?php endif; ?>
-				</aside>
-			<?php endif; ?>
-
 		</article>
+
 	</main>
 
 	<?php

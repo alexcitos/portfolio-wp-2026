@@ -54,26 +54,7 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 		// --------------------------------------------------------------- ?>
 	<div class="portada-oscura">
 
-		<div class="portada-oscura-fondo" aria-hidden="true">
-			<span class="hero-forma hero-forma--1"></span>
-			<span class="hero-forma hero-forma--2"></span>
-			<span class="hero-forma hero-forma--3"></span>
-			<span class="hero-forma hero-forma--4"></span>
-			<span class="hero-forma hero-forma--5"></span>
-			<span class="hero-forma hero-forma--6"></span>
-			<span class="hero-forma hero-forma--7"></span>
-			<span class="hero-forma hero-forma--8"></span>
-			<span class="hero-forma hero-forma--9"></span>
-			<span class="hero-forma hero-forma--10"></span>
-			<span class="hero-forma hero-forma--11"></span>
-			<span class="hero-forma hero-forma--12"></span>
-			<span class="hero-forma hero-forma--13"></span>
-			<span class="hero-forma hero-forma--14"></span>
-			<span class="hero-forma hero-forma--15"></span>
-			<span class="hero-forma hero-forma--16"></span>
-			<span class="hero-forma hero-forma--17"></span>
-			<span class="hero-forma hero-forma--18"></span>
-		</div>
+		<?php get_template_part( 'template-parts/fondo-esferas' ); ?>
 
 		<section class="portada-hero" aria-labelledby="hero-titulo">
 
@@ -194,42 +175,7 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 						<?php
 						while ( $proyectos_destacados->have_posts() ) :
 							$proyectos_destacados->the_post();
-							?>
-							<?php $portafolio_categoria_proyecto = get_the_terms( get_the_ID(), 'categoria_proyecto' ); ?>
-							<li <?php post_class( 'proyecto' ); ?>>
-								<article>
-									<?php if ( has_post_thumbnail() ) : ?>
-										<figure class="proyecto-imagen">
-											<a href="<?php the_permalink(); ?>">
-												<?php the_post_thumbnail( 'medium_large' ); ?>
-											</a>
-										</figure>
-									<?php endif; ?>
-
-									<div class="proyecto-contenido">
-										<?php if ( $portafolio_categoria_proyecto && ! is_wp_error( $portafolio_categoria_proyecto ) ) : ?>
-											<ul class="proyecto-categorias">
-												<?php foreach ( $portafolio_categoria_proyecto as $portafolio_categoria ) : ?>
-													<li class="proyecto-categoria">
-														<a href="<?php echo esc_url( get_term_link( $portafolio_categoria ) ); ?>">
-															<?php echo esc_html( $portafolio_categoria->name ); ?>
-														</a>
-													</li>
-												<?php endforeach; ?>
-											</ul>
-										<?php endif; ?>
-
-										<h3 class="proyecto-titulo">
-											<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-										</h3>
-
-										<div class="proyecto-extracto">
-											<?php the_excerpt(); ?>
-										</div>
-									</div>
-								</article>
-							</li>
-							<?php
+							get_template_part( 'template-parts/tarjeta-proyecto' );
 						endwhile;
 						?>
 					</ul>

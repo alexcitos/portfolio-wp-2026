@@ -1386,6 +1386,129 @@ a:focus {
 	}
 }
 
+/* --- Filtro de categorías (archivo de "proyectos" y archivos de
+   categoría; ver template-parts/filtro-categorias-proyecto.php) ---
+   Reutiliza --proyectos-tarjeta-fondo/--proyectos-tarjeta-borde (definidas
+   en .portada-proyectos, que envuelve tanto el filtro como la rejilla). */
+.filtro-categorias {
+	margin: 0 0 clamp(2rem, 5vw, 3rem);
+}
+
+.filtro-categorias-lista {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.75rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.filtro-categoria-enlace {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.5rem 1.25rem;
+	border-radius: 999px;
+	border: 1px solid var(--proyectos-tarjeta-borde);
+	background: var(--proyectos-tarjeta-fondo);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	color: var(--proyectos-texto-tenue);
+	font-size: 0.875rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.filtro-categoria-enlace:hover,
+.filtro-categoria-enlace:focus {
+	border-color: rgba(255, 255, 255, 0.3);
+	color: var(--color-fondo);
+	transform: translateY(-2px);
+}
+
+.filtro-categoria-enlace--activo,
+.filtro-categoria-enlace--activo:hover,
+.filtro-categoria-enlace--activo:focus {
+	background: linear-gradient(135deg, var(--color-primario), var(--color-acento-violeta));
+	border-color: transparent;
+	color: var(--color-fondo);
+	box-shadow: 0 10px 24px var(--sombra-boton);
+	transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.filtro-categoria-enlace {
+		transition: none;
+	}
+}
+
+/* Sin soporte de backdrop-filter: pastillas con fondo sólido. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.filtro-categoria-enlace {
+		background: var(--color-vidrio);
+	}
+}
+
+/* --- Paginación (the_posts_pagination(), archivo de "proyectos" y
+   archivos de categoría). Mismos tokens de --proyectos-* que las tarjetas
+   y el filtro de categorías: hereda de .portada-proyectos. --- */
+.proyectos-paginacion {
+	margin: clamp(2rem, 5vw, 3rem) 0 0;
+}
+
+.proyectos-paginacion .nav-links {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.5rem;
+}
+
+.proyectos-paginacion .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2.5rem;
+	height: 2.5rem;
+	padding: 0 0.75rem;
+	border-radius: 0.625rem;
+	border: 1px solid var(--proyectos-tarjeta-borde);
+	background: var(--proyectos-tarjeta-fondo);
+	color: var(--color-fondo);
+	font-size: 0.9375rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.proyectos-paginacion a.page-numbers:hover,
+.proyectos-paginacion a.page-numbers:focus {
+	border-color: rgba(255, 255, 255, 0.3);
+}
+
+.proyectos-paginacion .page-numbers.dots {
+	border-color: transparent;
+	background: transparent;
+	color: var(--proyectos-texto-tenue);
+}
+
+.proyectos-paginacion .page-numbers.current {
+	background: linear-gradient(135deg, var(--color-primario), var(--color-acento-violeta));
+	border-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.proyectos-paginacion .page-numbers {
+		transition: none;
+	}
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.proyectos-paginacion .page-numbers {
+		background: var(--color-vidrio);
+	}
+}
+
 /* ==========================================================================
    Portada — Sobre mí
    ==========================================================================
@@ -1741,6 +1864,211 @@ a:focus {
 }
 
 /* ==========================================================================
+   Ficha de proyecto (single-proyectos.php)
+   ==========================================================================
+
+   Mismo fondo oscuro con esferas que el resto del sitio (.portada-oscura +
+   .portada-oscura-fondo, ver template-parts/fondo-esferas.php): cabecera
+   con categorías + título + contexto, imagen destacada a sangre y, debajo,
+   una tarjeta de vidrio con el contenido de la entrada y (si existen) las
+   tecnologías/enlace al final, separados por un borde interior en vez de
+   una segunda tarjeta aparte.
+   ========================================================================== */
+.proyecto-single {
+	position: relative;
+	padding: clamp(3rem, 8vw, 6rem) var(--espacio-md);
+}
+
+.proyecto-single-contenedor {
+	position: relative;
+	z-index: 1;
+	max-width: 48rem;
+	margin: 0 auto;
+}
+
+.proyecto-single-cabecera {
+	text-align: center;
+	margin: 0 0 clamp(2rem, 5vw, 3rem);
+}
+
+/* Categorías en pastilla, sin el separador "·" de .proyecto-categoria
+   (pensado para una lista en línea dentro de una tarjeta, no para pastillas
+   con su propio espaciado): clase propia en vez de reutilizar
+   .proyecto-categoria. */
+.proyecto-single-categorias {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.5rem;
+	margin: 0 0 1.25rem;
+	padding: 0;
+	list-style: none;
+}
+
+.proyecto-single-categoria {
+	padding: 0.3rem 0.85rem;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	background: rgba(255, 255, 255, 0.06);
+	font-family: var(--fuente-mono);
+	font-size: 0.75rem;
+	letter-spacing: 0.05em;
+	color: var(--color-primario-claro);
+}
+
+.proyecto-single-categoria a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.proyecto-single-categoria a:hover,
+.proyecto-single-categoria a:focus {
+	text-decoration: underline;
+}
+
+.proyecto-single-titulo {
+	margin: 0;
+	font-size: clamp(1.875rem, 4.5vw, 2.75rem);
+	font-weight: 800;
+	letter-spacing: -0.01em;
+	color: var(--color-fondo);
+}
+
+.proyecto-single-contexto {
+	margin: 0.75rem 0 0;
+	font-size: 0.9375rem;
+	color: rgba(255, 255, 255, 0.65);
+}
+
+.proyecto-single-imagen {
+	margin: 0 0 clamp(2rem, 5vw, 3rem);
+	border-radius: 1.25rem;
+	overflow: hidden;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+}
+
+.proyecto-single-imagen img {
+	width: 100%;
+	height: auto;
+}
+
+/* --- Tarjeta de vidrio: contenido de la entrada + detalles --- */
+.proyecto-single-panel {
+	--panel-fondo: rgba(6, 13, 26, 0.55);
+	--panel-borde: rgba(255, 255, 255, 0.12);
+
+	border-radius: 1.5rem;
+	background: var(--panel-fondo);
+	border: 1px solid var(--panel-borde);
+	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(20px) saturate(150%);
+	-webkit-backdrop-filter: blur(20px) saturate(150%);
+	padding: clamp(1.75rem, 5vw, 2.75rem);
+}
+
+/* Tipografía de the_content(): mismo tono "tenue" que el resto del sitio
+   sobre fondo oscuro (ver .hero-tagline, .pilar-descripcion), con jerarquía
+   propia para los encabezados que pueda traer el editor. */
+.proyecto-single-contenido {
+	font-size: 1.0625rem;
+	line-height: 1.75;
+	color: rgba(255, 255, 255, 0.82);
+}
+
+.proyecto-single-contenido > * + * {
+	margin-top: 1.25rem;
+}
+
+.proyecto-single-contenido h2,
+.proyecto-single-contenido h3,
+.proyecto-single-contenido h4 {
+	line-height: 1.3;
+	color: var(--color-fondo);
+}
+
+.proyecto-single-contenido a {
+	color: var(--color-primario-claro);
+}
+
+.proyecto-single-contenido a:hover,
+.proyecto-single-contenido a:focus {
+	color: var(--color-fondo);
+}
+
+.proyecto-single-contenido ul,
+.proyecto-single-contenido ol {
+	padding-left: 1.5rem;
+}
+
+.proyecto-single-contenido img {
+	border-radius: 0.75rem;
+}
+
+.proyecto-single-contenido blockquote {
+	margin: 0;
+	padding-left: 1.25rem;
+	border-left: 3px solid var(--color-acento-violeta);
+	color: rgba(255, 255, 255, 0.7);
+	font-style: italic;
+}
+
+/* --- Detalles: tecnologías + enlace a repositorio/demo --- */
+.proyecto-single-detalles {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: clamp(1.5rem, 4vw, 2rem);
+	padding-top: clamp(1.5rem, 4vw, 2rem);
+	border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.proyecto-single-tecnologias {
+	margin: 0;
+	font-size: 0.9375rem;
+	color: rgba(255, 255, 255, 0.78);
+}
+
+.proyecto-detalle-etiqueta {
+	display: block;
+	margin-bottom: 0.25rem;
+	font-family: var(--fuente-mono);
+	font-size: 0.75rem;
+	letter-spacing: 0.05em;
+	color: var(--color-primario-claro);
+}
+
+.proyecto-single-enlace {
+	margin: 0;
+}
+
+.proyecto-single-volver {
+	margin: clamp(2rem, 5vw, 3rem) 0 0;
+	text-align: center;
+}
+
+.proyecto-single-volver a {
+	color: var(--color-primario-claro);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.proyecto-single-volver a:hover,
+.proyecto-single-volver a:focus {
+	color: var(--color-fondo);
+	text-decoration: underline;
+}
+
+/* Sin soporte de backdrop-filter: tarjeta con fondo sólido. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.proyecto-single-panel {
+		background: var(--color-vidrio);
+	}
+}
+
+/* ==========================================================================
    Mejora progresiva del color (oklch / color-mix)
    ==========================================================================
 
@@ -1874,6 +2202,10 @@ a:focus {
 
 	.contacto-tarjeta {
 		--contacto-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 55%, transparent);
+	}
+
+	.proyecto-single-panel {
+		--panel-fondo: color-mix(in srgb, var(--color-vidrio) 55%, transparent);
 	}
 }
 
