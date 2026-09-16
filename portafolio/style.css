@@ -1064,6 +1064,8 @@ a:focus {
 
 .pilar {
 	position: relative;
+	display: flex;
+	flex-direction: column;
 	flex: 1 1 17.5rem;
 	max-width: 22.5rem;
 	padding: 2rem 1.75rem;
@@ -1117,6 +1119,129 @@ a:focus {
 	margin: 0;
 	font-size: 0.9375rem;
 	color: var(--pilares-texto-tenue);
+}
+
+/* --- Tecnologías del pilar (logos pequeños) ---
+   margin-top: auto las ancla al pie de la tarjeta (.pilar ya es un flex
+   column) sin importar cuánto texto tenga pilar-descripcion, así las tres
+   filas de logos quedan alineadas entre sí en las tres tarjetas de la
+   fila. Cada icono hereda --pilar-acento-* de .pilar-wordpress/
+   -marketing/-infraestructura (mismas variables que .pilar-icono), así que
+   el resplandor de hover combina con el acento de su propio pilar. */
+.pilar-tecnologias {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem;
+	margin: 1.5rem 0 0;
+	padding: 1.25rem 0 0;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+	list-style: none;
+}
+
+.pilar-tecnologia {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.375rem;
+	height: 2.375rem;
+	border-radius: 0.625rem;
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	color: var(--pilar-acento-color);
+	cursor: default;
+	transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.pilar-tecnologia svg {
+	width: 1.1875rem;
+	height: 1.1875rem;
+	fill: currentColor;
+	transition: filter 0.25s ease;
+}
+
+/* Iconos de trazo (conceptos sin logo de marca, p. ej. "Terminal"; ver
+   'tipo' => 'trazo' en inc/iconos-tecnologia.php): mismo lenguaje visual
+   que .pilar-icono (línea, no relleno), para no hacerlos pasar por un logo
+   real que no existe. */
+.pilar-tecnologia--trazo svg {
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.pilar-tecnologia-texto {
+	font-family: var(--fuente-titulos);
+	font-size: 1rem;
+	font-weight: 800;
+	line-height: 1;
+}
+
+/* Insignia con la tecnología en pastilla flotante, en vez de un title
+   nativo del navegador (que no se puede estilizar y se retrasa). Oculta
+   en reposo y revelada con hover/foco (teclado incluido, gracias al
+   tabindex="0" del <li>); aria-hidden porque el nombre accesible ya va en
+   el role="img"+aria-label del <li> (ver pilar-tecnologias.php), así un
+   lector de pantalla no lo anuncia dos veces. */
+.pilar-tecnologia-etiqueta {
+	position: absolute;
+	bottom: calc(100% + 0.5rem);
+	left: 50%;
+	padding: 0.3rem 0.65rem;
+	border-radius: 0.4rem;
+	background: rgba(3, 7, 17, 0.95);
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	color: var(--color-fondo);
+	font-size: 0.6875rem;
+	font-weight: 600;
+	white-space: nowrap;
+	opacity: 0;
+	visibility: hidden;
+	transform: translate(-50%, 4px);
+	transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+	pointer-events: none;
+	z-index: 2;
+}
+
+/* Efecto llamativo al pasar el ratón (o al enfocar con teclado): el icono
+   flota, gira un poco y se ilumina con el acento de su pilar; el trazo del
+   logo suma un resplandor a juego (drop-shadow sigue la silueta del path,
+   no un box-shadow cuadrado). */
+.pilar-tecnologia:hover,
+.pilar-tecnologia:focus-visible {
+	transform: translateY(-5px) scale(1.12) rotate(-4deg);
+	background: var(--pilar-acento-fondo);
+	border-color: currentColor;
+	box-shadow: 0 10px 24px var(--pilar-acento-resplandor);
+	outline: none;
+}
+
+.pilar-tecnologia:hover svg,
+.pilar-tecnologia:focus-visible svg {
+	filter: drop-shadow(0 0 8px currentColor);
+}
+
+.pilar-tecnologia:hover .pilar-tecnologia-etiqueta,
+.pilar-tecnologia:focus-visible .pilar-tecnologia-etiqueta {
+	opacity: 1;
+	visibility: visible;
+	transform: translate(-50%, 0);
+	transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.pilar-tecnologia,
+	.pilar-tecnologia svg,
+	.pilar-tecnologia-etiqueta {
+		transition: none;
+	}
+
+	.pilar-tecnologia:hover,
+	.pilar-tecnologia:focus-visible {
+		transform: none;
+	}
 }
 
 /* Acento de color propio por pilar (icono y resplandor al pasar el ratón).

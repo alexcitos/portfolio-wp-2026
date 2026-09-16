@@ -9,6 +9,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Acceso directo no permitido.
 }
 
+// Catálogo de iconos de tecnología para las tarjetas de "Pilares" del home
+// (ver template-parts/pilar-tecnologias.php). Aparte porque son datos
+// (SVG de terceros), no lógica del tema.
+require get_template_directory() . '/inc/iconos-tecnologia.php';
+
 /**
  * Soporte de características del tema.
  */

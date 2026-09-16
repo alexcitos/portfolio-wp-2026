@@ -105,6 +105,13 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 							portafolio) como Elementor Pro y Divi, para entregar
 							rápido cuando el proyecto lo pide.
 						</p>
+						<?php
+						get_template_part(
+							'template-parts/pilar-tecnologias',
+							null,
+							array( 'tecnologias' => array( 'wordpress', 'elementor', 'divi', 'html5', 'css3', 'php', 'javascript', 'lighthouse' ) )
+						);
+						?>
 					</li>
 					<li class="pilar pilar-marketing">
 						<span class="pilar-icono" aria-hidden="true">
@@ -120,6 +127,13 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 							Console, con fundamentos de SEO on-page que refuerzan
 							cada estrategia.
 						</p>
+						<?php
+						get_template_part(
+							'template-parts/pilar-tecnologias',
+							null,
+							array( 'tecnologias' => array( 'google-ads', 'meta', 'ga4', 'search-console', 'semrush', 'yoast' ) )
+						);
+						?>
 					</li>
 					<li class="pilar pilar-infraestructura">
 						<span class="pilar-icono" aria-hidden="true">
@@ -138,6 +152,13 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 							de procesos con n8n — para que la infraestructura
 							funcione sola y de forma segura.
 						</p>
+						<?php
+						get_template_part(
+							'template-parts/pilar-tecnologias',
+							null,
+							array( 'tecnologias' => array( 'linux', 'ubuntu', 'docker', 'n8n', 'terminal', 'make', 'odoo', 'nextcloud', 'apache', 'nginx' ) )
+						);
+						?>
 					</li>
 				</ul>
 			</div>
