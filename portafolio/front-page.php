@@ -100,16 +100,16 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 						</span>
 						<h3 class="pilar-titulo">WordPress</h3>
 						<p class="pilar-descripcion">
-							Sitios WordPress construidos a medida — domino tanto la
-							maquetación desde cero (sin builders, como este mismo
-							portafolio) como Elementor Pro y Divi, para entregar
-							rápido cuando el proyecto lo pide.
+							Sitios WordPress construidos a medida — domino la
+							maquetación desde cero, sin builders, como este mismo
+							portafolio, además de Elementor Pro y Divi para
+							entregar rápido cuando el proyecto lo pide.
 						</p>
 						<?php
 						get_template_part(
 							'template-parts/pilar-tecnologias',
 							null,
-							array( 'tecnologias' => array( 'wordpress', 'elementor', 'divi', 'html5', 'css3', 'php', 'javascript', 'lighthouse' ) )
+							array( 'tecnologias' => array( 'wordpress', 'elementor', 'divi', 'html5', 'css3', 'php', 'javascript', 'rendimiento' ) )
 						);
 						?>
 					</li>
@@ -124,14 +124,14 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 						<p class="pilar-descripcion">
 							Marketing digital basado en datos: gestión de campañas
 							en Google Ads y Meta Ads, análisis con GA4 y Search
-							Console, con fundamentos de SEO on-page que refuerzan
-							cada estrategia.
+							Console, y fundamentos de SEO on-page para reforzar
+							cada estrategia con evidencia real.
 						</p>
 						<?php
 						get_template_part(
 							'template-parts/pilar-tecnologias',
 							null,
-							array( 'tecnologias' => array( 'google-ads', 'meta', 'ga4', 'search-console', 'semrush', 'yoast' ) )
+							array( 'tecnologias' => array( 'google-ads', 'meta', 'ga4', 'search-console', 'semrush' ) )
 						);
 						?>
 					</li>
@@ -147,16 +147,15 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 						<h3 class="pilar-titulo">Infraestructura IT</h3>
 						<p class="pilar-descripcion">
 							Servidores Linux en VPS, contenedores Docker,
-							instalación y configuración de herramientas open
-							source, seguridad con UFW y Fail2Ban, y automatización
-							de procesos con n8n — para que la infraestructura
-							funcione sola y de forma segura.
+							instalación de herramientas open source, seguridad
+							con UFW y Fail2Ban, y automatización de procesos
+							con n8n, para que la infraestructura funcione sola.
 						</p>
 						<?php
 						get_template_part(
 							'template-parts/pilar-tecnologias',
 							null,
-							array( 'tecnologias' => array( 'linux', 'ubuntu', 'docker', 'n8n', 'terminal', 'make', 'odoo', 'nextcloud', 'apache', 'nginx' ) )
+							array( 'tecnologias' => array( 'linux', 'ubuntu', 'docker', 'n8n', 'make', 'odoo', 'nextcloud', 'apache', 'nginx' ) )
 						);
 						?>
 					</li>
