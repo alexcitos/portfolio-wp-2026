@@ -339,10 +339,14 @@ function portafolio_registrar_campos_datos_del_sitio() {
 					'type'  => 'tab',
 				),
 				array(
-					'key'   => 'field_dds_email',
-					'label' => __( 'Email', 'portafolio' ),
-					'name'  => 'email',
-					'type'  => 'email',
+					'key'           => 'field_dds_email',
+					'label'         => __( 'Email', 'portafolio' ),
+					'name'          => 'email',
+					'type'          => 'email',
+					// Provisional hasta que se configure uno real: mismo valor de
+					// reserva que usan front-page.php (dato de contacto) y
+					// portafolio_obtener_redes_sociales() (icono de email).
+					'default_value' => 'alitos.rope@gmail.com',
 				),
 				array(
 					'key'   => 'field_dds_telefono',
@@ -511,14 +515,19 @@ function portafolio_registrar_campos_datos_del_sitio() {
 add_action( 'acf/init', 'portafolio_registrar_campos_datos_del_sitio' );
 
 /**
- * Redes sociales configuradas en "Datos del sitio" → "Redes sociales",
- * listas para pintar: combina portafolio_catalogo_redes_sociales()
- * (icono, en inc/redes-sociales.php) con la URL guardada en cada campo.
- * Usada por template-parts/redes-sociales.php, tanto en la barra flotante
+ * Redes sociales + email configurados en "Datos del sitio" (pestañas
+ * "Redes sociales" y "Contacto" → campo Email), listos para pintar:
+ * combina portafolio_catalogo_redes_sociales() (icono, en
+ * inc/redes-sociales.php) con la URL guardada en cada campo. Usada por
+ * template-parts/redes-sociales.php, tanto en la barra flotante
  * (header.php) como en la columna de contacto del home (front-page.php).
  *
+ * Orden de aparición: WhatsApp, Email, LinkedIn, GitHub, Instagram, Strava.
+ *
  * Una red solo aparece en la lista si su campo tiene un valor; así, dejar
- * un campo vacío la quita de los dos sitios a la vez.
+ * un campo vacío la quita de los dos sitios a la vez (el email usa además
+ * el mismo valor de reserva provisional que front-page.php mientras no se
+ * configure uno real).
  *
  * @return array<int, array{clave: string, nombre: string, url: string, viewbox: string, path: string}>
  */
@@ -528,12 +537,19 @@ function portafolio_obtener_redes_sociales() {
 
 	// Mismo orden en el que deben aparecer los botones.
 	$campos = array(
+		'whatsapp'  => get_field( 'red_whatsapp', $portada_id ),
+		'email'     => get_field( 'email', $portada_id ),
 		'linkedin'  => get_field( 'red_linkedin', $portada_id ),
 		'github'    => get_field( 'red_github', $portada_id ),
 		'instagram' => get_field( 'red_instagram', $portada_id ),
 		'strava'    => get_field( 'red_strava', $portada_id ),
-		'whatsapp'  => get_field( 'red_whatsapp', $portada_id ),
 	);
+
+	// Igual que $portafolio_email en front-page.php: provisional hasta que
+	// se configure un email real en "Datos del sitio" → "Contacto".
+	if ( '' === trim( (string) $campos['email'] ) ) {
+		$campos['email'] = 'alitos.rope@gmail.com';
+	}
 
 	$redes = array();
 
@@ -544,13 +560,20 @@ function portafolio_obtener_redes_sociales() {
 			continue;
 		}
 
-		// WhatsApp se guarda como número de teléfono (con o sin espacios,
-		// guiones o paréntesis), no como URL: aquí se convierte en enlace
-		// a wa.me, igual que el WhatsApp de la sección Contacto (ver
-		// front-page.php).
-		$url = ( 'whatsapp' === $clave )
-			? 'https://wa.me/' . preg_replace( '/[^0-9]/', '', $valor )
-			: $valor;
+		if ( 'whatsapp' === $clave ) {
+			// Se guarda como número de teléfono (con o sin espacios, guiones
+			// o paréntesis), no como URL: aquí se convierte en enlace a
+			// wa.me, igual que el WhatsApp de la sección Contacto (ver
+			// front-page.php).
+			$url = 'https://wa.me/' . preg_replace( '/[^0-9]/', '', $valor );
+		} elseif ( 'email' === $clave ) {
+			// antispambot(): misma ofuscación que ya usa el dato de contacto
+			// "Email" en front-page.php, para no exponer la dirección en
+			// texto plano a los rastreadores de spam.
+			$url = 'mailto:' . antispambot( $valor );
+		} else {
+			$url = $valor;
+		}
 
 		$redes[] = array_merge( $catalogo[ $clave ], array( 'url' => $url ) );
 	}

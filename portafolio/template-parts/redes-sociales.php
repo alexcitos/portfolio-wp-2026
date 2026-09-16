@@ -1,9 +1,10 @@
 <?php
 /**
- * Enlaces a redes sociales (LinkedIn, GitHub, Instagram, Strava,
- * WhatsApp), leídos de "Datos del sitio" → "Redes sociales" (ver
+ * Enlaces de contacto (WhatsApp, Email, LinkedIn, GitHub, Instagram,
+ * Strava, en ese orden), leídos de "Datos del sitio" (ver
  * portafolio_obtener_redes_sociales() en functions.php). Todos abren en
- * pestaña nueva. Se usa tanto en la barra flotante de todo el sitio (ver
+ * pestaña nueva salvo Email, que usa mailto: (el navegador decide cómo
+ * abrirlo). Se usa tanto en la barra flotante de todo el sitio (ver
  * header.php) como en la columna de contacto del home (ver
  * front-page.php); el 'clase' distingue el contexto para el CSS (ver
  * .redes-sociales--flotante/--contacto en style.css) y 'etiqueta' evita

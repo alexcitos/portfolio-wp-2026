@@ -2001,9 +2001,9 @@ a:focus {
    de todo el sitio (.redes-sociales--flotante, incluida en header.php,
    fuera de .portada-oscura) y la columna de contacto del home
    (.redes-sociales--contacto, dentro de .contacto-info en front-page.php).
-   Los enlaces y su orden salen de portafolio_obtener_redes_sociales()
-   (functions.php): una red solo aparece si su campo en "Datos del sitio" →
-   "Redes sociales" tiene valor.
+   Los enlaces y su orden (WhatsApp, Email, LinkedIn, GitHub, Instagram,
+   Strava) salen de portafolio_obtener_redes_sociales() (functions.php): uno
+   solo aparece si su campo en "Datos del sitio" tiene valor.
    ========================================================================== */
 .redes-sociales-lista {
 	display: flex;
@@ -2050,6 +2050,14 @@ a:focus {
 .red-social-enlace:hover svg,
 .red-social-enlace:focus-visible svg {
 	filter: drop-shadow(0 0 8px currentColor);
+}
+
+/* Email no es una red externa, así que su acento no es un color de marca:
+   reutiliza --color-primario del propio tema (sí pasa por la mejora
+   oklch()/color-mix() de :root, a diferencia de las marcas de abajo). */
+.red-social--email {
+	--red-social-color: var(--color-primario);
+	--red-social-resplandor: var(--sombra-boton);
 }
 
 /* Acento de marca por red. Colores literales (no se derivan de --color-*
@@ -2118,12 +2126,27 @@ a:focus {
 	flex-direction: column;
 }
 
-/* En pantallas estrechas la barra vertical resta ancho al contenido y
-   queda muy cerca del borde donde el dedo hace scroll: se retira y basta
-   con los botones de la columna de contacto. */
+/* En pantallas estrechas la barra vertical pegada al borde izquierdo resta
+   ancho al contenido y queda justo donde el dedo hace el gesto de "volver
+   atrás". En vez de ocultarla del todo (dejando los iconos solo visibles al
+   llegar a la sección de contacto), pasa a un dock horizontal centrado y
+   pegado abajo: mismas tarjetas de icono, mismo fondo de vidrio, mismos
+   efectos de hover/foco —solo cambia la forma del contenedor—, un patrón
+   habitual en móvil que no compite con ese gesto ni con el ancho del
+   contenido. safe-area-inset-bottom evita que quede tapado por la barra de
+   gestos del sistema en iOS. */
 @media (max-width: 40rem) {
 	.redes-sociales--flotante {
-		display: none;
+		left: 50%;
+		top: auto;
+		bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+		transform: translateX(-50%);
+		border-radius: 999px;
+		border-left: 1px solid rgba(255, 255, 255, 0.12);
+	}
+
+	.redes-sociales--flotante .redes-sociales-lista {
+		flex-direction: row;
 	}
 }
 

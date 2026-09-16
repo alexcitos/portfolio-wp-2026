@@ -33,7 +33,7 @@ $portafolio_nombre      = $portafolio_nombre ? $portafolio_nombre : 'Nombre Apel
 $portafolio_tagline     = $portafolio_tagline ? $portafolio_tagline : 'Desarrollo WordPress a medida, marketing digital e infraestructura IT para negocios que quieren crecer.';
 $portafolio_boton_texto = $portafolio_boton_texto ? $portafolio_boton_texto : 'Hablemos de tu proyecto';
 $portafolio_boton_url   = $portafolio_boton_url ? $portafolio_boton_url : '#contacto';
-$portafolio_email       = $portafolio_email ? $portafolio_email : 'hola@ejemplo.com';
+$portafolio_email       = $portafolio_email ? $portafolio_email : 'alitos.rope@gmail.com';
 $portafolio_telefono    = $portafolio_telefono ? $portafolio_telefono : '+34 600 00 00 00';
 $portafolio_ubicacion   = $portafolio_ubicacion ? $portafolio_ubicacion : 'Ciudad, País';
 
