@@ -214,16 +214,24 @@ a:focus {
    es quien centra y alinea el título/nav con el resto del sitio.
    ========================================================================== */
 .sitio-cabecera {
-	/* --color-primario domina el fondo (~5.17:1 de contraste con el texto
-	   blanco del título/nav) con solo un 20% de --color-acento-violeta
-	   mezclado ANTES de aplicar la transparencia —no como capa translúcida
-	   aparte— para que el contraste no varíe según lo que el blur deje
-	   traslucir detrás. La personalidad de la cabecera no depende del
-	   fondo: vive en el borde y la sombra, un resplandor lavanda que usa
-	   el mismo vocabulario que --hero-resplandor-a/b y
-	   --pilar-acento-resplandor, para que combine con el hero y los
-	   pilares (y con las secciones que vengan después). */
-	--cabecera-fondo: linear-gradient(135deg, rgba(37, 99, 235, 0.8), rgba(62, 98, 234, 0.8));
+	/* Degradado sutil entre --color-vidrio y --color-vidrio-trasero (mismo
+	   par que usan las capas "eco" del hero para el tono violáceo, ver
+	   .hero-panel-eco), casi opaco: la cabecera es "sticky" y, en reposo (sin
+	   scroll), no tiene nada detrás que el backdrop-filter pueda desenfocar
+	   —el hero empieza justo debajo, no detrás—, así que si el fondo
+	   dependiera del blur para verse oscuro (como con --hero-vidrio al 62%,
+	   pensado para ir SIEMPRE sobre las esferas del hero) se leía como un
+	   gris plano mezclado con el blanco de la página. Al 90% de opacidad el
+	   propio degradado ya se ve como vidrio oscuro sin ayuda del blur; el
+	   10% que queda basta para que, al hacer scroll y quedar sobre el hero,
+	   el desenfoque siga aportando ese matiz extra de profundidad. El texto
+	   blanco del título/nav mantiene contraste de sobra sobre este fondo
+	   oscuro con o sin scroll. La personalidad de la cabecera vive además en
+	   el borde y la sombra —un resplandor lavanda que usa el mismo
+	   vocabulario que --hero-resplandor-a/b y --pilar-acento-resplandor—,
+	   que solo aparece al hacer scroll (.sitio-cabecera--flotando) para
+	   separarla del contenido justo cuando queda flotando sobre él. */
+	--cabecera-fondo: linear-gradient(135deg, rgba(6, 13, 26, 0.9), rgba(37, 37, 65, 0.9));
 	--cabecera-borde: rgba(151, 152, 249, 0.55);
 	--cabecera-sombra: 0 8px 24px rgba(3, 7, 17, 0.35), 0 0 32px rgba(151, 152, 249, 0.25);
 
@@ -243,12 +251,11 @@ a:focus {
 	box-shadow: var(--cabecera-sombra);
 }
 
-/* Sin soporte de backdrop-filter: mismo reparto azul-dominante/violeta-acento
-   pero opaco (sin alfa), ya que aquí no hay blur que disimule la
-   transparencia. */
+/* Sin soporte de backdrop-filter: mismo degradado pero totalmente opaco (sin
+   alfa), ya que aquí no hay blur que disimule la transparencia. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
 	.sitio-cabecera {
-		background: linear-gradient(135deg, var(--color-primario) 0%, var(--color-primario) 55%, var(--color-acento-violeta) 100%);
+		background: linear-gradient(135deg, var(--color-vidrio), var(--color-vidrio-trasero));
 	}
 }
 
@@ -291,17 +298,14 @@ a:focus {
 	list-style: none;
 }
 
-/* El fondo de la cabecera es azul medio (--cabecera-fondo, ver
-   .sitio-cabecera): frente a un fondo de luminosidad media, --color-acento-
-   violeta y --color-acento-lavanda —pensados para leerse sobre el fondo
-   casi negro del hero— pierden casi todo el contraste (~1.3:1 y ~2:1
-   respectivamente, muy por debajo del 4.5:1 de AA), así que hover y
-   "página activa" quedaban prácticamente invisibles. En vez de perseguir
-   un color de texto que sí contraste con un azul medio (difícil: los tonos
-   muy saturados quedan igual de cerca en luminosidad), ambos estados se
-   resuelven con blanco —ya probado, ~4.6:1 mínimo— más una pastilla de
-   fondo: transparente y sutil en hover, sólida y con negrita en la página
-   activa, para que no dependan de acertarle a un matiz. */
+/* El fondo de la cabecera es vidrio oscuro (--cabecera-fondo, ver
+   .sitio-cabecera), casi negro: --color-acento-violeta y --color-acento-
+   lavanda pierden casi todo el contraste sobre un fondo tan oscuro (quedan
+   cerca de su propia luminosidad), así que hover y "página activa" quedaban
+   prácticamente invisibles con esos tonos como color de texto. En vez de
+   perseguir un matiz que sí contraste, ambos estados se resuelven con
+   blanco —ya probado, ~4.6:1 mínimo— más una pastilla de fondo: transparente
+   y sutil en hover, sólida y con negrita en la página activa. */
 .sitio-navegacion a {
 	display: block;
 	padding: var(--espacio-xs) var(--espacio-sm);
@@ -2393,10 +2397,13 @@ a:focus {
 	}
 
 	.sitio-cabecera {
+		/* Ver comentario en .sitio-cabecera (arriba): 90% de opacidad, no el
+		   62% de --hero-vidrio, porque en reposo no hay nada detrás que el
+		   backdrop-filter pueda desenfocar. */
 		--cabecera-fondo: linear-gradient(
 			135deg,
-			color-mix(in oklab, var(--color-primario) 80%, transparent),
-			color-mix(in oklab, color-mix(in oklab, var(--color-primario) 80%, var(--color-acento-violeta) 20%) 80%, transparent)
+			color-mix(in srgb, var(--color-vidrio) 90%, transparent),
+			color-mix(in srgb, var(--color-vidrio-trasero) 90%, transparent)
 		);
 		--cabecera-borde: color-mix(in oklab, var(--color-acento-lavanda) 55%, transparent);
 		--cabecera-sombra:
