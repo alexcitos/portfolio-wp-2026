@@ -1148,6 +1148,12 @@ a:focus {
 	list-style: none;
 }
 
+/* --pilar-acento-*: la define el .pilar-wordpress/-marketing/-infraestructura
+   que envuelve estas insignias en el home (ver más abajo). Con el mismo
+   valor de reserva que .pilar-wordpress para cuando .pilar-tecnologias se
+   reutiliza fuera de una tarjeta de "Pilar" —p. ej. en la ficha de proyecto,
+   ver .proyecto-single-tecnologias en single-proyectos.php—, donde nadie
+   define esa variable. */
 .pilar-tecnologia {
 	position: relative;
 	display: flex;
@@ -1158,7 +1164,7 @@ a:focus {
 	border-radius: 0.625rem;
 	background: rgba(255, 255, 255, 0.06);
 	border: 1px solid rgba(255, 255, 255, 0.14);
-	color: var(--pilar-acento-color);
+	color: var(--pilar-acento-color, #9bbcfb);
 	cursor: default;
 	transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
@@ -1222,9 +1228,9 @@ a:focus {
 .pilar-tecnologia:hover,
 .pilar-tecnologia:focus-visible {
 	transform: translateY(-5px) scale(1.12) rotate(-4deg);
-	background: var(--pilar-acento-fondo);
+	background: var(--pilar-acento-fondo, rgba(37, 99, 235, 0.25));
 	border-color: currentColor;
-	box-shadow: 0 10px 24px var(--pilar-acento-resplandor);
+	box-shadow: 0 10px 24px var(--pilar-acento-resplandor, rgba(37, 99, 235, 0.35));
 	outline: none;
 }
 
@@ -2346,6 +2352,9 @@ a:focus {
 }
 
 .proyecto-single-tecnologias {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
 	margin: 0;
 	font-size: 0.9375rem;
 	color: rgba(255, 255, 255, 0.78);
@@ -2353,11 +2362,41 @@ a:focus {
 
 .proyecto-detalle-etiqueta {
 	display: block;
-	margin-bottom: 0.25rem;
 	font-family: var(--fuente-mono);
 	font-size: 0.75rem;
 	letter-spacing: 0.05em;
 	color: var(--color-primario-claro);
+}
+
+/* Mismas insignias de icono que .pilar-tecnologias (ver
+   template-parts/pilar-tecnologias.php), pero sueltas dentro de la ficha de
+   proyecto en vez de ancladas al pie de una tarjeta de "Pilar": sin el
+   borde superior ni el margin-top: auto pensados para ese otro contexto. */
+.proyecto-single-tecnologias .pilar-tecnologias {
+	margin-top: 0;
+	padding-top: 0;
+	border-top: 0;
+}
+
+/* Conceptos genéricos sin logo de marca (p. ej. "DNS"): etiqueta de texto
+   simple, deliberadamente más discreta que las insignias con icono de
+   arriba, para no hacerlas pasar por una herramienta con logo propio. */
+.proyecto-tecnologias-simples {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.proyecto-tecnologia-simple {
+	padding: 0.3rem 0.75rem;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	background: rgba(255, 255, 255, 0.05);
+	font-size: 0.8125rem;
+	color: rgba(255, 255, 255, 0.65);
 }
 
 .proyecto-single-enlace {

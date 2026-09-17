@@ -699,10 +699,27 @@ function portafolio_registrar_campos_detalles_proyecto() {
 			'description' => __( 'Información adicional del proyecto.', 'portafolio' ),
 			'fields'      => array(
 				array(
-					'key'   => 'field_dp_tecnologias_usadas',
-					'label' => __( 'Tecnologías usadas', 'portafolio' ),
-					'name'  => 'tecnologias_usadas',
-					'type'  => 'text',
+					// 'choices' generado desde el mismo catálogo de
+					// template-parts/pilar-tecnologias.php (ver
+					// inc/iconos-tecnologia.php): así una tecnología nueva
+					// solo se da de alta una vez, con icono incluido. "DNS"
+					// se deja fuera a propósito —es un concepto genérico sin
+					// logo de marca— y se recoge aparte en
+					// tecnologias_otras, como etiqueta de texto simple.
+					'key'          => 'field_dp_tecnologias_usadas',
+					'label'        => __( 'Tecnologías usadas', 'portafolio' ),
+					'name'         => 'tecnologias_usadas',
+					'type'         => 'checkbox',
+					'choices'      => wp_list_pluck( portafolio_catalogo_iconos_tecnologia(), 'nombre' ),
+					'layout'       => 'horizontal',
+					'instructions' => __( 'Se muestran como insignias con icono en la ficha del proyecto. Para tecnologías sin logo de marca (p. ej. "DNS"), usa el campo de texto de abajo.', 'portafolio' ),
+				),
+				array(
+					'key'          => 'field_dp_tecnologias_otras',
+					'label'        => __( 'Otras tecnologías (sin icono)', 'portafolio' ),
+					'name'         => 'tecnologias_otras',
+					'type'         => 'text',
+					'instructions' => __( 'Conceptos genéricos sin logo de marca propio, separados por comas (p. ej. "DNS"). Se muestran como etiqueta de texto simple, sin icono.', 'portafolio' ),
 				),
 				array(
 					'key'          => 'field_dp_enlace_repositorio_demo',

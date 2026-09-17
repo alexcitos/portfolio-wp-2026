@@ -19,6 +19,7 @@ while ( have_posts() ) :
 
 	$portafolio_categorias        = portafolio_obtener_categorias_proyecto( get_the_ID() );
 	$portafolio_tecnologias       = get_field( 'tecnologias_usadas' );
+	$portafolio_tecnologias_otras = get_field( 'tecnologias_otras' );
 	$portafolio_enlace_repo_demo  = get_field( 'enlace_repositorio_demo' );
 	$portafolio_contexto_proyecto = get_field( 'contexto_proyecto' );
 	$portafolio_nombre_cliente    = get_field( 'nombre_cliente' );
@@ -76,13 +77,34 @@ while ( have_posts() ) :
 						<?php the_content(); ?>
 					</div>
 
-					<?php if ( $portafolio_tecnologias || $portafolio_enlace_repo_demo ) : ?>
+					<?php if ( $portafolio_tecnologias || $portafolio_tecnologias_otras || $portafolio_enlace_repo_demo ) : ?>
 						<aside class="proyecto-single-detalles">
-							<?php if ( $portafolio_tecnologias ) : ?>
-								<p class="proyecto-single-tecnologias">
+							<?php if ( $portafolio_tecnologias || $portafolio_tecnologias_otras ) : ?>
+								<div class="proyecto-single-tecnologias">
 									<span class="proyecto-detalle-etiqueta"><?php esc_html_e( 'Tecnologías usadas:', 'portafolio' ); ?></span>
-									<?php echo esc_html( $portafolio_tecnologias ); ?>
-								</p>
+
+									<?php // Mismas insignias (icono + nombre) que las tarjetas de
+										// "Pilares" del home: mismo template-part, mismas clases
+										// .pilar-tecnologias/.pilar-tecnologia (ver style.css). ?>
+									<?php
+									get_template_part(
+										'template-parts/pilar-tecnologias',
+										null,
+										array( 'tecnologias' => (array) $portafolio_tecnologias )
+									);
+									?>
+
+									<?php if ( $portafolio_tecnologias_otras ) : ?>
+										<?php // Conceptos genéricos sin logo de marca (p. ej. "DNS"): etiqueta
+											// de texto simple, sin icono, separada de las insignias de
+											// arriba. ?>
+										<ul class="proyecto-tecnologias-simples">
+											<?php foreach ( array_filter( array_map( 'trim', explode( ',', $portafolio_tecnologias_otras ) ) ) as $portafolio_tecnologia_simple ) : ?>
+												<li class="proyecto-tecnologia-simple"><?php echo esc_html( $portafolio_tecnologia_simple ); ?></li>
+											<?php endforeach; ?>
+										</ul>
+									<?php endif; ?>
+								</div>
 							<?php endif; ?>
 
 							<?php if ( $portafolio_enlace_repo_demo ) : ?>
