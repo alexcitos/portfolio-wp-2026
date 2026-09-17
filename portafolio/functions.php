@@ -83,6 +83,17 @@ function portafolio_assets() {
 		true
 	);
 
+	// Conteo ascendente del número de tokens en el pie (ver footer.php):
+	// pie de página global, así que se encola en todas las plantillas, no
+	// solo en portada.
+	wp_enqueue_script(
+		'portafolio-contador-tokens',
+		get_template_directory_uri() . '/js/contador-tokens.js',
+		array(),
+		$version,
+		true
+	);
+
 	// Envío por AJAX del formulario de contacto (solo existe en portada).
 	// Ver portafolio_ajax_enviar_contacto() más abajo.
 	if ( is_front_page() ) {
@@ -363,11 +374,9 @@ function portafolio_registrar_campos_datos_del_sitio() {
 
 				// --- Redes sociales ------------------------------------------
 				// Se muestran en la barra flotante de todo el sitio (ver
-				// header.php) y en la columna de contacto del home (ver
-				// front-page.php), a través de template-parts/redes-sociales.php
+				// header.php), a través de template-parts/redes-sociales.php
 				// y portafolio_obtener_redes_sociales() más abajo. Una red se
-				// deja de mostrar en ambos sitios en cuanto su campo queda
-				// vacío.
+				// deja de mostrar en cuanto su campo queda vacío.
 				array(
 					'key'   => 'field_dds_tab_redes',
 					'label' => __( 'Redes sociales', 'portafolio' ),
@@ -519,15 +528,16 @@ add_action( 'acf/init', 'portafolio_registrar_campos_datos_del_sitio' );
  * "Redes sociales" y "Contacto" → campo Email), listos para pintar:
  * combina portafolio_catalogo_redes_sociales() (icono, en
  * inc/redes-sociales.php) con la URL guardada en cada campo. Usada por
- * template-parts/redes-sociales.php, tanto en la barra flotante
- * (header.php) como en la columna de contacto del home (front-page.php).
+ * template-parts/redes-sociales.php en la barra flotante de todo el sitio
+ * (header.php); la sección Contacto del home (front-page.php) no repite
+ * esta fila de iconos porque la barra flotante ya cubre esa función.
  *
  * Orden de aparición: WhatsApp, Email, LinkedIn, GitHub, Instagram, Strava.
  *
  * Una red solo aparece en la lista si su campo tiene un valor; así, dejar
- * un campo vacío la quita de los dos sitios a la vez (el email usa además
- * el mismo valor de reserva provisional que front-page.php mientras no se
- * configure uno real).
+ * un campo vacío la quita de la barra (el email usa además el mismo valor
+ * de reserva provisional que front-page.php mientras no se configure uno
+ * real).
  *
  * @return array<int, array{clave: string, nombre: string, url: string, viewbox: string, path: string}>
  */

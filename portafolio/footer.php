@@ -53,7 +53,10 @@ if ( $portafolio_pie_mostrar_contador && $portafolio_pie_tokens_actualizado ) {
 				esc_html__( 'Hecho con %1$s por Alex Rodríguez, junto con %2$s Claude Code, %3$s tokens de IA y mucho %4$s · © %5$s Alex Rodríguez', 'portafolio' ),
 				'<span aria-hidden="true">💻</span>',
 				'<span aria-hidden="true">🤖</span>',
-				esc_html( $portafolio_pie_tokens_valor ),
+				// Envuelto en su propio <span> para que js/contador-tokens.js
+				// pueda animarlo sin tocar el resto de la frase (ver
+				// wp_enqueue_script() en functions.php).
+				'<span class="sitio-pie-tokens">' . esc_html( $portafolio_pie_tokens_valor ) . '</span>',
 				'<span aria-hidden="true">☕</span>',
 				esc_html( gmdate( 'Y' ) )
 			);

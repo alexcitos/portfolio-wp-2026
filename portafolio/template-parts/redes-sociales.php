@@ -4,12 +4,9 @@
  * Strava, en ese orden), leídos de "Datos del sitio" (ver
  * portafolio_obtener_redes_sociales() en functions.php). Todos abren en
  * pestaña nueva salvo Email, que usa mailto: (el navegador decide cómo
- * abrirlo). Se usa tanto en la barra flotante de todo el sitio (ver
- * header.php) como en la columna de contacto del home (ver
- * front-page.php); el 'clase' distingue el contexto para el CSS (ver
- * .redes-sociales--flotante/--contacto en style.css) y 'etiqueta' evita
- * que ambas instancias compartan el mismo nombre accesible cuando
- * coinciden en la misma página.
+ * abrirlo). Se usa en la barra flotante de todo el sitio (ver header.php);
+ * el 'clase' distingue el contexto para el CSS (ver .redes-sociales--flotante
+ * en style.css) y 'etiqueta' da nombre accesible propio a esa instancia.
  *
  * Argumentos vía get_template_part( ..., array( 'clase' => ..., 'etiqueta' => ... ) ).
  *

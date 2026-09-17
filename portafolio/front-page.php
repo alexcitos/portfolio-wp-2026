@@ -265,19 +265,22 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 			// Contacto: última sección, misma zona oscura. La tarjeta reúne
 			// los datos de contacto (con icono, sin etiqueta visible —el
 			// icono ya la transmite; queda como texto para lectores de
-			// pantalla) y un formulario real que envía correo por
-			// wp_mail() vía portafolio_ajax_enviar_contacto() en
-			// functions.php. El envío lo intercepta js/formulario-
-			// contacto.js con fetch() contra admin-ajax.php: sin recarga
-			// de página, botón deshabilitado mientras envía y mensajes
-			// (generales y por campo) inyectados en el propio panel.
+			// pantalla; sin fila de redes sociales propia, la barra flotante
+			// de header.php ya cubre esa función en todo el sitio) y un
+			// formulario real que envía correo por wp_mail() vía
+			// portafolio_ajax_enviar_contacto() en functions.php. El envío
+			// lo intercepta js/formulario-contacto.js con fetch() contra
+			// admin-ajax.php: sin recarga de página, botón deshabilitado
+			// mientras envía y mensajes (generales y por campo) inyectados
+			// en el propio panel.
 			// ----------------------------------------------------------- ?>
 		<section id="contacto" class="portada-contacto" aria-labelledby="contacto-titulo">
 			<div class="contacto-tarjeta">
 
 				<div class="contacto-info">
 					<p class="contacto-eyebrow">// contacto</p>
-					<h2 id="contacto-titulo" class="contacto-titulo">Hablemos de tu proyecto</h2>
+					<h2 id="contacto-titulo" class="contacto-titulo">¿Trabajamos juntos?</h2>
+					<p class="contacto-subtitulo">Ya sea que busques sumar a alguien a tu equipo o necesites ayuda con un proyecto puntual, escríbeme y lo conversamos.</p>
 
 					<ul class="contacto-datos">
 						<li class="contacto-dato">
@@ -304,17 +307,6 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 							<span><?php echo esc_html( $portafolio_ubicacion ); ?></span>
 						</li>
 					</ul>
-
-					<?php
-					get_template_part(
-						'template-parts/redes-sociales',
-						null,
-						array(
-							'clase'    => 'redes-sociales--contacto',
-							'etiqueta' => __( 'Redes sociales de contacto', 'portafolio' ),
-						)
-					);
-					?>
 				</div>
 
 				<?php // action="admin-ajax.php" + campo oculto "action": es el
@@ -350,17 +342,17 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 					<p class="formulario-mensaje" aria-live="polite"></p>
 
 					<p class="formulario-campo">
-						<label class="screen-reader-text" for="contacto-nombre">Nombre</label>
+						<label class="formulario-etiqueta" for="contacto-nombre">Nombre</label>
 						<input type="text" id="contacto-nombre" name="contacto_nombre" placeholder="Nombre" aria-describedby="contacto-nombre-error" required>
 						<span class="formulario-campo-error" id="contacto-nombre-error"></span>
 					</p>
 					<p class="formulario-campo">
-						<label class="screen-reader-text" for="contacto-email">Email</label>
+						<label class="formulario-etiqueta" for="contacto-email">Email</label>
 						<input type="email" id="contacto-email" name="contacto_email" placeholder="Email" aria-describedby="contacto-email-error" required>
 						<span class="formulario-campo-error" id="contacto-email-error"></span>
 					</p>
 					<p class="formulario-campo">
-						<label class="screen-reader-text" for="contacto-mensaje">Mensaje</label>
+						<label class="formulario-etiqueta" for="contacto-mensaje">Mensaje</label>
 						<textarea id="contacto-mensaje" name="contacto_mensaje" rows="4" placeholder="Mensaje" aria-describedby="contacto-mensaje-error" required></textarea>
 						<span class="formulario-campo-error" id="contacto-mensaje-error"></span>
 					</p>
