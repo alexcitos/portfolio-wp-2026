@@ -2117,6 +2117,12 @@ a:focus {
 	justify-content: center;
 	width: 2.5rem;
 	height: 2.5rem;
+	/* Área táctil mínima (WCAG 2.5.8 pide 24×24px; aquí 40×40): el enlace ya
+	   es el círculo completo, no el icono de 18px, y no se encoge dentro del
+	   dock flex aunque falte espacio. */
+	min-width: 2.5rem;
+	min-height: 2.5rem;
+	flex-shrink: 0;
 	border-radius: 50%;
 	background: rgba(255, 255, 255, 0.06);
 	border: 1px solid rgba(255, 255, 255, 0.16);

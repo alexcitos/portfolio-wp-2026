@@ -31,7 +31,21 @@ $portafolio_categorias_tarjeta = portafolio_obtener_categorias_proyecto( get_the
 					// de verdad están a la vista): estas tarjetas nunca son lo
 					// primero visible de la página, van después del hero+pilares en
 					// el home y del título+filtro en el archivo.
-					the_post_thumbnail( 'portafolio-tarjeta', array( 'loading' => 'lazy' ) );
+					//
+					// sizes: ancho real de la tarjeta según la rejilla de
+					// .proyectos-lista (1 columna hasta 40rem, 2 hasta ~64rem y 3 a
+					// partir de ahí, con tope en --ancho-contenido: ≈350px por
+					// tarjeta). Sin esto WordPress asumiría "100vw hasta 640px, 640px
+					// después" y el navegador pediría de más en pantallas medianas;
+					// el "auto" inicial (lazy) lo añade WordPress y en navegadores
+					// que lo soportan manda el ancho real medido en layout.
+					the_post_thumbnail(
+						'portafolio-tarjeta',
+						array(
+							'loading' => 'lazy',
+							'sizes'   => '(max-width: 40rem) 100vw, (max-width: 64rem) 50vw, 350px',
+						)
+					);
 					?>
 				</a>
 			</figure>
