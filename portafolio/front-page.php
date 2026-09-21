@@ -56,7 +56,7 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 
 		<?php get_template_part( 'template-parts/fondo-esferas' ); ?>
 
-		<section class="portada-hero" aria-labelledby="hero-titulo">
+		<section id="inicio" class="portada-hero" aria-labelledby="hero-titulo">
 
 			<div class="hero-panel">
 				<span class="hero-panel-eco hero-panel-eco--1" aria-hidden="true"></span>
@@ -82,7 +82,7 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 			// también son decorativos (aria-hidden) porque el título ya
 			// identifica el pilar.
 			// ----------------------------------------------------------- ?>
-		<section class="portada-pilares" aria-labelledby="pilares-titulo">
+		<section id="pilares" class="portada-pilares" aria-labelledby="pilares-titulo">
 
 			<div class="pilares-contenedor">
 				<div class="pilares-cabecera">
@@ -171,7 +171,7 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 			// .portada-oscura (ver comentario en .portada-oscura, en
 			// style.css).
 			// ----------------------------------------------------------- ?>
-		<section class="portada-proyectos" aria-labelledby="proyectos-titulo">
+		<section id="proyectos" class="portada-proyectos" aria-labelledby="proyectos-titulo">
 
 			<div class="proyectos-contenedor">
 				<div class="proyectos-cabecera">
@@ -222,7 +222,7 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 			// explica sola, así que el <h2> queda oculto visualmente y solo
 			// sirve de nombre accesible para la sección (aria-labelledby).
 			// ----------------------------------------------------------- ?>
-		<section class="portada-sobre-mi" aria-labelledby="sobre-mi-titulo">
+		<section id="sobre-mi" class="portada-sobre-mi" aria-labelledby="sobre-mi-titulo">
 			<h2 id="sobre-mi-titulo" class="screen-reader-text">Sobre mí</h2>
 			<p class="sobre-mi-eyebrow">// sobre mí</p>
 

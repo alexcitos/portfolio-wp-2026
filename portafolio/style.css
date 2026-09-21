@@ -73,6 +73,14 @@ Text Domain: portafolio
 
 	/* Disposición */
 	--ancho-contenido: 70rem;
+
+	/* Altura real de la cabecera sticky (la calcula js/menu-anclas.js al
+	   cargar y al redimensionar, ver .sitio-cabecera). Este valor de 80px es
+	   solo el respaldo para el primer pintado, antes de que el JS corra, o
+	   por si JavaScript está desactivado. Se usa en scroll-margin-top más
+	   abajo para que las secciones ancladas no queden tapadas a medias
+	   detrás del header al hacer clic en un enlace del menú. */
+	--cabecera-alto: 80px;
 }
 
 /* ==========================================================================
@@ -289,10 +297,14 @@ a:focus {
 /* ==========================================================================
    Navegación principal
    ========================================================================== */
+/* Gap ajustado (antes 1rem, pensado para 2 enlaces): con 5 enlaces, cada
+   pastilla ya aporta su propio respiro por dentro (ver .sitio-navegacion a),
+   así que un gap grande entre ellas duplicaba el espaciado y el grupo se
+   leía disperso en vez de como un único bloque de navegación. */
 .sitio-navegacion .menu {
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--espacio-md);
+	gap: var(--espacio-xs);
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -301,18 +313,24 @@ a:focus {
 /* El fondo de la cabecera es vidrio oscuro (--cabecera-fondo, ver
    .sitio-cabecera), casi negro: --color-acento-violeta y --color-acento-
    lavanda pierden casi todo el contraste sobre un fondo tan oscuro (quedan
-   cerca de su propia luminosidad), así que hover y "página activa" quedaban
+   cerca de su propia luminosidad), así que hover y "sección activa" quedaban
    prácticamente invisibles con esos tonos como color de texto. En vez de
    perseguir un matiz que sí contraste, ambos estados se resuelven con
    blanco —ya probado, ~4.6:1 mínimo— más una pastilla de fondo: transparente
-   y sutil en hover, sólida y con negrita en la página activa. */
+   y sutil en hover, sólida en la sección activa. Padding horizontal ampliado
+   (antes 0.5rem) para que el área de clic/hover sea cómoda con 5 enlaces
+   cortos y largos ("Inicio" vs. "Sobre mí") sin verse descompensada. */
 .sitio-navegacion a {
 	display: block;
-	padding: var(--espacio-xs) var(--espacio-sm);
+	padding: var(--espacio-xs) var(--espacio-md);
 	border-radius: 0.5rem;
 	color: var(--color-fondo);
 	text-decoration: none;
-	transition: background-color 0.2s ease;
+	/* box-shadow también anima: sin esto, el subrayado ámbar de la sección
+	   activa (ver .menu-ancla-activo) aparecía y desaparecía de golpe al
+	   hacer scroll, mientras el fondo sí se desvanecía — inconsistente
+	   entre reposo, hover y activo. */
+	transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .sitio-navegacion a:hover,
@@ -320,8 +338,18 @@ a:focus {
 	background-color: rgba(255, 255, 255, 0.16);
 }
 
-.sitio-navegacion .current-menu-item > a {
-	font-weight: 700;
+/* Sección activa: la marca EXCLUSIVAMENTE js/menu-anclas.js (scrollspy),
+   con la clase .menu-ancla-activo — no la clase nativa .current-menu-item
+   de WordPress. En un menú de una sola página con anclas, WordPress solo
+   sabe marcar como "actual" el enlace que apunta a la URL de la portada
+   ("Inicio"), de forma estática, sin importar qué sección se esté viendo;
+   dejar que compitiera con el scrollspy producía dos enlaces "activos" a
+   la vez (p. ej. "Inicio" y "Pilares" juntos) con criterios distintos. Sin
+   font-weight: al alternar de un enlace a otro mientras se hace scroll,
+   engordar el texto cambia su ancho y desplaza los enlaces vecinos —un
+   parpadeo perceptible que negrita + fondo + subrayado (ver más abajo)
+   no necesitan para leerse como "activo". */
+.sitio-navegacion a.menu-ancla-activo {
 	background-color: rgba(255, 255, 255, 0.24);
 	box-shadow: inset 0 -2px 0 rgba(245, 166, 35, 0.9);
 }
@@ -502,6 +530,28 @@ a:focus {
 .boton-primario:focus-visible {
 	outline: 2px solid var(--anillo-foco);
 	outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Menú de anclas — base
+   ==========================================================================
+
+   Cada sección de la portada tiene un id único (#inicio, #pilares,
+   #proyectos, #sobre-mi, #contacto) para que el futuro menú de anclas
+   enlace directo a ellas. scroll-margin-top usa --cabecera-alto (ver :root)
+   para que, al saltar a un ancla, la sección no quede tapada a medias
+   detrás de la cabecera sticky (.sitio-cabecera): el navegador para el
+   scroll dejando ese margen libre por encima del borde superior real de la
+   sección. El resaltado de "sección visible" en el menú (scrollspy) lo
+   añade js/menu-anclas.js con la clase .menu-ancla-activo, más abajo en
+   "Navegación principal".
+   ========================================================================== */
+.portada-hero,
+.portada-pilares,
+.portada-proyectos,
+.portada-sobre-mi,
+.portada-contacto {
+	scroll-margin-top: var(--cabecera-alto);
 }
 
 /* ==========================================================================

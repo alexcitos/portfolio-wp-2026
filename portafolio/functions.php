@@ -83,6 +83,17 @@ function portafolio_assets() {
 		true
 	);
 
+	// Base del menú de anclas: fija --cabecera-alto (altura real de la
+	// cabecera, usada por scroll-margin-top en style.css) y resalta en el
+	// menú la sección visible mientras se hace scroll (scrollspy).
+	wp_enqueue_script(
+		'portafolio-menu-anclas',
+		get_template_directory_uri() . '/js/menu-anclas.js',
+		array(),
+		$version,
+		true
+	);
+
 	// Conteo ascendente del número de tokens en el pie (ver footer.php):
 	// pie de página global, así que se encola en todas las plantillas, no
 	// solo en portada.
