@@ -91,10 +91,17 @@ function portafolio_version_activo( $ruta_relativa ) {
  * Encola estilos y scripts del tema.
  */
 function portafolio_assets() {
-	// Hoja de estilos principal: version = fecha de modificación del archivo,
-	// para que el navegador la recargue en cada cambio durante el desarrollo
-	// sin depender de subir la versión del tema a mano.
-	wp_enqueue_style( 'portafolio-style', get_stylesheet_uri(), array(), filemtime( get_stylesheet_directory() . '/style.css' ) );
+	// Hoja de estilos principal: se sirve minificada (style.min.css, generado
+	// desde style.css por bin/minificar.py — sin build tools, así que hay
+	// que volver a correr ese script a mano tras editar style.css). version
+	// = fecha de modificación del propio .min.css, no del fuente: así el
+	// "?ver=" siempre refleja lo que de verdad se está sirviendo.
+	wp_enqueue_style(
+		'portafolio-style',
+		get_stylesheet_directory_uri() . '/style.min.css',
+		array(),
+		portafolio_version_activo( '/style.min.css' )
+	);
 
 	// Todos los scripts del tema comparten la misma estrategia de carga:
 	// defer (además de ir en el footer). "defer" dejar al navegador
@@ -103,6 +110,10 @@ function portafolio_assets() {
 	// bajar hasta llegar ahí— y ejecutarlos en orden justo después de
 	// parsear el DOM, sin bloquear el renderizado. Ninguno toca el DOM
 	// antes de que exista, así que defer es seguro en los seis.
+	//
+	// Igual que style.min.css: cada uno se sirve minificado (js/*.min.js,
+	// generado desde el .js fuente por bin/minificar.py) y versionado por
+	// la fecha de modificación de ese .min.js, no del fuente.
 	$portafolio_estrategia_scripts = array(
 		'strategy'  => 'defer',
 		'in_footer' => true,
@@ -111,18 +122,18 @@ function portafolio_assets() {
 	// Muestra el borde/sombra de la cabecera sticky solo tras hacer scroll.
 	wp_enqueue_script(
 		'portafolio-cabecera-scroll',
-		get_template_directory_uri() . '/js/cabecera-scroll.js',
+		get_template_directory_uri() . '/js/cabecera-scroll.min.js',
 		array(),
-		portafolio_version_activo( '/js/cabecera-scroll.js' ),
+		portafolio_version_activo( '/js/cabecera-scroll.min.js' ),
 		$portafolio_estrategia_scripts
 	);
 
 	// Botón hamburguesa: abre/cierra la navegación principal en mobile.
 	wp_enqueue_script(
 		'portafolio-menu-movil',
-		get_template_directory_uri() . '/js/menu-movil.js',
+		get_template_directory_uri() . '/js/menu-movil.min.js',
 		array(),
-		portafolio_version_activo( '/js/menu-movil.js' ),
+		portafolio_version_activo( '/js/menu-movil.min.js' ),
 		$portafolio_estrategia_scripts
 	);
 
@@ -130,9 +141,9 @@ function portafolio_assets() {
 	// botón de contacto del hero, que apunta a #contacto).
 	wp_enqueue_script(
 		'portafolio-scroll-suave',
-		get_template_directory_uri() . '/js/scroll-suave.js',
+		get_template_directory_uri() . '/js/scroll-suave.min.js',
 		array(),
-		portafolio_version_activo( '/js/scroll-suave.js' ),
+		portafolio_version_activo( '/js/scroll-suave.min.js' ),
 		$portafolio_estrategia_scripts
 	);
 
@@ -141,9 +152,9 @@ function portafolio_assets() {
 	// menú la sección visible mientras se hace scroll (scrollspy).
 	wp_enqueue_script(
 		'portafolio-menu-anclas',
-		get_template_directory_uri() . '/js/menu-anclas.js',
+		get_template_directory_uri() . '/js/menu-anclas.min.js',
 		array(),
-		portafolio_version_activo( '/js/menu-anclas.js' ),
+		portafolio_version_activo( '/js/menu-anclas.min.js' ),
 		$portafolio_estrategia_scripts
 	);
 
@@ -152,9 +163,9 @@ function portafolio_assets() {
 	// solo en portada.
 	wp_enqueue_script(
 		'portafolio-contador-tokens',
-		get_template_directory_uri() . '/js/contador-tokens.js',
+		get_template_directory_uri() . '/js/contador-tokens.min.js',
 		array(),
-		portafolio_version_activo( '/js/contador-tokens.js' ),
+		portafolio_version_activo( '/js/contador-tokens.min.js' ),
 		$portafolio_estrategia_scripts
 	);
 
@@ -163,9 +174,9 @@ function portafolio_assets() {
 	if ( is_front_page() ) {
 		wp_enqueue_script(
 			'portafolio-formulario-contacto',
-			get_template_directory_uri() . '/js/formulario-contacto.js',
+			get_template_directory_uri() . '/js/formulario-contacto.min.js',
 			array(),
-			portafolio_version_activo( '/js/formulario-contacto.js' ),
+			portafolio_version_activo( '/js/formulario-contacto.min.js' ),
 			$portafolio_estrategia_scripts
 		);
 
