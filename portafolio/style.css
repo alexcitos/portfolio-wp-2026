@@ -1165,6 +1165,13 @@ a:focus {
 }
 
 .pilar-icono svg {
+	/* Resplandor fijo (antes el propio filter se animaba entre 6px y 14px:
+	   filter fuerza repintado en cada fotograma, una animación "no
+	   compuesta" que Lighthouse marca aparte de transform/opacity). El
+	   pulso ahora lo da transform: scale() más abajo, que sí compone en la
+	   GPU sin repintar. */
+	filter: drop-shadow(0 0 8px currentColor);
+	transform-origin: center;
 	animation: pilar-icono-brillo 2.6s ease-in-out infinite;
 }
 
@@ -1331,8 +1338,8 @@ a:focus {
 }
 
 @keyframes pilar-icono-brillo {
-	0%, 100% { filter: drop-shadow(0 0 6px currentColor); }
-	50% { filter: drop-shadow(0 0 14px currentColor); }
+	0%, 100% { transform: scale(1); }
+	50% { transform: scale(1.16); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1761,12 +1768,20 @@ a:focus {
 	padding: 5px;
 	border-radius: 50%;
 	background: linear-gradient(135deg, var(--color-primario), var(--color-acento-purpura));
+	/* Resplandor fijo (antes el propio box-shadow animaba su radio entre
+	   30px y 50px: box-shadow fuerza repintado en cada fotograma, una
+	   animación "no compuesta" que Lighthouse marca aparte de
+	   transform/opacity). El pulso ahora lo da transform: scale() más
+	   abajo, que sí compone en la GPU sin repintar. De paso, con
+	   movimiento reducido (animation:none) el resplandor ya no desaparece
+	   del todo como antes —queda fijo en este valor—, en vez de perderse. */
+	box-shadow: 0 0 40px var(--sobre-mi-foto-resplandor-a);
 	animation: sobre-mi-foto-brillo 3s ease-in-out infinite;
 }
 
 @keyframes sobre-mi-foto-brillo {
-	0%, 100% { box-shadow: 0 0 30px var(--sobre-mi-foto-resplandor-a); }
-	50% { box-shadow: 0 0 50px var(--sobre-mi-foto-resplandor-b); }
+	0%, 100% { transform: scale(1); }
+	50% { transform: scale(1.035); }
 }
 
 .sobre-mi-foto img,

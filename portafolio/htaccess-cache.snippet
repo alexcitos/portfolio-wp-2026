@@ -1,0 +1,52 @@
+# BEGIN Portafolio - Caché de archivos estáticos
+#
+# Este bloque NO se aplica solo: el núcleo de WordPress (y su .htaccess)
+# vive en el volumen Docker "wp_core" (ver docker-compose.yml), fuera de
+# este repo, así que hay que pegarlo a mano en el .htaccess real del sitio
+# —justo debajo de "# END WordPress"— cada vez que se reinstala desde cero
+# (una VM/VPS nueva, o un `docker compose down -v` local).
+#
+# CSS y JS del tema se encolan con "?ver=" igual a la fecha de modificación
+# del archivo (ver portafolio_version_activo() en functions.php): cualquier
+# cambio produce una URL nueva, así que cachearlos por mucho tiempo es
+# seguro —el navegador nunca sigue sirviendo una versión vieja—. Las
+# imágenes de Medios no llevan "?ver=", pero WordPress les da una URL nueva
+# cuando se reemplazan (sufijo -1, -2…, o una carpeta de fecha distinta), así
+# que el mismo razonamiento aplica.
+<IfModule mod_expires.c>
+	ExpiresActive On
+
+	ExpiresByType text/css "access plus 1 year"
+	ExpiresByType application/javascript "access plus 1 year"
+	ExpiresByType text/javascript "access plus 1 year"
+
+	ExpiresByType image/jpeg "access plus 1 year"
+	ExpiresByType image/png "access plus 1 year"
+	ExpiresByType image/webp "access plus 1 year"
+	ExpiresByType image/svg+xml "access plus 1 year"
+	ExpiresByType image/x-icon "access plus 1 year"
+	ExpiresByType image/vnd.microsoft.icon "access plus 1 year"
+
+	ExpiresByType font/woff "access plus 1 year"
+	ExpiresByType font/woff2 "access plus 1 year"
+
+	# El manifest sí puede cambiar sin URL nueva (theme_color, iconos...):
+	# una semana, no un año.
+	ExpiresByType application/manifest+json "access plus 1 week"
+</IfModule>
+
+# Refuerza lo mismo vía Cache-Control (algunos navegadores/proxies lo
+# priorizan sobre Expires). Requiere mod_headers —en la imagen Docker de
+# WordPress usada en local no viene habilitado por defecto; se activó a
+# mano con "a2enmod headers && service apache2 restart" (no persiste si se
+# recrea el contenedor: hay que repetirlo, o habilitarlo en el Dockerfile
+# del VPS). Este bloque no falla si el módulo no está: Apache lo ignora.
+<IfModule mod_headers.c>
+	<FilesMatch "\.(css|js|jpg|jpeg|png|webp|svg|ico|woff2?)$">
+		Header set Cache-Control "public, max-age=31536000, immutable"
+	</FilesMatch>
+	<FilesMatch "\.webmanifest$">
+		Header set Cache-Control "public, max-age=604800"
+	</FilesMatch>
+</IfModule>
+# END Portafolio - Caché de archivos estáticos

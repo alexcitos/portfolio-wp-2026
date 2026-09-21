@@ -24,6 +24,10 @@ require get_template_directory() . '/inc/redes-sociales.php';
 // funcionalidad propio, no configuración general del tema.
 require get_template_directory() . '/inc/seo.php';
 
+// Optimizaciones de rendimiento (WPO) que no encajan en otro archivo de
+// inc/ (por ahora, desactivar la detección de emojis de núcleo).
+require get_template_directory() . '/inc/rendimiento.php';
+
 /**
  * Soporte de características del tema.
  */
@@ -68,11 +72,25 @@ function portafolio_setup() {
 add_action( 'after_setup_theme', 'portafolio_setup' );
 
 /**
+ * Fecha de modificación de un archivo del tema, para usar como "?ver=" al
+ * encolarlo (mismo criterio que ya usaba style.css, ver más abajo):
+ * cambia solo cuando el archivo cambia, así el navegador lo recarga en
+ * cada edición sin depender de subir la versión del tema a mano — y, al
+ * revés, permite cachear ese archivo por mucho tiempo en el navegador
+ * (ver .htaccess) sin miedo a servir una versión vieja, porque cualquier
+ * cambio ya viene con una URL distinta.
+ *
+ * @param string $ruta_relativa Ruta relativa a la carpeta del tema (p. ej. "/js/menu-movil.js").
+ * @return int
+ */
+function portafolio_version_activo( $ruta_relativa ) {
+	return filemtime( get_theme_file_path( $ruta_relativa ) );
+}
+
+/**
  * Encola estilos y scripts del tema.
  */
 function portafolio_assets() {
-	$version = wp_get_theme()->get( 'Version' );
-
 	// Hoja de estilos principal: version = fecha de modificación del archivo,
 	// para que el navegador la recargue en cada cambio durante el desarrollo
 	// sin depender de subir la versión del tema a mano.
@@ -95,7 +113,7 @@ function portafolio_assets() {
 		'portafolio-cabecera-scroll',
 		get_template_directory_uri() . '/js/cabecera-scroll.js',
 		array(),
-		$version,
+		portafolio_version_activo( '/js/cabecera-scroll.js' ),
 		$portafolio_estrategia_scripts
 	);
 
@@ -104,7 +122,7 @@ function portafolio_assets() {
 		'portafolio-menu-movil',
 		get_template_directory_uri() . '/js/menu-movil.js',
 		array(),
-		$version,
+		portafolio_version_activo( '/js/menu-movil.js' ),
 		$portafolio_estrategia_scripts
 	);
 
@@ -114,7 +132,7 @@ function portafolio_assets() {
 		'portafolio-scroll-suave',
 		get_template_directory_uri() . '/js/scroll-suave.js',
 		array(),
-		$version,
+		portafolio_version_activo( '/js/scroll-suave.js' ),
 		$portafolio_estrategia_scripts
 	);
 
@@ -125,7 +143,7 @@ function portafolio_assets() {
 		'portafolio-menu-anclas',
 		get_template_directory_uri() . '/js/menu-anclas.js',
 		array(),
-		$version,
+		portafolio_version_activo( '/js/menu-anclas.js' ),
 		$portafolio_estrategia_scripts
 	);
 
@@ -136,7 +154,7 @@ function portafolio_assets() {
 		'portafolio-contador-tokens',
 		get_template_directory_uri() . '/js/contador-tokens.js',
 		array(),
-		$version,
+		portafolio_version_activo( '/js/contador-tokens.js' ),
 		$portafolio_estrategia_scripts
 	);
 
@@ -147,7 +165,7 @@ function portafolio_assets() {
 			'portafolio-formulario-contacto',
 			get_template_directory_uri() . '/js/formulario-contacto.js',
 			array(),
-			$version,
+			portafolio_version_activo( '/js/formulario-contacto.js' ),
 			$portafolio_estrategia_scripts
 		);
 
