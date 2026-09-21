@@ -21,7 +21,18 @@ $portafolio_categorias_tarjeta = portafolio_obtener_categorias_proyecto( get_the
 		<?php if ( has_post_thumbnail() ) : ?>
 			<figure class="proyecto-imagen">
 				<a href="<?php the_permalink(); ?>">
-					<?php the_post_thumbnail( 'medium_large' ); ?>
+					<?php
+					// portafolio-tarjeta/-2x (ver add_image_size() en functions.php):
+					// recorte 16:10, el mismo que fuerza .proyecto-imagen por CSS, en
+					// dos anchos para que WordPress arme el srcset con una variante
+					// 1x y otra retina/2x. loading="lazy" forzado (en vez de dejarlo
+					// en la heurística automática de WordPress, que por defecto no
+					// aplica lazy a las primeras imágenes del documento sin mirar si
+					// de verdad están a la vista): estas tarjetas nunca son lo
+					// primero visible de la página, van después del hero+pilares en
+					// el home y del título+filtro en el archivo.
+					the_post_thumbnail( 'portafolio-tarjeta', array( 'loading' => 'lazy' ) );
+					?>
 				</a>
 			</figure>
 		<?php endif; ?>

@@ -68,7 +68,22 @@ while ( have_posts() ) :
 
 				<?php if ( has_post_thumbnail() ) : ?>
 					<figure class="proyecto-single-imagen">
-						<?php the_post_thumbnail( 'large' ); ?>
+						<?php
+						// portafolio-proyecto (ver add_image_size() en functions.php):
+						// sin recortar, limitada a 768px de ancho (lo mismo que mide
+						// como máximo .proyecto-single-contenedor en style.css). Sin
+						// loading="lazy" a propósito: en esta plantilla no hay ningún
+						// hero — esta es la primera imagen grande de la página, justo
+						// debajo del título, así que es su "hero" de facto y conviene
+						// que cargue cuanto antes (fetchpriority="high").
+						the_post_thumbnail(
+							'portafolio-proyecto',
+							array(
+								'loading'       => 'eager',
+								'fetchpriority' => 'high',
+							)
+						);
+						?>
 					</figure>
 				<?php endif; ?>
 

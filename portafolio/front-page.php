@@ -233,11 +233,18 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 					// la tarjeta nunca se vea a medio terminar. ?>
 				<div class="sobre-mi-foto">
 					<?php if ( $portafolio_foto_sobre_mi ) : ?>
+						<?php // portafolio-avatar (ver add_image_size() en functions.php):
+							// recorte cuadrado de 250×250, el mismo tamaño fijo con el
+							// que .sobre-mi-foto pinta el círculo en style.css — así no
+							// se baja ni un byte de más. loading="lazy": esta imagen
+							// nunca es lo primero visible (la portada abre con el hero,
+							// mucho más arriba). ?>
 						<img
-							src="<?php echo esc_url( $portafolio_foto_sobre_mi['sizes']['medium'] ?? $portafolio_foto_sobre_mi['url'] ); ?>"
+							src="<?php echo esc_url( $portafolio_foto_sobre_mi['sizes']['portafolio-avatar'] ?? $portafolio_foto_sobre_mi['url'] ); ?>"
 							alt="<?php echo esc_attr( $portafolio_foto_sobre_mi['alt'] ? $portafolio_foto_sobre_mi['alt'] : $portafolio_nombre ); ?>"
 							width="250"
 							height="250"
+							loading="lazy"
 						>
 					<?php else : ?>
 						<div class="sobre-mi-foto-marcador" role="img" aria-label="<?php echo esc_attr( $portafolio_nombre ); ?>">

@@ -19,6 +19,11 @@ require get_template_directory() . '/inc/iconos-tecnologia.php';
 // require anterior: son datos, no lógica del tema.
 require get_template_directory() . '/inc/redes-sociales.php';
 
+// Base de SEO técnico (título, meta descripción, Open Graph/Twitter,
+// favicon, datos estructurados). Aparte porque es un bloque de
+// funcionalidad propio, no configuración general del tema.
+require get_template_directory() . '/inc/seo.php';
+
 /**
  * Soporte de características del tema.
  */
@@ -28,6 +33,24 @@ function portafolio_setup() {
 
 	// Imágenes destacadas.
 	add_theme_support( 'post-thumbnails' );
+
+	// Tamaños de imagen ajustados al tamaño real en pantalla de cada uso
+	// (ver style.css para las medidas exactas), en vez de los tamaños
+	// genéricos de núcleo (medium/medium_large/large): menos bytes que
+	// bajar y sin depender de que el recorte por CSS (object-fit: cover)
+	// tenga que recortar de más.
+	// - "Sobre mí" (front-page.php): círculo fijo de 250×250 (.sobre-mi-foto).
+	add_image_size( 'portafolio-avatar', 250, 250, true );
+	// - Tarjeta de proyecto (template-parts/tarjeta-proyecto.php): recorte
+	//   16:10 (.proyecto-imagen), en dos anchos para que el srcset cubra
+	//   tanto 1x como pantallas retina/2x.
+	add_image_size( 'portafolio-tarjeta', 640, 400, true );
+	add_image_size( 'portafolio-tarjeta-2x', 1280, 800, true );
+	// - Imagen destacada del proyecto individual (single-proyectos.php):
+	//   sin recortar (mismo alto/ancho que el original, solo limitado en
+	//   ancho), porque .proyecto-single-imagen no fuerza un aspect-ratio
+	//   propio — el contenedor mide como mucho 48rem (768px).
+	add_image_size( 'portafolio-proyecto', 768, 0, false );
 
 	// Marcado HTML5 en los elementos del núcleo.
 	add_theme_support(
@@ -55,13 +78,25 @@ function portafolio_assets() {
 	// sin depender de subir la versión del tema a mano.
 	wp_enqueue_style( 'portafolio-style', get_stylesheet_uri(), array(), filemtime( get_stylesheet_directory() . '/style.css' ) );
 
+	// Todos los scripts del tema comparten la misma estrategia de carga:
+	// defer (además de ir en el footer). "defer" dejar al navegador
+	// descargarlos en paralelo mientras sigue parseando el HTML —a
+	// diferencia de un <script> normal en el footer, que no empieza a
+	// bajar hasta llegar ahí— y ejecutarlos en orden justo después de
+	// parsear el DOM, sin bloquear el renderizado. Ninguno toca el DOM
+	// antes de que exista, así que defer es seguro en los seis.
+	$portafolio_estrategia_scripts = array(
+		'strategy'  => 'defer',
+		'in_footer' => true,
+	);
+
 	// Muestra el borde/sombra de la cabecera sticky solo tras hacer scroll.
 	wp_enqueue_script(
 		'portafolio-cabecera-scroll',
 		get_template_directory_uri() . '/js/cabecera-scroll.js',
 		array(),
 		$version,
-		true
+		$portafolio_estrategia_scripts
 	);
 
 	// Botón hamburguesa: abre/cierra la navegación principal en mobile.
@@ -70,7 +105,7 @@ function portafolio_assets() {
 		get_template_directory_uri() . '/js/menu-movil.js',
 		array(),
 		$version,
-		true
+		$portafolio_estrategia_scripts
 	);
 
 	// Desplazamiento animado al pulsar enlaces de ancla internos (p. ej. el
@@ -80,7 +115,7 @@ function portafolio_assets() {
 		get_template_directory_uri() . '/js/scroll-suave.js',
 		array(),
 		$version,
-		true
+		$portafolio_estrategia_scripts
 	);
 
 	// Base del menú de anclas: fija --cabecera-alto (altura real de la
@@ -91,7 +126,7 @@ function portafolio_assets() {
 		get_template_directory_uri() . '/js/menu-anclas.js',
 		array(),
 		$version,
-		true
+		$portafolio_estrategia_scripts
 	);
 
 	// Conteo ascendente del número de tokens en el pie (ver footer.php):
@@ -102,7 +137,7 @@ function portafolio_assets() {
 		get_template_directory_uri() . '/js/contador-tokens.js',
 		array(),
 		$version,
-		true
+		$portafolio_estrategia_scripts
 	);
 
 	// Envío por AJAX del formulario de contacto (solo existe en portada).
@@ -113,7 +148,7 @@ function portafolio_assets() {
 			get_template_directory_uri() . '/js/formulario-contacto.js',
 			array(),
 			$version,
-			true
+			$portafolio_estrategia_scripts
 		);
 
 		// La URL de admin-ajax.php se pasa por wp_localize_script() en vez
