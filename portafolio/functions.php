@@ -974,21 +974,20 @@ function portafolio_ajax_enviar_contacto() {
 	$destino    = get_field( 'email', $portada_id );
 	$destino    = $destino ? $destino : get_option( 'admin_email' );
 
-	$asunto = sprintf(
-		/* translators: %s: nombre de quien escribe. */
-		__( 'Nuevo mensaje de contacto de %s', 'portafolio' ),
-		$nombre
-	);
-	$cuerpo = sprintf(
-		"%1\$s\n\n— %2\$s <%3\$s>",
-		$mensaje,
-		$nombre,
-		$email
-	);
+	$asunto = __( 'Solicitud del portafolio web', 'portafolio' );
+
+	$cuerpo  = '<p><strong>' . esc_html__( 'Nombre:', 'portafolio' ) . '</strong> ' . esc_html( $nombre ) . '</p>';
+	$cuerpo .= '<p><strong>' . esc_html__( 'Correo:', 'portafolio' ) . '</strong> ' . esc_html( $email ) . '</p>';
+	$cuerpo .= '<p><strong>' . esc_html__( 'Mensaje:', 'portafolio' ) . '</strong><br>' . nl2br( esc_html( $mensaje ) ) . '</p>';
+
 	// Reply-To (no From): que el remitente real sea del propio dominio
 	// evita que servidores de correo rechacen o marquen como spam un From
-	// con un dominio ajeno.
-	$cabeceras = array( 'Reply-To: ' . $nombre . ' <' . $email . '>' );
+	// con un dominio ajeno. Content-Type en HTML: necesario para que las
+	// etiquetas <strong> se vean en negrita en vez de como texto literal.
+	$cabeceras = array(
+		'Content-Type: text/html; charset=UTF-8',
+		'Reply-To: ' . $nombre . ' <' . $email . '>',
+	);
 
 	$enviado = wp_mail( $destino, $asunto, $cuerpo, $cabeceras );
 
