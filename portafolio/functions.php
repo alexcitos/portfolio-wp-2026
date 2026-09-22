@@ -839,58 +839,62 @@ function portafolio_registrar_campos_detalles_proyecto() {
 add_action( 'acf/init', 'portafolio_registrar_campos_detalles_proyecto' );
 
 /**
- * En local, envía todo el correo saliente al SMTP de Mailpit en vez de
- * intentar entregarlo de verdad.
+ * Envío SMTP del formulario de contacto.
  *
- * Sin este hook, wp_mail() usa PHP mail(), que en el contenedor de
- * WordPress no tiene ningún MTA configurado y siempre falla en silencio
- * (ver portafolio_procesar_formulario_contacto() más abajo). Mailpit
- * (servicio "mailpit" en docker-compose.yml) atrapa el correo y lo muestra
- * en http://localhost:8025 sin enviarlo de verdad — así se puede probar el
- * formulario de contacto sin plugins de SMTP ni un servidor de correo real.
- *
- * "mailpit" como host (no "localhost") porque en la red interna de Docker
- * Compose los contenedores se resuelven entre sí por nombre de servicio.
- *
- * Restringido a WP_DEBUG (activo en docker-compose.yml vía
- * WORDPRESS_DEBUG) para que esto nunca se active fuera de local: en un
- * VPS de producción no existe ningún host "mailpit" y WP_DEBUG estará
- * apagado, así que wp_mail() vuelve a su comportamiento normal.
+ * En local: Mailpit (activado explícitamente con PORTAFOLIO_USE_MAILPIT,
+ * no con WP_DEBUG — WP_DEBUG también está activo en producción para logs
+ * de errores, así que no sirve como señal de entorno).
+ * En producción: relay real por Gmail SMTP usando una App Password,
+ * inyectada por variables de entorno del contenedor (GMAIL_USER /
+ * GMAIL_APP_PASSWORD) — nunca hardcodeada, este repo es público.
  *
  * @param PHPMailer $phpmailer Instancia de PHPMailer, por referencia.
  */
 function portafolio_smtp_mailpit( $phpmailer ) {
-	if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+	if ( defined( 'PORTAFOLIO_USE_MAILPIT' ) && PORTAFOLIO_USE_MAILPIT ) {
+		$phpmailer->isSMTP();
+		$phpmailer->Host        = 'mailpit';
+		$phpmailer->Port        = 1025;
+		$phpmailer->SMTPAuth    = false;
+		$phpmailer->SMTPSecure  = '';
+		$phpmailer->SMTPAutoTLS = false;
+		return;
+	}
+
+	$gmail_user     = getenv( 'GMAIL_USER' );
+	$gmail_password = getenv( 'GMAIL_APP_PASSWORD' );
+
+	if ( ! $gmail_user || ! $gmail_password ) {
 		return;
 	}
 
 	$phpmailer->isSMTP();
-	$phpmailer->Host        = 'mailpit';
-	$phpmailer->Port        = 1025;
-	$phpmailer->SMTPAuth    = false;
-	$phpmailer->SMTPSecure  = '';
-	$phpmailer->SMTPAutoTLS = false;
+	$phpmailer->Host        = 'smtp.gmail.com';
+	$phpmailer->Port        = 587;
+	$phpmailer->SMTPAuth    = true;
+	$phpmailer->SMTPSecure  = 'tls';
+	$phpmailer->Username    = $gmail_user;
+	$phpmailer->Password    = $gmail_password;
 }
 add_action( 'phpmailer_init', 'portafolio_smtp_mailpit' );
 
 /**
- * Acompaña a portafolio_smtp_mailpit(): en local, WordPress arma el
- * remitente por defecto como wordpress@<host de home_url()>, y ese host es
- * "localhost" —sin punto—, que PHPMailer rechaza como dirección inválida
- * antes de intentar nada (Mailpit nunca llega a recibir el correo). Un
- * dominio con punto, aunque no exista de verdad, basta para pasar esa
- * validación. Mismo guard de WP_DEBUG que el hook de arriba: en
- * producción, home_url() ya tiene un dominio real y esto no hace falta.
+ * Acompaña a portafolio_smtp_mailpit(): remitente por defecto según entorno.
+ * En local, home_url() es "localhost" (sin punto), que PHPMailer rechaza
+ * como dirección inválida — se usa un dominio falso con punto para pasar
+ * esa validación. En producción, se usa la cuenta real de Gmail configurada.
  *
  * @param string $correo_remitente Remitente por defecto de wp_mail().
  * @return string
  */
 function portafolio_smtp_mailpit_from( $correo_remitente ) {
-	if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
-		return $correo_remitente;
+	if ( defined( 'PORTAFOLIO_USE_MAILPIT' ) && PORTAFOLIO_USE_MAILPIT ) {
+		return 'wordpress@portafolio.test';
 	}
 
-	return 'wordpress@portafolio.test';
+	$gmail_user = getenv( 'GMAIL_USER' );
+
+	return $gmail_user ? $gmail_user : $correo_remitente;
 }
 add_filter( 'wp_mail_from', 'portafolio_smtp_mailpit_from' );
 
