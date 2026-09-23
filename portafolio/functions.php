@@ -1004,3 +1004,25 @@ function portafolio_ajax_enviar_contacto() {
 }
 add_action( 'wp_ajax_portafolio_enviar_contacto', 'portafolio_ajax_enviar_contacto' );
 add_action( 'wp_ajax_nopriv_portafolio_enviar_contacto', 'portafolio_ajax_enviar_contacto' );
+
+/**
+ * Inserta el snippet de Google Analytics (GA4) en el <head>.
+ * Solo en producción: PORTAFOLIO_ENTORNO_LOCAL se define como true
+ * únicamente en el docker-compose.yml local, nunca en el de producción,
+ * así que por defecto (sin la constante definida) el snippet SÍ carga.
+ */
+function portafolio_google_analytics() {
+	if ( defined( 'PORTAFOLIO_ENTORNO_LOCAL' ) && PORTAFOLIO_ENTORNO_LOCAL ) {
+		return;
+	}
+	?>
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-TCBT35N7BE"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'G-TCBT35N7BE');
+	</script>
+	<?php
+}
+add_action( 'wp_head', 'portafolio_google_analytics', 1 );

@@ -41,6 +41,7 @@ services:
         define( 'WP_DEBUG_DISPLAY', true );
         define( 'DISALLOW_FILE_EDIT', true );
         define( 'PORTAFOLIO_USE_MAILPIT', true );
+        define( 'PORTAFOLIO_ENTORNO_LOCAL', true );
     volumes:
       # Núcleo de WordPress persistente (plugins como ACF, uploads, etc.)
       - wp_core:/var/www/html
