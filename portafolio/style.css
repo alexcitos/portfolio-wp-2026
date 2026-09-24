@@ -800,6 +800,14 @@ a:focus {
 	animation: hero-flotar-3 15s ease-in-out -9s infinite;
 }
 
+/* js/hero-pausar-animaciones.js añade esta clase al body unos segundos
+   después de cargar: congela las esferas donde estén (sin saltar a su
+   posición inicial) para que dejen de consumir CPU. La especificidad
+   (0,2,0) le gana al shorthand animation de cada .hero-forma--N. */
+.animaciones-hero-pausadas .hero-forma {
+	animation-play-state: paused;
+}
+
 /* ==========================================================================
    Portada — Hero
    ==========================================================================
@@ -859,8 +867,8 @@ a:focus {
 	background: var(--hero-eco-fondo);
 	border: 1px solid var(--hero-eco-borde);
 	box-shadow: 0 0 32px var(--hero-eco-resplandor);
-	backdrop-filter: blur(12px);
-	-webkit-backdrop-filter: blur(12px);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
 }
 
 .hero-panel-eco--1 {
@@ -892,8 +900,8 @@ a:focus {
 	padding: clamp(2rem, 5vw, 2.75rem) clamp(1.5rem, 4vw, 2.25rem);
 	border-radius: 1.7rem;
 	background: var(--hero-vidrio);
-	backdrop-filter: blur(24px) saturate(160%);
-	-webkit-backdrop-filter: blur(24px) saturate(160%);
+	backdrop-filter: blur(16px) saturate(160%);
+	-webkit-backdrop-filter: blur(16px) saturate(160%);
 	text-align: center;
 	overflow: hidden;
 }

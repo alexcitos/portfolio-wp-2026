@@ -109,7 +109,7 @@ function portafolio_assets() {
 	// diferencia de un <script> normal en el footer, que no empieza a
 	// bajar hasta llegar ahí— y ejecutarlos en orden justo después de
 	// parsear el DOM, sin bloquear el renderizado. Ninguno toca el DOM
-	// antes de que exista, así que defer es seguro en los seis.
+	// antes de que exista, así que defer es seguro en los siete.
 	//
 	// Igual que style.min.css: cada uno se sirve minificado (js/*.min.js,
 	// generado desde el .js fuente por bin/minificar.py) y versionado por
@@ -166,6 +166,17 @@ function portafolio_assets() {
 		get_template_directory_uri() . '/js/contador-tokens.min.js',
 		array(),
 		portafolio_version_activo( '/js/contador-tokens.min.js' ),
+		$portafolio_estrategia_scripts
+	);
+
+	// Congela las esferas animadas de fondo (template-parts/fondo-esferas.php)
+	// unos segundos después de cargar, para que no consuman CPU sin fin.
+	// Se usa en portada, archivo y single de proyectos, así que va global.
+	wp_enqueue_script(
+		'portafolio-hero-pausar-animaciones',
+		get_template_directory_uri() . '/js/hero-pausar-animaciones.min.js',
+		array(),
+		portafolio_version_activo( '/js/hero-pausar-animaciones.min.js' ),
 		$portafolio_estrategia_scripts
 	);
 
