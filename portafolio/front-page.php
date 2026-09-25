@@ -48,9 +48,11 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 	<?php // ---------------------------------------------------------------
 		// Zona oscura (Hero + Pilares + Proyectos + Sobre mí + Contacto):
 		// toda la portada comparte un único fondo y las mismas esferas
-		// animadas, concentradas arriba y desvanecidas hacia abajo con una
-		// máscara, para que no haya corte entre secciones. Las esferas y
-		// las capas "eco" del panel son puramente decorativas (aria-hidden).
+		// animadas, en una capa fija del tamaño de la ventana (ver
+		// template-parts/fondo-esferas.php) que queda detrás de todas las
+		// secciones mientras se hace scroll, sin cortes entre ellas. Las
+		// esferas y las capas "eco" del panel son puramente decorativas
+		// (aria-hidden).
 		// --------------------------------------------------------------- ?>
 	<div class="portada-oscura">
 

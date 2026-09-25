@@ -169,14 +169,17 @@ function portafolio_assets() {
 		$portafolio_estrategia_scripts
 	);
 
-	// Congela las esferas animadas de fondo (template-parts/fondo-esferas.php)
-	// unos segundos después de cargar, para que no consuman CPU sin fin.
-	// Se usa en portada, archivo y single de proyectos, así que va global.
+	// Arranca, pausa y reanuda las animaciones infinitas decorativas (esferas
+	// del fondo fijo de template-parts/fondo-esferas.php, capas eco del hero,
+	// iconos de pilares y foto de "Sobre mí"): corren solo tras la carga y
+	// mientras hay interacción, y se detienen tras unos segundos de
+	// inactividad. El fondo se usa en portada, archivo y single de
+	// proyectos, así que va global.
 	wp_enqueue_script(
-		'portafolio-hero-pausar-animaciones',
-		get_template_directory_uri() . '/js/hero-pausar-animaciones.min.js',
+		'portafolio-animaciones-ambiente',
+		get_template_directory_uri() . '/js/animaciones-ambiente.min.js',
 		array(),
-		portafolio_version_activo( '/js/hero-pausar-animaciones.min.js' ),
+		portafolio_version_activo( '/js/animaciones-ambiente.min.js' ),
 		$portafolio_estrategia_scripts
 	);
 

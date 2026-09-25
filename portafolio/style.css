@@ -124,26 +124,14 @@ body {
 	color: var(--color-texto);
 	background-color: var(--color-fondo);
 
-	/* Fundido de entrada al cargar el sitio. "both" mantiene opacity:0
-	   antes de que arranque la animación, evitando un parpadeo del
-	   contenido a opacidad completa en el primer frame. */
-	animation: portafolio-fundido-entrada 0.7s ease both;
-}
-
-@keyframes portafolio-fundido-entrada {
-	from {
-		opacity: 0;
-	}
-
-	to {
-		opacity: 1;
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	body {
-		animation: none;
-	}
+	/* Sin fundido de entrada a propósito. Antes el <body> arrancaba en
+	   opacity:0 y subía a 1 con una animación CSS: el navegador no cuenta
+	   como "pintura con contenido" nada pintado a opacidad 0, y una
+	   animación CSS no avanza en una pestaña oculta o en segundo plano (como
+	   a veces corren Lighthouse/GTmetrix). Con eso la página podía quedarse
+	   invisible para la medición (NO_FCP/NO_LCP) aunque un usuario real la
+	   viera bien. No volver a animar la opacidad del <body> ni de ningún
+	   contenedor del contenido principal. */
 }
 
 h1,
@@ -224,21 +212,18 @@ a:focus {
 .sitio-cabecera {
 	/* Degradado sutil entre --color-vidrio y --color-vidrio-trasero (mismo
 	   par que usan las capas "eco" del hero para el tono violáceo, ver
-	   .hero-panel-eco), casi opaco: la cabecera es "sticky" y, en reposo (sin
-	   scroll), no tiene nada detrás que el backdrop-filter pueda desenfocar
-	   —el hero empieza justo debajo, no detrás—, así que si el fondo
-	   dependiera del blur para verse oscuro (como con --hero-vidrio al 62%,
-	   pensado para ir SIEMPRE sobre las esferas del hero) se leía como un
-	   gris plano mezclado con el blanco de la página. Al 90% de opacidad el
-	   propio degradado ya se ve como vidrio oscuro sin ayuda del blur; el
-	   10% que queda basta para que, al hacer scroll y quedar sobre el hero,
-	   el desenfoque siga aportando ese matiz extra de profundidad. El texto
-	   blanco del título/nav mantiene contraste de sobra sobre este fondo
-	   oscuro con o sin scroll. La personalidad de la cabecera vive además en
-	   el borde y la sombra —un resplandor lavanda que usa el mismo
-	   vocabulario que --hero-resplandor-a/b y --pilar-acento-resplandor—,
-	   que solo aparece al hacer scroll (.sitio-cabecera--flotando) para
-	   separarla del contenido justo cuando queda flotando sobre él. */
+	   .hero-panel-eco), al 90% de opacidad: el propio degradado ya se lee
+	   como vidrio oscuro. Sin backdrop-filter a propósito: la cabecera es
+	   sticky y pasa siempre por encima del fondo de esferas animadas (capa
+	   fija, ver .portada-oscura-fondo). Un blur ahí obliga al navegador a
+	   rehacer el desenfoque en cada fotograma de la animación, y con un 90%
+	   de opacidad apenas aportaba nada visible. El texto blanco del
+	   título/nav mantiene contraste de sobra sobre este fondo. La
+	   personalidad de la cabecera vive en el borde y la sombra (un
+	   resplandor lavanda que usa el mismo vocabulario que
+	   --hero-resplandor-a/b y --pilar-acento-resplandor), que solo aparecen
+	   al hacer scroll (.sitio-cabecera--flotando) para separarla del
+	   contenido justo cuando queda flotando sobre él. */
 	--cabecera-fondo: linear-gradient(135deg, rgba(6, 13, 26, 0.9), rgba(37, 37, 65, 0.9));
 	--cabecera-borde: rgba(151, 152, 249, 0.55);
 	--cabecera-sombra: 0 8px 24px rgba(3, 7, 17, 0.35), 0 0 32px rgba(151, 152, 249, 0.25);
@@ -247,8 +232,6 @@ a:focus {
 	top: 0;
 	z-index: 500;
 	background: var(--cabecera-fondo);
-	backdrop-filter: blur(60px) saturate(300%);
-	-webkit-backdrop-filter: blur(60px) saturate(300%);
 	border-bottom: 1px solid transparent;
 	box-shadow: 0 8px 24px transparent;
 	transition: border-color 0.25s ease, box-shadow 0.25s ease;
@@ -257,14 +240,6 @@ a:focus {
 .sitio-cabecera--flotando {
 	border-bottom-color: var(--cabecera-borde);
 	box-shadow: var(--cabecera-sombra);
-}
-
-/* Sin soporte de backdrop-filter: mismo degradado pero totalmente opaco (sin
-   alfa), ya que aquí no hay blur que disimule la transparencia. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.sitio-cabecera {
-		background: linear-gradient(135deg, var(--color-vidrio), var(--color-vidrio-trasero));
-	}
 }
 
 .sitio-cabecera-interior {
@@ -452,9 +427,9 @@ a:focus {
 		top: 100%;
 		left: 0;
 		right: 0;
+		/* Mismo fondo que .sitio-cabecera y sin backdrop-filter por el
+		   mismo motivo (ver comentario ahí). */
 		background: var(--cabecera-fondo);
-		backdrop-filter: blur(60px) saturate(300%);
-		-webkit-backdrop-filter: blur(60px) saturate(300%);
 		border-bottom: 1px solid var(--cabecera-borde);
 		box-shadow: var(--cabecera-sombra);
 		opacity: 0;
@@ -555,257 +530,279 @@ a:focus {
 }
 
 /* ==========================================================================
-   Portada — Zona oscura (Hero + Pilares + Proyectos + Sobre mí + Contacto)
+   Zona oscura compartida (portada, archivo/categorías y ficha de proyecto)
    ==========================================================================
 
-   Toda la portada comparte un único fondo oscuro y UNA sola familia de
-   esferas difuminadas (.portada-oscura-fondo): nueve esferas repartidas por
-   porcentaje de alto a lo largo de todo el contenedor, no una por sección.
-   Antes cada sección (Hero, Pilares, Proyectos) tenía su propio grupo de
-   esferas más una máscara que solo mantenía visible el tramo superior del
-   conjunto; eso dejaba tramos enteros del fondo totalmente planos entre
-   secciones —sobre todo cuanto más larga se hacía la página— y se leía
-   como un corte, aunque el color de fondo fuera idéntico en toda la zona.
-   Usar porcentajes (top: N%) en vez de rem hace que las nueve esferas se
-   redistribuyan solas sea cual sea la altura total, así que no hay que
-   recalibrar nada al añadir contenido (más proyectos, texto de "Sobre mí",
-   etc.). Todo el fondo es decorativo (aria-hidden en el HTML). Los colores
-   salen de las variables de :root; los tokens --hero-forma-* solo aplican
+   Todas las páginas con fondo oscuro comparten un único color de base (aquí,
+   en .portada-oscura) y UNA sola familia de esferas difuminadas
+   (.portada-oscura-fondo, ver template-parts/fondo-esferas.php).
+
+   El fondo de esferas es una capa position:fixed del tamaño de la ventana,
+   no una capa del alto de toda la página. Antes era absolute + inset:0
+   sobre el contenedor entero, con las esferas repartidas en top:% del alto
+   total y una máscara para desvanecerlas al final. Eso tenía dos problemas:
+   - costo: la máscara sobre un árbol animado obligaba a recomponer una
+     superficie tan alta como la página en cada fotograma, así que cada
+     sección nueva encarecía el renderizado;
+   - cortes: cuanto más larga la página, más separadas quedaban las
+     esferas, y aparecían tramos planos que se leían como un corte entre
+     secciones.
+   Con la capa fija, el costo depende solo del tamaño de la ventana y
+   siempre hay esferas detrás de lo que se está viendo, sea cual sea el
+   largo de la página.
+
+   Regla derivada de esto: NINGÚN panel que pase por encima de este fondo
+   usa backdrop-filter. Con el fondo fijo, todos los paneles terminan sobre
+   las esferas en algún punto del scroll, así que no hay forma de
+   "reposicionarlos" para evitar el solape. Un backdrop-filter sobre
+   contenido que se anima obliga a rehacer el desenfoque en cada fotograma
+   (y tiende a impedir que el navegador llegue a reposo, algo que confunde
+   a Lighthouse/GTmetrix al medir LCP). Por eso cada tarjeta de "vidrio" es
+   un fondo semitransparente (alfa ~0.8) o un degradado sin desenfoque; las
+   esferas ya son suaves de por sí, así que el efecto se sigue leyendo como
+   vidrio oscuro.
+
+   Todo el fondo es decorativo (aria-hidden en el HTML). Los colores salen
+   de las variables de :root; los tokens --fondo-esfera-* solo aplican
    transparencia (rgba por defecto, color-mix bajo @supports al final del
-   archivo). Cada <section> interior queda con fondo transparente: el color
-   de base vive únicamente aquí.
+   archivo). Cada <section> interior queda con fondo transparente.
    ========================================================================== */
 .portada-oscura {
 	/* Derivados con transparencia de las variables de :root. Valor por
 	   defecto en rgba(); el bloque @supports de color-mix() (al final del
 	   archivo) los reescribe a color-mix() cuando está disponible. */
-	--hero-forma-azul: rgba(37, 99, 235, 0.6);
-	--hero-forma-violeta: rgba(163, 93, 228, 0.6);
-	--hero-forma-lavanda: rgba(151, 152, 249, 0.55);
-	--hero-forma-purpura: rgba(138, 127, 244, 0.55);
+	--fondo-esfera-azul: rgba(37, 99, 235, 0.6);
+	--fondo-esfera-violeta: rgba(163, 93, 228, 0.6);
+	--fondo-esfera-lavanda: rgba(151, 152, 249, 0.55);
+	--fondo-esfera-purpura: rgba(138, 127, 244, 0.55);
 
 	/* Tonos cálidos/vivos, fuera de la familia azul-violeta: contrastan a
 	   propósito con el fondo (frío, oklch 13% 0.025 258) y entre sí con las
-	   otras esferas, para que el fondo no se lea monocromático en un
-	   recorrido tan largo. Colores nuevos (no derivados de --color-*), así
-	   que su mejora a oklch() más abajo son valores literales, no
-	   color-mix(). */
-	--hero-forma-ambar: rgba(245, 166, 35, 0.55);
-	--hero-forma-cian: rgba(34, 211, 238, 0.5);
-	--hero-forma-rosa: rgba(236, 72, 153, 0.5);
-	--hero-forma-esmeralda: rgba(34, 197, 94, 0.5);
+	   otras esferas, para que el fondo no se lea monocromático. Colores
+	   nuevos (no derivados de --color-*), así que su mejora a oklch() más
+	   abajo son valores literales, no color-mix(). */
+	--fondo-esfera-ambar: rgba(245, 166, 35, 0.55);
+	--fondo-esfera-cian: rgba(34, 211, 238, 0.5);
+	--fondo-esfera-rosa: rgba(236, 72, 153, 0.5);
+	--fondo-esfera-esmeralda: rgba(34, 197, 94, 0.5);
 
-	/* Sin isolation: isolate a propósito. Esa propiedad crea un nuevo
-	   "backdrop root" y le impediría a .sitio-cabecera (fuera de este
-	   contenedor, con su propio backdrop-filter) desenfocar el contenido de
-	   aquí dentro cuando la cabecera flota por encima al hacer scroll. El
-	   orden en el DOM ya basta para que .portada-oscura-fondo (z-index:0)
-	   quede detrás de las secciones (position:relative, z-index:auto). */
+	/* Sin z-index propio a propósito: así .portada-oscura no crea un
+	   contexto de apilamiento y la capa fija de esferas (z-index:0) se
+	   ordena junto al resto de elementos posicionados del documento. Las
+	   secciones (position:relative, z-index:auto) van después en el DOM y
+	   se pintan encima; .sitio-pie también es position:relative por el
+	   mismo motivo (ver ahí). */
 	position: relative;
 	overflow: hidden;
 	background-color: var(--color-fondo-oscuro);
 }
 
-/* --- Formas difuminadas de fondo, compartidas por toda la zona oscura --- */
+/* --- Capa fija de esferas, compartida por toda la zona oscura --- */
 .portada-oscura-fondo {
-	position: absolute;
+	position: fixed;
 	inset: 0;
 	z-index: 0;
+	overflow: hidden;
 	pointer-events: none;
-	/* Opaco casi toda la altura; solo se desvanece en el último tramo, para
-	   fundirse con el pie de página (claro) en vez de cortarse en seco. */
-	-webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 88%, transparent 100%);
-	mask-image: linear-gradient(to bottom, #000 0%, #000 88%, transparent 100%);
 }
 
-.hero-forma {
+/* Sin filter: blur(). El desenfoque lo da el propio degradado: color pleno
+   en el centro y una caída rápida (la pista de interpolación al 40%) hacia
+   transparente en el borde, que se lee igual de difuminado que antes con
+   blur(45px) pero sin pedirle al navegador un filtro por esfera en cada
+   fotograma. --fondo-esfera-color lo fija cada variante --N. */
+.fondo-esfera {
 	position: absolute;
 	border-radius: 50%;
-	filter: blur(45px);
+	background: radial-gradient(circle closest-side, var(--fondo-esfera-color), 40%, transparent);
 }
 
-/* Dieciocho esferas en top:% (no rem), para repartirse solas por toda la
-   altura de la zona oscura sea cual sea el contenido real (sigue creciendo:
-   Sobre mí y Contacto se sumaron después que Hero/Pilares/Proyectos, y las
-   posiciones en % ya se reacomodan solas). Nueve reutilizan los cuatro
-   colores azul/violeta/lavanda/púrpura en ciclo; las nueve restantes
-   (--10 a --18) usan los tonos de contraste —ámbar, cian, rosa,
-   esmeralda—, intercaladas en los huecos del reparto para que la variedad
-   de color se note en todo el recorrido, no solo al principio. El tamaño
-   también varía a propósito, de 7rem a 30rem, para que no se lea como una
-   fila pareja de círculos. Cada esfera tiene su propia trayectoria (ver
-   @keyframes hero-flotar-*), una duración distinta
-   dentro de la franja 15–25 s y un retardo negativo para que arranquen
-   desfasadas y el conjunto no se perciba sincronizado ni repetitivo pese a
-   reutilizar las mismas cuatro animaciones. */
-.hero-forma--1 {
-	top: -4%;
-	left: -6rem;
+/* Diez esferas en % de la ventana (la capa es fija, así que top/left en %
+   ya son relativos al viewport). Alternan la familia azul/violeta/lavanda/
+   púrpura con los tonos de contraste (ámbar, cian, rosa, esmeralda) para
+   que la variedad de color se note en cualquier tramo de la página. El
+   tamaño varía de 11rem a 28rem para que no se lea como una fila pareja de
+   círculos. Cada esfera usa una de las cuatro trayectorias (ver
+   @keyframes fondo-flotar-*) orientada hacia el centro de la ventana
+   según su lado, con una duración distinta dentro de la franja 17–25 s y
+   un retardo negativo para que arranquen desfasadas.
+
+   Solo se anima transform (translate/scale), que el navegador compone sin
+   recalcular layout ni repintar. */
+.fondo-esfera--1 {
+	--fondo-esfera-color: var(--fondo-esfera-azul);
+	top: -12%;
+	left: -10%;
 	width: 26rem;
 	height: 26rem;
-	background: radial-gradient(circle, var(--hero-forma-azul), transparent 70%);
-	animation: hero-flotar-1 21s ease-in-out -4s infinite;
+	animation: fondo-flotar-1 21s ease-in-out -4s infinite;
 }
 
-.hero-forma--2 {
-	top: 6%;
-	right: -7rem;
+.fondo-esfera--2 {
+	--fondo-esfera-color: var(--fondo-esfera-violeta);
+	top: -6%;
+	right: -12%;
 	width: 28rem;
 	height: 28rem;
-	background: radial-gradient(circle, var(--hero-forma-violeta), transparent 70%);
-	animation: hero-flotar-2 17s ease-in-out -9s infinite;
+	animation: fondo-flotar-2 17s ease-in-out -9s infinite;
 }
 
-.hero-forma--3 {
-	top: 2%;
-	right: 6rem;
+.fondo-esfera--3 {
+	--fondo-esfera-color: var(--fondo-esfera-lavanda);
+	top: 8%;
+	right: 14%;
 	width: 12.5rem;
 	height: 12.5rem;
-	background: radial-gradient(circle, var(--hero-forma-lavanda), transparent 72%);
-	animation: hero-flotar-3 25s ease-in-out -6s infinite;
+	animation: fondo-flotar-3 25s ease-in-out -6s infinite;
 }
 
-.hero-forma--4 {
-	top: 16%;
-	left: 3rem;
-	width: 10rem;
-	height: 10rem;
-	background: radial-gradient(circle, var(--hero-forma-purpura), transparent 72%);
-	animation: hero-flotar-4 15s ease-in-out -11s infinite;
-}
-
-.hero-forma--5 {
-	top: 30%;
-	right: -8rem;
-	width: 25rem;
-	height: 25rem;
-	background: radial-gradient(circle, var(--hero-forma-azul), transparent 70%);
-	animation: hero-flotar-2 19s ease-in-out -2s infinite;
-}
-
-.hero-forma--6 {
-	top: 44%;
-	left: -7rem;
-	width: 23rem;
-	height: 23rem;
-	background: radial-gradient(circle, var(--hero-forma-violeta), transparent 70%);
-	animation: hero-flotar-1 23s ease-in-out -13s infinite;
-}
-
-.hero-forma--7 {
-	top: 58%;
-	right: 8%;
-	width: 11rem;
-	height: 11rem;
-	background: radial-gradient(circle, var(--hero-forma-lavanda), transparent 72%);
-	animation: hero-flotar-3 18s ease-in-out -8s infinite;
-}
-
-.hero-forma--8 {
-	top: 72%;
-	left: 5%;
-	width: 21rem;
-	height: 21rem;
-	background: radial-gradient(circle, var(--hero-forma-purpura), transparent 72%);
-	animation: hero-flotar-4 20s ease-in-out -5s infinite;
-}
-
-.hero-forma--9 {
-	top: 85%;
-	right: -7rem;
-	width: 22rem;
-	height: 22rem;
-	background: radial-gradient(circle, var(--hero-forma-azul), transparent 70%);
-	animation: hero-flotar-2 16s ease-in-out -10s infinite;
-}
-
-.hero-forma--10 {
-	top: 22%;
-	right: 4rem;
+.fondo-esfera--4 {
+	--fondo-esfera-color: var(--fondo-esfera-ambar);
+	top: 28%;
+	right: -6%;
 	width: 16rem;
 	height: 16rem;
-	background: radial-gradient(circle, var(--hero-forma-ambar), transparent 72%);
-	animation: hero-flotar-3 20s ease-in-out -9s infinite;
+	animation: fondo-flotar-3 20s ease-in-out -9s infinite;
 }
 
-.hero-forma--11 {
-	top: 50%;
-	left: 6%;
+.fondo-esfera--5 {
+	--fondo-esfera-color: var(--fondo-esfera-cian);
+	top: 38%;
+	left: 2%;
 	width: 18rem;
 	height: 18rem;
-	background: radial-gradient(circle, var(--hero-forma-cian), transparent 72%);
-	animation: hero-flotar-4 24s ease-in-out -6s infinite;
+	animation: fondo-flotar-4 24s ease-in-out -6s infinite;
 }
 
-.hero-forma--12 {
-	top: 78%;
-	right: -6rem;
+.fondo-esfera--6 {
+	--fondo-esfera-color: var(--fondo-esfera-purpura);
+	top: 50%;
+	right: 20%;
+	width: 11rem;
+	height: 11rem;
+	animation: fondo-flotar-2 20s ease-in-out -5s infinite;
+}
+
+.fondo-esfera--7 {
+	--fondo-esfera-color: var(--fondo-esfera-azul);
+	top: 58%;
+	right: -10%;
+	width: 25rem;
+	height: 25rem;
+	animation: fondo-flotar-2 19s ease-in-out -2s infinite;
+}
+
+.fondo-esfera--8 {
+	--fondo-esfera-color: var(--fondo-esfera-rosa);
+	top: 68%;
+	left: -8%;
 	width: 19rem;
 	height: 19rem;
-	background: radial-gradient(circle, var(--hero-forma-rosa), transparent 72%);
-	animation: hero-flotar-1 18s ease-in-out -12s infinite;
+	animation: fondo-flotar-1 18s ease-in-out -12s infinite;
 }
 
-.hero-forma--13 {
-	top: 11%;
-	left: 7%;
-	width: 9rem;
-	height: 9rem;
-	background: radial-gradient(circle, var(--hero-forma-esmeralda), transparent 72%);
-	animation: hero-flotar-3 19s ease-in-out -3s infinite;
-}
-
-.hero-forma--14 {
-	top: 26%;
-	right: -6rem;
-	width: 7rem;
-	height: 7rem;
-	background: radial-gradient(circle, var(--hero-forma-ambar), transparent 72%);
-	animation: hero-flotar-4 14s ease-in-out -6s infinite;
-}
-
-.hero-forma--15 {
-	top: 37%;
-	right: 6rem;
-	width: 8rem;
-	height: 8rem;
-	background: radial-gradient(circle, var(--hero-forma-rosa), transparent 72%);
-	animation: hero-flotar-4 17s ease-in-out -14s infinite;
-}
-
-.hero-forma--16 {
-	top: 65%;
-	left: -8rem;
-	width: 30rem;
-	height: 30rem;
-	background: radial-gradient(circle, var(--hero-forma-azul), transparent 70%);
-	animation: hero-flotar-1 26s ease-in-out -8s infinite;
-}
-
-.hero-forma--17 {
-	top: 91%;
-	left: 8%;
+.fondo-esfera--9 {
+	--fondo-esfera-color: var(--fondo-esfera-esmeralda);
+	top: 80%;
+	left: 32%;
 	width: 14rem;
 	height: 14rem;
-	background: radial-gradient(circle, var(--hero-forma-esmeralda), transparent 72%);
-	animation: hero-flotar-2 21s ease-in-out -4s infinite;
+	animation: fondo-flotar-4 21s ease-in-out -4s infinite;
 }
 
-.hero-forma--18 {
-	top: 95%;
-	right: -7rem;
-	width: 10rem;
-	height: 10rem;
-	background: radial-gradient(circle, var(--hero-forma-cian), transparent 72%);
-	animation: hero-flotar-3 15s ease-in-out -9s infinite;
+.fondo-esfera--10 {
+	--fondo-esfera-color: var(--fondo-esfera-violeta);
+	top: 86%;
+	right: -8%;
+	width: 22rem;
+	height: 22rem;
+	animation: fondo-flotar-2 23s ease-in-out -13s infinite;
 }
 
-/* js/hero-pausar-animaciones.js añade esta clase al body unos segundos
-   después de cargar: congela las esferas donde estén (sin saltar a su
-   posición inicial) para que dejen de consumir CPU. La especificidad
-   (0,2,0) le gana al shorthand animation de cada .hero-forma--N. */
-.animaciones-hero-pausadas .hero-forma {
+/* --- Trayectorias de las esferas (CSS puro) ---
+
+   Cada esfera recorre un lazo cerrado y asimétrico, en una dirección
+   distinta y con los puntos clave en porcentajes diferentes, para que no
+   lleguen a los extremos a la vez. */
+@keyframes fondo-flotar-1 {
+	0%   { transform: translate(0, 0) scale(1); }
+	30%  { transform: translate(13rem, 4rem) scale(1.1); }
+	55%  { transform: translate(8rem, 10rem) scale(1.16); }
+	80%  { transform: translate(-4rem, 6rem) scale(1.06); }
+	100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes fondo-flotar-2 {
+	0%   { transform: translate(0, 0) scale(1); }
+	25%  { transform: translate(-11rem, -3rem) scale(1.12); }
+	50%  { transform: translate(-15rem, 4rem) scale(1.05); }
+	75%  { transform: translate(-6rem, -7rem) scale(1.15); }
+	100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes fondo-flotar-3 {
+	0%   { transform: translate(0, 0) scale(1); }
+	20%  { transform: translate(-9rem, 7rem) scale(1.14); }
+	45%  { transform: translate(-16rem, 2rem) scale(1.08); }
+	70%  { transform: translate(-11rem, 12rem) scale(1.2); }
+	100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes fondo-flotar-4 {
+	0%   { transform: translate(0, 0) scale(1); }
+	30%  { transform: translate(9rem, -6rem) scale(1.16); }
+	60%  { transform: translate(15rem, -2rem) scale(1.1); }
+	85%  { transform: translate(6rem, -9rem) scale(1.18); }
+	100% { transform: translate(0, 0) scale(1); }
+}
+
+/* En pantallas estrechas se aligera el fondo: se quedan las seis esferas
+   grandes, que ya cubren una ventana de móvil. */
+@media (max-width: 30rem) {
+	.fondo-esfera--3,
+	.fondo-esfera--6,
+	.fondo-esfera--9,
+	.fondo-esfera--10 {
+		display: none;
+	}
+}
+
+/* --- Control de las animaciones "de ambiente" ---
+
+   Todas las animaciones infinitas y decorativas del sitio (esferas de
+   fondo, capas eco del hero, iconos de pilares y anillo de la foto de
+   "Sobre mí") arrancan PAUSADAS y solo corren mientras <html> tiene la
+   clase .ambiente-activo. Esa clase la pone y la quita
+   js/animaciones-ambiente.js: la añade tras la carga completa y con cada
+   interacción (scroll, puntero, teclado) y la retira tras unos segundos
+   de inactividad o al ocultar la pestaña. Así el navegador llega a reposo
+   cuando nadie está usando la página, en vez de animar sin fin.
+
+   animation-play-state: paused congela cada animación donde esté (sin
+   saltar a su posición inicial), así que pausar/reanudar no se nota como
+   un salto. Especificidad (0,2,1) o más: le gana al shorthand "animation"
+   de cada regla individual (.fondo-esfera--N, .hero-panel-eco--N, etc.).
+
+   Selectores escritos uno por uno y no como
+   "html:not(.ambiente-activo) :is(...)": bin/minificar.py quita los
+   espacios alrededor de ":" y convertiría ese espacio descendiente en
+   "html:not(...):is(...)", que no coincide con nada.
+
+   Sin JavaScript la clase nunca aparece y todo queda quieto: se prefiere
+   un fondo estático a una animación sin ningún límite. */
+html:not(.ambiente-activo) .fondo-esfera,
+html:not(.ambiente-activo) .hero-panel-eco,
+html:not(.ambiente-activo) .pilar-icono svg,
+html:not(.ambiente-activo) .sobre-mi-foto {
 	animation-play-state: paused;
+}
+
+/* Movimiento reducido: ni siquiera se inician (animation:none). Las capas
+   eco conservan su translate/rotate base, que va en propiedades aparte. */
+@media (prefers-reduced-motion: reduce) {
+	.fondo-esfera {
+		animation: none;
+	}
 }
 
 /* ==========================================================================
@@ -821,22 +818,23 @@ a:focus {
 	   panel de vidrio (no del fondo compartido). Valor por defecto en
 	   rgba(); el bloque @supports de color-mix() (al final del archivo) los
 	   reescribe a color-mix() cuando está disponible. */
-	--hero-vidrio: rgba(6, 13, 26, 0.62);
+	/* Sin backdrop-filter (ver .portada-oscura), así que el vidrio sube de
+	   0.62 a 0.8 de opacidad: sin desenfoque detrás, al 62% las esferas se
+	   leían con demasiado detalle a través del panel y competían con el
+	   texto. */
+	--hero-vidrio: rgba(6, 13, 26, 0.8);
 	--hero-texto-tenue: rgba(255, 255, 255, 0.78);
 	--hero-resplandor-a: rgba(37, 99, 235, 0.4);
 	--hero-resplandor-b: rgba(163, 93, 228, 0.28);
 	/* Panel eco: relleno traslúcido con tono propio, borde claro definido y
 	   resplandor, para que se lea como una capa —no como un borde difuso. */
-	--hero-eco-fondo: rgba(37, 37, 65, 0.58);
+	--hero-eco-fondo: rgba(37, 37, 65, 0.75);
 	--hero-eco-borde: #bbbcfb;
 	--hero-eco-resplandor: rgba(138, 127, 244, 0.42);
 	--hero-vineta-a: rgba(26, 26, 26, 0.32);
 	--hero-vineta-b: rgba(26, 26, 26, 0.08);
 	--hero-foco: rgba(255, 255, 255, 0.8);
 
-	/* Sin isolation: isolate a propósito (ver .portada-oscura): al llegar a
-	   este panel de vidrio, la cabecera sticky debe poder seguir
-	   desenfocándolo a través de su backdrop-filter. */
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -858,7 +856,11 @@ a:focus {
    giro. El desfase y el giro son marcados a propósito, y llevan tono, borde
    claro y resplandor propios, para que se lean como una capa distinta.
    Su deriva (parallax) va más rápida que las esferas y con distinto ritmo
-   entre sí, para que el desplazamiento se perciba. */
+   entre sí, para que el desplazamiento se perciba. Sin backdrop-filter:
+   estas capas se mueven y además quedan sobre las esferas animadas, el peor
+   caso posible para el renderizado (ver .portada-oscura); el tono lo da
+   solo --hero-eco-fondo. Su animación queda bajo el mismo control de
+   pausa que las esferas (ver .ambiente-activo). */
 .hero-panel-eco {
 	position: absolute;
 	inset: 0;
@@ -867,8 +869,6 @@ a:focus {
 	background: var(--hero-eco-fondo);
 	border: 1px solid var(--hero-eco-borde);
 	box-shadow: 0 0 32px var(--hero-eco-resplandor);
-	backdrop-filter: blur(8px);
-	-webkit-backdrop-filter: blur(8px);
 }
 
 .hero-panel-eco--1 {
@@ -900,8 +900,6 @@ a:focus {
 	padding: clamp(2rem, 5vw, 2.75rem) clamp(1.5rem, 4vw, 2.25rem);
 	border-radius: 1.7rem;
 	background: var(--hero-vidrio);
-	backdrop-filter: blur(16px) saturate(160%);
-	-webkit-backdrop-filter: blur(16px) saturate(160%);
 	text-align: center;
 	overflow: hidden;
 }
@@ -960,45 +958,10 @@ a:focus {
 	outline-color: var(--hero-foco);
 }
 
-/* --- Animación del fondo (CSS puro, sin JavaScript) ---
+/* --- Deriva de las capas eco (CSS puro) ---
 
-   Cada esfera recorre un lazo cerrado y asimétrico por una zona amplia del
-   hero, en una dirección distinta y con los puntos clave en porcentajes
-   diferentes, para que no lleguen a los extremos a la vez. Las dos capas
-   "eco" del panel derivan más rápido y con un giro leve, a otro ritmo que
-   las esferas (parallax). */
-@keyframes hero-flotar-1 {
-	0%   { transform: translate(0, 0) scale(1); }
-	30%  { transform: translate(13rem, 4rem) scale(1.1); }
-	55%  { transform: translate(8rem, 10rem) scale(1.16); }
-	80%  { transform: translate(-4rem, 6rem) scale(1.06); }
-	100% { transform: translate(0, 0) scale(1); }
-}
-
-@keyframes hero-flotar-2 {
-	0%   { transform: translate(0, 0) scale(1); }
-	25%  { transform: translate(-11rem, -3rem) scale(1.12); }
-	50%  { transform: translate(-15rem, 4rem) scale(1.05); }
-	75%  { transform: translate(-6rem, -7rem) scale(1.15); }
-	100% { transform: translate(0, 0) scale(1); }
-}
-
-@keyframes hero-flotar-3 {
-	0%   { transform: translate(0, 0) scale(1); }
-	20%  { transform: translate(-9rem, 7rem) scale(1.14); }
-	45%  { transform: translate(-16rem, 2rem) scale(1.08); }
-	70%  { transform: translate(-11rem, 12rem) scale(1.2); }
-	100% { transform: translate(0, 0) scale(1); }
-}
-
-@keyframes hero-flotar-4 {
-	0%   { transform: translate(0, 0) scale(1); }
-	30%  { transform: translate(9rem, -6rem) scale(1.16); }
-	60%  { transform: translate(15rem, -2rem) scale(1.1); }
-	85%  { transform: translate(6rem, -9rem) scale(1.18); }
-	100% { transform: translate(0, 0) scale(1); }
-}
-
+   Las dos capas "eco" del panel derivan más rápido y con un giro leve, a
+   otro ritmo que las esferas de fondo (parallax). */
 @keyframes hero-eco-1 {
 	0%, 100% { transform: translate(0, 0) rotate(0); }
 	50% { transform: translate(15px, -11px) rotate(1deg); }
@@ -1009,17 +972,15 @@ a:focus {
 	50% { transform: translate(-13px, 14px) rotate(-1.2deg); }
 }
 
-/* Movimiento reducido: detiene tanto las esferas como las capas eco. Con
-   animation:none cada capa eco conserva su translate/rotate base. */
+/* Movimiento reducido: detiene las capas eco. Con animation:none cada
+   capa conserva su translate/rotate base. */
 @media (prefers-reduced-motion: reduce) {
-	.hero-forma,
 	.hero-panel-eco {
 		animation: none;
 	}
 }
 
-/* En pantallas estrechas se aligera el fondo. Las capas eco se ocultan
-   antes (40rem): con el panel casi a todo el ancho, su desfase marcado se
+/* En pantallas estrechas las capas eco se ocultan (40rem): con el panel casi a todo el ancho, su desfase marcado se
    saldría del hero y quedaría recortado. */
 @media (max-width: 40rem) {
 	.hero-panel-eco {
@@ -1036,30 +997,6 @@ a:focus {
 	}
 }
 
-@media (max-width: 30rem) {
-	.hero-forma--3,
-	.hero-forma--4,
-	.hero-forma--7,
-	.hero-forma--13,
-	.hero-forma--14,
-	.hero-forma--15,
-	.hero-forma--18 {
-		display: none;
-	}
-}
-
-/* Sin soporte de backdrop-filter: paneles con fondo sólido (cada uno con
-   su propio tono). */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.hero-panel-vidrio {
-		background: var(--color-vidrio);
-	}
-
-	.hero-panel-eco {
-		background: var(--color-vidrio-trasero);
-	}
-}
-
 /* ==========================================================================
    Portada — Pilares
    ==========================================================================
@@ -1073,13 +1010,10 @@ a:focus {
 	/* Derivados con transparencia; valor por defecto en rgba(), reescritos a
 	   color-mix() bajo @supports al final del archivo (mismo esquema que
 	   .portada-hero). */
-	--pilares-tarjeta-fondo: rgba(6, 13, 26, 0.55);
+	--pilares-tarjeta-fondo: rgba(6, 13, 26, 0.8);
 	--pilares-tarjeta-borde: rgba(255, 255, 255, 0.12);
 	--pilares-texto-tenue: rgba(255, 255, 255, 0.78);
 
-	/* Sin isolation: isolate a propósito (ver .portada-oscura): las
-	   tarjetas de pilar también deben poder desenfocarse a través de la
-	   cabecera sticky cuando pasan por debajo al hacer scroll. */
 	position: relative;
 	padding: clamp(3rem, 8vw, 6rem) var(--espacio-md);
 }
@@ -1141,8 +1075,9 @@ a:focus {
 	background: var(--pilares-tarjeta-fondo);
 	border: 1px solid var(--pilares-tarjeta-borde);
 	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-	backdrop-filter: blur(20px) saturate(150%);
-	-webkit-backdrop-filter: blur(20px) saturate(150%);
+	/* Sin backdrop-filter: la tarjeta pasa sobre las esferas animadas del
+	   fondo fijo (ver .portada-oscura). El fondo semitransparente sube a
+	   0.8 (--pilares-tarjeta-fondo) para compensar la falta de desenfoque. */
 	transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
@@ -1177,7 +1112,8 @@ a:focus {
 	   filter fuerza repintado en cada fotograma, una animación "no
 	   compuesta" que Lighthouse marca aparte de transform/opacity). El
 	   pulso ahora lo da transform: scale() más abajo, que sí compone en la
-	   GPU sin repintar. */
+	   GPU sin repintar. Arranca pausada y solo corre mientras hay
+	   interacción, igual que las esferas (ver .ambiente-activo). */
 	filter: drop-shadow(0 0 8px currentColor);
 	transform-origin: center;
 	animation: pilar-icono-brillo 2.6s ease-in-out infinite;
@@ -1361,13 +1297,6 @@ a:focus {
 	}
 }
 
-/* Sin soporte de backdrop-filter: tarjetas con fondo sólido. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.pilar {
-		background: var(--color-vidrio);
-	}
-}
-
 /* ==========================================================================
    Portada — Proyectos
    ==========================================================================
@@ -1381,7 +1310,7 @@ a:focus {
    independientes generan una costura visible en el borde.
    ========================================================================== */
 .portada-proyectos {
-	--proyectos-tarjeta-fondo: rgba(6, 13, 26, 0.55);
+	--proyectos-tarjeta-fondo: rgba(6, 13, 26, 0.8);
 	--proyectos-tarjeta-borde: rgba(255, 255, 255, 0.12);
 	--proyectos-texto-tenue: rgba(255, 255, 255, 0.78);
 
@@ -1436,8 +1365,10 @@ a:focus {
 	background: var(--proyectos-tarjeta-fondo);
 	border: 1px solid var(--proyectos-tarjeta-borde);
 	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-	backdrop-filter: blur(20px) saturate(150%);
-	-webkit-backdrop-filter: blur(20px) saturate(150%);
+	/* Sin backdrop-filter: la tarjeta pasa sobre las esferas animadas del
+	   fondo fijo (ver .portada-oscura). El fondo semitransparente sube a
+	   0.8 (--proyectos-tarjeta-fondo) para compensar la falta de
+	   desenfoque. */
 	overflow: hidden;
 	transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
@@ -1585,13 +1516,6 @@ a:focus {
 	}
 }
 
-/* Sin soporte de backdrop-filter: tarjetas con fondo sólido. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.proyecto {
-		background: var(--color-vidrio);
-	}
-}
-
 /* --- Filtro de categorías (archivo de "proyectos" y archivos de
    categoría; ver template-parts/filtro-categorias-proyecto.php) ---
    Reutiliza --proyectos-tarjeta-fondo/--proyectos-tarjeta-borde (definidas
@@ -1617,8 +1541,9 @@ a:focus {
 	border-radius: 999px;
 	border: 1px solid var(--proyectos-tarjeta-borde);
 	background: var(--proyectos-tarjeta-fondo);
-	backdrop-filter: blur(12px);
-	-webkit-backdrop-filter: blur(12px);
+	/* Sin backdrop-filter: la pastilla pasa sobre las esferas animadas del
+	   fondo fijo (ver .portada-oscura). Usa el mismo fondo al 0.8 de las
+	   tarjetas (--proyectos-tarjeta-fondo). */
 	color: var(--proyectos-texto-tenue);
 	font-size: 0.875rem;
 	font-weight: 600;
@@ -1646,13 +1571,6 @@ a:focus {
 @media (prefers-reduced-motion: reduce) {
 	.filtro-categoria-enlace {
 		transition: none;
-	}
-}
-
-/* Sin soporte de backdrop-filter: pastillas con fondo sólido. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.filtro-categoria-enlace {
-		background: var(--color-vidrio);
 	}
 }
 
@@ -1709,12 +1627,6 @@ a:focus {
 	}
 }
 
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.proyectos-paginacion .page-numbers {
-		background: var(--color-vidrio);
-	}
-}
-
 /* ==========================================================================
    Portada — Sobre mí
    ==========================================================================
@@ -1743,7 +1655,7 @@ a:focus {
 }
 
 .sobre-mi-tarjeta {
-	--sobre-mi-tarjeta-fondo: rgba(6, 13, 26, 0.55);
+	--sobre-mi-tarjeta-fondo: rgba(6, 13, 26, 0.8);
 	--sobre-mi-tarjeta-borde: rgba(255, 255, 255, 0.12);
 
 	position: relative;
@@ -1756,8 +1668,10 @@ a:focus {
 	background: var(--sobre-mi-tarjeta-fondo);
 	border: 1px solid var(--sobre-mi-tarjeta-borde);
 	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
-	backdrop-filter: blur(20px) saturate(150%);
-	-webkit-backdrop-filter: blur(20px) saturate(150%);
+	/* Sin backdrop-filter: la tarjeta pasa sobre las esferas animadas del
+	   fondo fijo (ver .portada-oscura). El fondo semitransparente sube a
+	   0.8 (--sobre-mi-tarjeta-fondo) para compensar la falta de
+	   desenfoque. */
 	padding: clamp(1.75rem, 4vw, 3rem);
 }
 
@@ -1782,7 +1696,9 @@ a:focus {
 	   transform/opacity). El pulso ahora lo da transform: scale() más
 	   abajo, que sí compone en la GPU sin repintar. De paso, con
 	   movimiento reducido (animation:none) el resplandor ya no desaparece
-	   del todo como antes —queda fijo en este valor—, en vez de perderse. */
+	   del todo como antes —queda fijo en este valor—, en vez de perderse.
+	   Arranca pausada y solo corre mientras hay interacción, igual que las
+	   esferas (ver .ambiente-activo). */
 	box-shadow: 0 0 40px var(--sobre-mi-foto-resplandor-a);
 	animation: sobre-mi-foto-brillo 3s ease-in-out infinite;
 }
@@ -1840,13 +1756,6 @@ a:focus {
 	}
 }
 
-/* Sin soporte de backdrop-filter: tarjeta con fondo sólido. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.sobre-mi-tarjeta {
-		background: var(--color-vidrio);
-	}
-}
-
 /* ==========================================================================
    Portada — Contacto
    ==========================================================================
@@ -1866,7 +1775,7 @@ a:focus {
 }
 
 .contacto-tarjeta {
-	--contacto-tarjeta-fondo: rgba(6, 13, 26, 0.55);
+	--contacto-tarjeta-fondo: rgba(6, 13, 26, 0.8);
 	--contacto-tarjeta-borde: rgba(255, 255, 255, 0.14);
 
 	position: relative;
@@ -1879,8 +1788,10 @@ a:focus {
 	background: var(--contacto-tarjeta-fondo);
 	border: 1px solid var(--contacto-tarjeta-borde);
 	box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
-	backdrop-filter: blur(24px) saturate(160%);
-	-webkit-backdrop-filter: blur(24px) saturate(160%);
+	/* Sin backdrop-filter: la tarjeta pasa sobre las esferas animadas del
+	   fondo fijo (ver .portada-oscura). El fondo semitransparente sube a
+	   0.8 (--contacto-tarjeta-fondo) para compensar la falta de
+	   desenfoque. */
 	padding: clamp(2.25rem, 5vw, 3.5rem);
 }
 
@@ -2092,13 +2003,6 @@ a:focus {
 	box-shadow: 0 0 0 3px var(--color-alerta-fondo);
 }
 
-/* Sin soporte de backdrop-filter: tarjeta con fondo sólido. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.contacto-tarjeta {
-		background: var(--color-vidrio);
-	}
-}
-
 /* ==========================================================================
    Redes sociales
    ==========================================================================
@@ -2226,12 +2130,14 @@ a:focus {
 	transform: translateY(-50%);
 	padding: 0.75rem 0.5rem;
 	border-radius: 0 1rem 1rem 0;
-	background: rgba(6, 13, 26, 0.55);
+	background: rgba(6, 13, 26, 0.85);
 	border: 1px solid rgba(255, 255, 255, 0.12);
 	border-left: 0;
 	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-	backdrop-filter: blur(20px) saturate(150%);
-	-webkit-backdrop-filter: blur(20px) saturate(150%);
+	/* Sin backdrop-filter: la barra es fija y queda siempre sobre las
+	   esferas animadas del fondo fijo (ver .portada-oscura). Fondo casi
+	   opaco (0.85) en su lugar: al ser fija no hay forma de reposicionarla
+	   para evitar el solape. */
 }
 
 .redes-sociales--flotante .redes-sociales-lista {
@@ -2259,12 +2165,6 @@ a:focus {
 
 	.redes-sociales--flotante .redes-sociales-lista {
 		flex-direction: row;
-	}
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.redes-sociales--flotante {
-		background: var(--color-vidrio);
 	}
 }
 
@@ -2360,15 +2260,16 @@ a:focus {
 
 /* --- Tarjeta de vidrio: contenido de la entrada + detalles --- */
 .proyecto-single-panel {
-	--panel-fondo: rgba(6, 13, 26, 0.55);
+	--panel-fondo: rgba(6, 13, 26, 0.8);
 	--panel-borde: rgba(255, 255, 255, 0.12);
 
 	border-radius: 1.5rem;
 	background: var(--panel-fondo);
 	border: 1px solid var(--panel-borde);
 	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
-	backdrop-filter: blur(20px) saturate(150%);
-	-webkit-backdrop-filter: blur(20px) saturate(150%);
+	/* Sin backdrop-filter: la tarjeta pasa sobre las esferas animadas del
+	   fondo fijo (ver .portada-oscura). El fondo semitransparente sube a
+	   0.8 (--panel-fondo) para compensar la falta de desenfoque. */
 	padding: clamp(1.75rem, 5vw, 2.75rem);
 }
 
@@ -2499,13 +2400,6 @@ a:focus {
 	text-decoration: underline;
 }
 
-/* Sin soporte de backdrop-filter: tarjeta con fondo sólido. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-	.proyecto-single-panel {
-		background: var(--color-vidrio);
-	}
-}
-
 /* ==========================================================================
    Mejora progresiva del color (oklch / color-mix)
    ==========================================================================
@@ -2534,14 +2428,14 @@ a:focus {
 		--color-acento-purpura: oklch(66% 0.17 285);
 	}
 
-	/* Tonos de contraste de las esferas --10/11/12: no derivan de ningún
+	/* Tonos de contraste de las esferas: no derivan de ningún
 	   --color-* de :root, así que aquí van como literales oklch() (con
 	   alfa) en vez de color-mix(). */
 	.portada-oscura {
-		--hero-forma-ambar: oklch(76% 0.17 70 / 0.55);
-		--hero-forma-cian: oklch(80% 0.14 200 / 0.5);
-		--hero-forma-rosa: oklch(62% 0.21 350 / 0.5);
-		--hero-forma-esmeralda: oklch(74% 0.18 152 / 0.5);
+		--fondo-esfera-ambar: oklch(76% 0.17 70 / 0.55);
+		--fondo-esfera-cian: oklch(80% 0.14 200 / 0.5);
+		--fondo-esfera-rosa: oklch(62% 0.21 350 / 0.5);
+		--fondo-esfera-esmeralda: oklch(74% 0.18 152 / 0.5);
 	}
 }
 
@@ -2560,9 +2454,8 @@ a:focus {
 	}
 
 	.sitio-cabecera {
-		/* Ver comentario en .sitio-cabecera (arriba): 90% de opacidad, no el
-		   62% de --hero-vidrio, porque en reposo no hay nada detrás que el
-		   backdrop-filter pueda desenfocar. */
+		/* Ver comentario en .sitio-cabecera (arriba): 90% de opacidad, sin
+		   backdrop-filter. */
 		--cabecera-fondo: linear-gradient(
 			135deg,
 			color-mix(in srgb, var(--color-vidrio) 90%, transparent),
@@ -2575,18 +2468,18 @@ a:focus {
 	}
 
 	.portada-oscura {
-		--hero-forma-azul: color-mix(in oklab, var(--color-primario) 60%, transparent);
-		--hero-forma-violeta: color-mix(in oklab, var(--color-acento-violeta) 60%, transparent);
-		--hero-forma-lavanda: color-mix(in oklab, var(--color-acento-lavanda) 55%, transparent);
-		--hero-forma-purpura: color-mix(in oklab, var(--color-acento-purpura) 55%, transparent);
+		--fondo-esfera-azul: color-mix(in oklab, var(--color-primario) 60%, transparent);
+		--fondo-esfera-violeta: color-mix(in oklab, var(--color-acento-violeta) 60%, transparent);
+		--fondo-esfera-lavanda: color-mix(in oklab, var(--color-acento-lavanda) 55%, transparent);
+		--fondo-esfera-purpura: color-mix(in oklab, var(--color-acento-purpura) 55%, transparent);
 	}
 
 	.portada-hero {
-		--hero-vidrio: color-mix(in srgb, var(--color-vidrio) 62%, transparent);
+		--hero-vidrio: color-mix(in srgb, var(--color-vidrio) 80%, transparent);
 		--hero-texto-tenue: color-mix(in srgb, var(--color-fondo) 78%, transparent);
 		--hero-resplandor-a: color-mix(in oklab, var(--color-primario) 40%, transparent);
 		--hero-resplandor-b: color-mix(in oklab, var(--color-acento-violeta) 28%, transparent);
-		--hero-eco-fondo: color-mix(in srgb, var(--color-vidrio-trasero) 58%, transparent);
+		--hero-eco-fondo: color-mix(in srgb, var(--color-vidrio-trasero) 75%, transparent);
 		--hero-eco-borde: color-mix(in srgb, var(--color-acento-lavanda) 65%, var(--color-fondo));
 		--hero-eco-resplandor: color-mix(in oklab, var(--color-acento-purpura) 42%, transparent);
 		--hero-vineta-a: color-mix(in srgb, var(--color-texto) 32%, transparent);
@@ -2595,7 +2488,7 @@ a:focus {
 	}
 
 	.portada-pilares {
-		--pilares-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 55%, transparent);
+		--pilares-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 80%, transparent);
 	}
 
 	.pilar-wordpress {
@@ -2617,7 +2510,7 @@ a:focus {
 	}
 
 	.portada-proyectos {
-		--proyectos-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 55%, transparent);
+		--proyectos-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 80%, transparent);
 	}
 
 	.proyecto:nth-child(3n+1) {
@@ -2633,7 +2526,7 @@ a:focus {
 	}
 
 	.sobre-mi-tarjeta {
-		--sobre-mi-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 55%, transparent);
+		--sobre-mi-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 80%, transparent);
 	}
 
 	.sobre-mi-foto {
@@ -2642,11 +2535,11 @@ a:focus {
 	}
 
 	.contacto-tarjeta {
-		--contacto-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 55%, transparent);
+		--contacto-tarjeta-fondo: color-mix(in srgb, var(--color-vidrio) 80%, transparent);
 	}
 
 	.proyecto-single-panel {
-		--panel-fondo: color-mix(in srgb, var(--color-vidrio) 55%, transparent);
+		--panel-fondo: color-mix(in srgb, var(--color-vidrio) 80%, transparent);
 	}
 }
 
@@ -2672,6 +2565,12 @@ a:focus {
 	--pie-borde: rgba(151, 152, 249, 0.5);
 	--pie-resplandor: 0 -10px 28px rgba(3, 7, 17, 0.35), 0 -1px 36px rgba(151, 152, 249, 0.16);
 
+	/* position:relative (sin z-index): el fondo de esferas es una capa fija
+	   con z-index:0 (ver .portada-oscura-fondo), y un bloque sin posicionar
+	   se pinta por debajo de ella, así que las esferas asomarían sobre el
+	   pie. Posicionado y después en el DOM, el pie se pinta encima y su
+	   fondo opaco las tapa. */
+	position: relative;
 	background-color: var(--pie-fondo);
 	border-top: 1px solid var(--pie-borde);
 	box-shadow: var(--pie-resplandor);
