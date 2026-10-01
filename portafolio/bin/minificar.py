@@ -19,10 +19,50 @@ edite style.css o algún js/*.js. Los *.min.* generados quedan versionados
 en el repo (functions.php encola esos, no los fuentes) — si cambia el
 minificador, hay que volver a correrlo y commitear la salida nueva.
 """
+import argparse
 import re
 import os
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Reglas @ cuyo bloque contiene reglas (selector { ... }), no declaraciones.
+AT_AGRUPADORAS = re.compile(
+    r"@(-[a-z]+-)?(media|supports|container|layer|keyframes|scope|"
+    r"document|starting-style)\b"
+)
+# Reglas @ cuyo preludio lleva condiciones "(propiedad: valor)".
+AT_CON_CONDICION = re.compile(r"@(media|supports|container)\b")
+
+
+def _quitar_espacios_dos_puntos(css):
+    """Quita espacios alrededor de ":" solo en declaraciones (color: red) y
+    en preludios de @media/@supports/@container, nunca en selectores.
+    Espera el CSS ya compactado y con las cadenas protegidas (\\0N\\0)."""
+    def _quitar(texto):
+        return re.sub(r"\s*:\s*", ":", texto)
+
+    # Pila de bloques abiertos: True si el bloque contiene declaraciones
+    # (regla normal, @font-face...), False si contiene reglas (@media...).
+    pila = []
+    partes = re.split(r"([{};])", css)
+    for i in range(0, len(partes), 2):
+        texto = partes[i]
+        delimitador = partes[i + 1] if i + 1 < len(partes) else ""
+        if delimitador == "{":
+            # Preludio: selector o regla @.
+            if texto.startswith("@"):
+                if AT_CON_CONDICION.match(texto):
+                    texto = _quitar(texto)
+                pila.append(not AT_AGRUPADORAS.match(texto))
+            else:
+                pila.append(True)
+        elif pila and pila[-1]:
+            # Declaración (termina en ";" o en el "}" de su bloque).
+            texto = _quitar(texto)
+        if delimitador == "}" and pila:
+            pila.pop()
+        partes[i] = texto
+    return "".join(partes)
 
 
 def minificar_css(src):
@@ -44,11 +84,15 @@ def minificar_css(src):
     compacto = re.sub(r"\s+", " ", protegido).strip()
 
     # 4) Quitar espacios alrededor de los delimitadores donde no hacen falta.
-    compacto = re.sub(r"\s*([{}:;,>])\s*", r"\1", compacto)
+    compacto = re.sub(r"\s*([{};,>])\s*", r"\1", compacto)
     # Excepción: un espacio SÍ es significativo en selectores descendientes
     # ("a b") y en valores con varios términos (p. ej. "1px solid red") — el
     # regex anterior no toca esos espacios porque no están pegados a los
-    # delimitadores {, }, :, ;, ,, >.
+    # delimitadores {, }, ;, ,, >.
+    # ":" va aparte: en un selector, el espacio antes de ":" es el
+    # combinador descendiente (".menu :hover" ≠ ".menu:hover"), así que solo
+    # se quita dentro de declaraciones y de condiciones (min-width: 600px).
+    compacto = _quitar_espacios_dos_puntos(compacto)
 
     # 5) Punto y coma sobrante justo antes de "}".
     compacto = re.sub(r";}", "}", compacto)
@@ -113,6 +157,13 @@ def escribir_si_cambia(ruta, contenido):
 
 
 def main():
+    # Sin argumentos propios: argparse solo aporta --help (muestra el uso
+    # y sale sin regenerar nada) y rechaza opciones desconocidas.
+    argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    ).parse_args()
+
     origen_css = os.path.join(RAIZ, "style.css")
     destino_css = os.path.join(RAIZ, "style.min.css")
     src = open(origen_css, encoding="utf-8").read()
