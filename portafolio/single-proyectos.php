@@ -7,7 +7,7 @@
  * portafolio_obtener_categorias_proyecto() en functions.php) y contexto
  * del proyecto (personal o cliente/empresa), imagen destacada, contenido
  * completo dentro de una tarjeta de vidrio, y las tecnologías usadas y el
- * enlace a repositorio/demo cuando existen.
+ * enlace al sitio en vivo cuando existen.
  *
  * @package Portafolio
  */
@@ -125,7 +125,7 @@ while ( have_posts() ) :
 							<?php if ( $portafolio_enlace_repo_demo ) : ?>
 								<p class="proyecto-single-enlace">
 									<a class="boton boton-primario" href="<?php echo esc_url( $portafolio_enlace_repo_demo ); ?>" target="_blank" rel="noopener noreferrer">
-										<?php esc_html_e( 'Ver repositorio / demo', 'portafolio' ); ?>
+										<?php esc_html_e( 'Visitar sitio', 'portafolio' ); ?>
 									</a>
 								</p>
 							<?php endif; ?>

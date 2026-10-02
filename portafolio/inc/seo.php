@@ -329,7 +329,7 @@ add_action( 'wp_head', 'portafolio_datos_estructurados_home' );
  * JSON-LD de cada proyecto: CreativeWork con nombre, descripción (misma que
  * portafolio_meta_descripcion(), como única fuente de verdad), las
  * tecnologías reales del checkbox de ACF como "keywords", el enlace real
- * del proyecto como "url" (repositorio/demo si existe, si no el permalink)
+ * del proyecto como "url" (sitio en vivo si existe, si no el permalink)
  * y, cuando el proyecto es de cliente y tiene nombre_cliente, una
  * referencia al cliente vía "sourceOrganization" (la propiedad de
  * schema.org para "la organización para la que se hizo el trabajo").

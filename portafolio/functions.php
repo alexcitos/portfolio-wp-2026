@@ -880,10 +880,10 @@ function portafolio_registrar_campos_detalles_proyecto() {
 				),
 				array(
 					'key'          => 'field_dp_enlace_repositorio_demo',
-					'label'        => __( 'Enlace a repositorio o demo', 'portafolio' ),
+					'label'        => __( 'Enlace al sitio', 'portafolio' ),
 					'name'         => 'enlace_repositorio_demo',
 					'type'         => 'url',
-					'instructions' => __( 'Para proyectos sin sitio público (p. ej. automatizaciones de n8n), puede apuntar a un repositorio de GitHub con el JSON exportado del workflow.', 'portafolio' ),
+					'instructions' => __( 'URL del sitio en vivo. El repositorio, si existe, va como enlace dentro del contenido.', 'portafolio' ),
 				),
 				array(
 					'key'           => 'field_dp_contexto_proyecto',
