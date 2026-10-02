@@ -166,7 +166,7 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 		</section>
 
 		<?php // -----------------------------------------------------------
-			// Proyectos destacados (últimos 4 del CPT "proyectos"): tercera
+			// Proyectos destacados (hasta 6 del CPT "proyectos"): tercera
 			// sección dentro de la misma zona oscura que Hero y Pilares. Sin
 			// fondo ni esferas propias —usa las de .portada-oscura-fondo—;
 			// debe quedar anidada aquí, no como hermana suelta después de
@@ -182,10 +182,18 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 				</div>
 
 				<?php
-				$proyectos_destacados = new WP_Query(
+				// Hasta 6: primero los marcados como destacados y el resto
+				// con los más recientes (ver portafolio_ids_proyectos_portada()
+				// en functions.php). orderby post__in respeta ese orden; con
+				// la lista vacía se pasa array( 0 ), porque un post__in vacío
+				// haría que WP_Query ignore el filtro y devuelva todo.
+				$portafolio_ids_proyectos = portafolio_ids_proyectos_portada( 6 );
+				$proyectos_destacados     = new WP_Query(
 					array(
 						'post_type'           => 'proyectos',
-						'posts_per_page'      => 4,
+						'post__in'            => $portafolio_ids_proyectos ? $portafolio_ids_proyectos : array( 0 ),
+						'orderby'             => 'post__in',
+						'posts_per_page'      => count( $portafolio_ids_proyectos ),
 						'ignore_sticky_posts' => true,
 						'no_found_rows'       => true,
 					)

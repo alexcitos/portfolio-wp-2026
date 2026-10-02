@@ -1357,6 +1357,43 @@ html:not(.ambiente-activo) .sobre-mi-foto {
 	padding: 0;
 }
 
+/* Portada: misma rejilla, pero con flex-wrap para poder centrar una última
+   fila incompleta (una grid con auto-fit no puede centrar las celdas de la
+   última fila). Las columnas replican las de la grid de arriba: caben n
+   columnas de 17.5rem + gap de 2rem (--espacio-lg) cuando el contenedor
+   mide al menos n × 17.5rem + (n − 1) × 2rem, o sea 37rem para 2 y 56.5rem
+   para 3 (el tope de --ancho-contenido, 70rem, no deja llegar a 4). Así el
+   ancho de cada tarjeta y el "sizes" de su imagen (ver
+   template-parts/tarjeta-proyecto.php) coinciden con los de /proyectos/.
+   Los valores de @container van en rem fijos porque ahí no se admite var().
+   align-items: stretch (el valor por defecto) iguala el alto de las
+   tarjetas de cada fila. */
+.portada .proyectos-contenedor {
+	container-type: inline-size;
+}
+
+.portada .proyectos-lista {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.portada .proyecto {
+	flex: 0 0 100%;
+}
+
+@container (min-width: 37rem) {
+	.portada .proyecto {
+		flex-basis: calc((100% - var(--espacio-lg)) / 2);
+	}
+}
+
+@container (min-width: 56.5rem) {
+	.portada .proyecto {
+		flex-basis: calc((100% - 2 * var(--espacio-lg)) / 3);
+	}
+}
+
 .proyecto {
 	position: relative;
 	display: flex;
@@ -1426,9 +1463,14 @@ html:not(.ambiente-activo) .sobre-mi-foto {
 	transform: scale(1.05);
 }
 
+/* flex-grow: el bloque de texto ocupa todo el alto que le deja la imagen
+   dentro de la tarjeta, que la fila ya estira al alto de la más alta (sin
+   esto, el contenido de una tarjeta con título o extracto más corto
+   terminaba antes del borde). */
 .proyecto-contenido {
 	position: relative;
 	z-index: 1;
+	flex-grow: 1;
 	display: flex;
 	flex-direction: column;
 	gap: 0.6rem;

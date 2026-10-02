@@ -350,6 +350,62 @@ function portafolio_obtener_categorias_proyecto( $post_id ) {
 }
 
 /**
+ * IDs de los proyectos de la portada, en el orden en que se muestran:
+ * primero los marcados con "Mostrar en la portada" (campo ACF
+ * destacado_portada), del más reciente al más antiguo; si no llegan al
+ * máximo, se completa con los más recientes no marcados, sin repetir.
+ *
+ * Dos consultas livianas (solo IDs, sin paginación ni cachés de meta y
+ * términos): front-page.php hace después una única consulta completa con
+ * post__in para el Loop de las tarjetas.
+ *
+ * @param int $maximo Cantidad máxima de proyectos.
+ * @return int[] IDs ordenados; vacío si no hay proyectos publicados.
+ */
+function portafolio_ids_proyectos_portada( $maximo = 6 ) {
+	$argumentos_base = array(
+		'post_type'              => 'proyectos',
+		'post_status'            => 'publish',
+		'fields'                 => 'ids',
+		'orderby'                => 'date',
+		'order'                  => 'DESC',
+		'ignore_sticky_posts'    => true,
+		'no_found_rows'          => true,
+		'update_post_meta_cache' => false,
+		'update_post_term_cache' => false,
+	);
+
+	// ACF guarda el true_false como '1' (marcado) o '0'; los proyectos
+	// creados antes de existir el campo no tienen la meta y quedan fuera.
+	$destacados = new WP_Query(
+		array_merge(
+			$argumentos_base,
+			array(
+				'posts_per_page' => $maximo,
+				'meta_key'       => 'destacado_portada',
+				'meta_value'     => '1',
+			)
+		)
+	);
+	$ids = array_map( 'intval', $destacados->posts );
+
+	if ( count( $ids ) < $maximo ) {
+		$relleno = new WP_Query(
+			array_merge(
+				$argumentos_base,
+				array(
+					'posts_per_page' => $maximo - count( $ids ),
+					'post__not_in'   => $ids,
+				)
+			)
+		);
+		$ids = array_merge( $ids, array_map( 'intval', $relleno->posts ) );
+	}
+
+	return $ids;
+}
+
+/**
  * Registra por código el grupo de campos "Datos del sitio".
  *
  * Contenido único y global del sitio (identidad, contacto, biografía). No
@@ -802,6 +858,18 @@ function portafolio_registrar_campos_detalles_proyecto() {
 					'choices'      => wp_list_pluck( portafolio_catalogo_iconos_tecnologia(), 'nombre' ),
 					'layout'       => 'horizontal',
 					'instructions' => __( 'Se muestran como insignias con icono en la ficha del proyecto. Para tecnologías sin logo de marca (p. ej. "DNS"), usa el campo de texto de abajo.', 'portafolio' ),
+				),
+				array(
+					// Leído por portafolio_ids_proyectos_portada(): los marcados
+					// van primero en la portada y el resto se completa con los
+					// más recientes.
+					'key'           => 'field_dp_destacado_portada',
+					'label'         => __( 'Mostrar en la portada', 'portafolio' ),
+					'name'          => 'destacado_portada',
+					'type'          => 'true_false',
+					'default_value' => 0,
+					'ui'            => 1,
+					'instructions'  => __( 'Hasta 6 proyectos marcados aparecen en la portada.', 'portafolio' ),
 				),
 				array(
 					'key'          => 'field_dp_tecnologias_otras',
