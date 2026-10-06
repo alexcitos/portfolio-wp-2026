@@ -28,6 +28,10 @@ require get_template_directory() . '/inc/seo.php';
 // inc/ (por ahora, desactivar la detección de emojis de núcleo).
 require get_template_directory() . '/inc/rendimiento.php';
 
+// Privacidad de usuarios: que un visitante no pueda descubrir el nombre de
+// usuario de WordPress (REST, archivos de autor, sitemaps y oEmbed).
+require get_template_directory() . '/inc/privacidad.php';
+
 /**
  * Soporte de características del tema.
  */
