@@ -32,6 +32,11 @@ require get_template_directory() . '/inc/rendimiento.php';
 // usuario de WordPress (REST, archivos de autor, sitemaps y oEmbed).
 require get_template_directory() . '/inc/privacidad.php';
 
+// Ajustes generales del sitio: el blog nativo no se usa (sus archivos
+// redirigen a la portada y salen de los sitemaps) y las contraseñas de
+// aplicación quedan desactivadas.
+require get_template_directory() . '/inc/sitio.php';
+
 /**
  * Soporte de características del tema.
  */

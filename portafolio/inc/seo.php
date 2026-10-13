@@ -263,6 +263,7 @@ function portafolio_favicon_enlaces() {
 	<link rel="icon" href="<?php echo esc_url( $base . 'favicon.ico' ); ?>" sizes="any">
 	<link rel="icon" type="image/png" sizes="16x16" href="<?php echo esc_url( $base . 'favicon-16x16.png' ); ?>">
 	<link rel="icon" type="image/png" sizes="32x32" href="<?php echo esc_url( $base . 'favicon-32x32.png' ); ?>">
+	<link rel="icon" type="image/png" sizes="48x48" href="<?php echo esc_url( $base . 'favicon-48x48.png' ); ?>">
 	<link rel="icon" type="image/png" sizes="192x192" href="<?php echo esc_url( $base . 'icon-192.png' ); ?>">
 	<link rel="apple-touch-icon" href="<?php echo esc_url( $base . 'apple-touch-icon.png' ); ?>">
 	<link rel="manifest" href="<?php echo esc_url( get_template_directory_uri() . '/site.webmanifest' ); ?>">
@@ -308,12 +309,15 @@ function portafolio_datos_estructurados_home() {
 	}
 
 	$sitio = array(
-		'@type'      => 'WebSite',
-		'@id'        => home_url( '/#sitio' ),
-		'name'       => 'Portafolio Alex Rodríguez',
-		'url'        => home_url( '/' ),
-		'inLanguage' => 'es',
-		'publisher'  => array( '@id' => home_url( '/#persona' ) ),
+		'@type'         => 'WebSite',
+		'@id'           => home_url( '/#sitio' ),
+		'name'          => 'Portafolio Alex Rodríguez',
+		// Nombres alternativos que Google puede usar como "nombre del sitio"
+		// en los resultados si no elige el principal.
+		'alternateName' => array( 'Alex Rodríguez P.', 'alexrope.dev' ),
+		'url'           => home_url( '/' ),
+		'inLanguage'    => 'es',
+		'publisher'     => array( '@id' => home_url( '/#persona' ) ),
 	);
 
 	$datos = array(

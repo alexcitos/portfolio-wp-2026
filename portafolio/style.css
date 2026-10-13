@@ -1,9 +1,10 @@
 /*
 Theme Name: Portafolio
-Theme URI: https://github.com/alitos-rope/tema-portafolio
-Author: Alex Rodriguez
-Description: Tema de WordPress construido 100% desde cero, sin page builders, como pieza de portafolio.
-Version: 0.1.0
+Theme URI: https://github.com/alexcitos/portfolio-wp-2026
+Author: Alex Rodríguez P.
+Author URI: https://alexrope.dev
+Description: Tema de portafolio construido 100% desde cero, sin page builders: tipo de contenido propio para proyectos con su taxonomía, campos de ACF definidos en código, SEO técnico sin plugins con datos estructurados JSON-LD y CSS/JS minificados.
+Version: 0.2.0
 Requires at least: 6.0
 Requires PHP: 8.1
 License: GNU General Public License v2 or later
