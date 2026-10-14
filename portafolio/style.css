@@ -2354,6 +2354,19 @@ html:not(.ambiente-activo) .sobre-mi-foto {
 	border-radius: 0.75rem;
 }
 
+/* Videos del editor (bloque Vídeo): una grabación vertical de celular no
+   debe ocupar más alto que la pantalla. Se limita la altura y el ancho se
+   ajusta solo, manteniendo la proporción; los videos horizontales llegan
+   antes al ancho máximo, así que no cambian. */
+.proyecto-single-contenido .wp-block-video video {
+	display: block;
+	width: auto;
+	max-width: 100%;
+	max-height: min(70vh, 36rem);
+	margin-inline: auto;
+	border-radius: 0.75rem;
+}
+
 .proyecto-single-contenido blockquote {
 	margin: 0;
 	padding-left: 1.25rem;
