@@ -1980,6 +1980,15 @@ html:not(.ambiente-activo) .sobre-mi-foto {
 	align-self: flex-start;
 }
 
+/* Aviso de transparencia bajo el botón (uso de IA en el formulario):
+   letra pequeña y tono tenue, para informar sin competir con el botón. */
+.formulario-nota {
+	margin: 0;
+	font-size: 0.8125rem;
+	line-height: 1.5;
+	color: rgba(255, 255, 255, 0.6);
+}
+
 /* Botón mientras se envía (ver js/formulario-contacto.js): deshabilitado
    para evitar doble envío, con la misma opacidad reducida que el resto del
    sitio usa para estados inactivos. */

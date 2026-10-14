@@ -374,6 +374,12 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 						<span class="formulario-campo-error" id="contacto-mensaje-error"></span>
 					</p>
 					<button type="submit" class="boton boton-primario">Enviar mensaje</button>
+					<?php
+					// Aviso de transparencia: el mensaje pasa por una automatización
+					// (n8n + Gemini) que lo clasifica y envía un acuse de recibo. Ver
+					// portafolio_enviar_lead_a_n8n() en functions.php.
+					?>
+					<p class="formulario-nota"><?php esc_html_e( 'Tu mensaje se procesa con herramientas de IA para clasificarlo y enviarte un acuse de recibo. Siempre te responderé personalmente.', 'portafolio' ); ?></p>
 				</form>
 
 			</div>
