@@ -234,6 +234,29 @@ function portafolio_assets() {
 add_action( 'wp_enqueue_scripts', 'portafolio_assets' );
 
 /**
+ * Enlaces del menú principal que son solo un ancla ("#contacto",
+ * "#proyectos"…): se convierten en anclas de la portada ("/#contacto").
+ *
+ * En el menú (Apariencia → Menús) las secciones se enlazan como "#id". En
+ * la portada eso funciona, pero en cualquier otra página (fichas de
+ * proyecto, Privacidad, Cookies) "#contacto" apuntaba a una sección que no
+ * existe en esa página y el clic no hacía nada. Con la URL completa de la
+ * portada, desde otra página el navegador va a la portada y baja a la
+ * sección; en la propia portada js/scroll-suave.js sigue interceptando el
+ * clic (misma ruta) y hace el desplazamiento suave como antes.
+ *
+ * @param array $atributos Atributos del <a> del elemento de menú.
+ * @return array
+ */
+function portafolio_menu_anclas_a_portada( $atributos ) {
+	if ( isset( $atributos['href'] ) && 0 === strpos( $atributos['href'], '#' ) && strlen( $atributos['href'] ) > 1 ) {
+		$atributos['href'] = home_url( '/' ) . $atributos['href'];
+	}
+	return $atributos;
+}
+add_filter( 'nav_menu_link_attributes', 'portafolio_menu_anclas_a_portada' );
+
+/**
  * Registra el Custom Post Type "proyectos".
  */
 function portafolio_registrar_cpt_proyectos() {
