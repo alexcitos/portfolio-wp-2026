@@ -373,13 +373,26 @@ $portafolio_telefono_whatsapp = preg_replace( '/[^0-9]/', '', $portafolio_telefo
 						<textarea id="contacto-mensaje" name="contacto_mensaje" rows="4" placeholder="Mensaje" aria-describedby="contacto-mensaje-error" required></textarea>
 						<span class="formulario-campo-error" id="contacto-mensaje-error"></span>
 					</p>
+					<?php // Autorización de tratamiento de datos (Ley 1581 / RGPD):
+						// casilla desmarcada y obligatoria, validada en
+						// js/formulario-contacto.js y otra vez en el servidor
+						// (portafolio_ajax_enviar_contacto()). Incluye el aviso de que
+						// el mensaje pasa por IA (n8n + Gemini, ver
+						// portafolio_enviar_lead_a_n8n()). ?>
+					<p class="formulario-campo formulario-campo--casilla">
+						<input type="checkbox" id="contacto-autorizacion" name="contacto_autorizacion" value="1" aria-describedby="contacto-autorizacion-error" required>
+						<label for="contacto-autorizacion">
+							<?php
+							printf(
+								/* translators: %s: enlace a la Política de tratamiento de datos. */
+								esc_html__( 'Autorizo el tratamiento de mis datos según la %s, incluido su procesamiento con herramientas de IA para clasificar mi mensaje y enviarme un acuse de recibo.', 'portafolio' ),
+								'<a href="' . esc_url( portafolio_url_politica_datos() ) . '" target="_blank" rel="noopener">' . esc_html__( 'Política de tratamiento de datos', 'portafolio' ) . '</a>'
+							);
+							?>
+						</label>
+						<span class="formulario-campo-error" id="contacto-autorizacion-error"></span>
+					</p>
 					<button type="submit" class="boton boton-primario">Enviar mensaje</button>
-					<?php
-					// Aviso de transparencia: el mensaje pasa por una automatización
-					// (n8n + Gemini) que lo clasifica y envía un acuse de recibo. Ver
-					// portafolio_enviar_lead_a_n8n() en functions.php.
-					?>
-					<p class="formulario-nota"><?php esc_html_e( 'Tu mensaje se procesa con herramientas de IA para clasificarlo y enviarte un acuse de recibo. Siempre te responderé personalmente.', 'portafolio' ); ?></p>
 				</form>
 
 			</div>

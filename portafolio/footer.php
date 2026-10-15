@@ -70,8 +70,35 @@ if ( $portafolio_pie_mostrar_contador && $portafolio_pie_tokens_actualizado ) {
 				?>
 			</p>
 		<?php endif; ?>
+
+		<?php // Enlaces legales. "Preferencias de cookies" es un botón: no
+			// navega, vuelve a abrir el aviso (js/consentimiento-cookies.js). ?>
+		<nav class="sitio-pie-legal" aria-label="<?php esc_attr_e( 'Información legal', 'portafolio' ); ?>">
+			<a href="<?php echo esc_url( portafolio_url_politica_datos() ); ?>"><?php esc_html_e( 'Privacidad', 'portafolio' ); ?></a>
+			<a href="<?php echo esc_url( portafolio_url_politica_cookies() ); ?>"><?php esc_html_e( 'Cookies', 'portafolio' ); ?></a>
+			<button type="button" class="sitio-pie-legal-boton" data-abrir-cookies><?php esc_html_e( 'Preferencias de cookies', 'portafolio' ); ?></button>
+		</nav>
 	</div>
 </footer>
+
+<?php // Aviso de cookies: oculto por defecto (hidden); el JS lo muestra si
+	// el visitante aún no ha decidido. "Aceptar" y "Rechazar" con el mismo
+	// estilo a propósito (RGPD). ?>
+<div class="aviso-cookies" id="aviso-cookies" role="region" aria-label="<?php esc_attr_e( 'Aviso de cookies', 'portafolio' ); ?>" hidden>
+	<p class="aviso-cookies-texto">
+		<?php
+		printf(
+			/* translators: %s: enlace a la Política de cookies. */
+			esc_html__( 'Uso cookies de análisis (Google Analytics) para saber qué contenido interesa más. Solo se activan si las aceptas. %s', 'portafolio' ),
+			'<a href="' . esc_url( portafolio_url_politica_cookies() ) . '">' . esc_html__( 'Más información', 'portafolio' ) . '</a>'
+		);
+		?>
+	</p>
+	<div class="aviso-cookies-botones">
+		<button type="button" class="aviso-cookies-boton" data-consentimiento="rechazado"><?php esc_html_e( 'Rechazar', 'portafolio' ); ?></button>
+		<button type="button" class="aviso-cookies-boton" data-consentimiento="aceptado"><?php esc_html_e( 'Aceptar', 'portafolio' ); ?></button>
+	</div>
+</div>
 
 <?php wp_footer(); ?>
 </body>

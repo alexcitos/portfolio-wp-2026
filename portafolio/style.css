@@ -1980,13 +1980,43 @@ html:not(.ambiente-activo) .sobre-mi-foto {
 	align-self: flex-start;
 }
 
-/* Aviso de transparencia bajo el botón (uso de IA en el formulario):
-   letra pequeña y tono tenue, para informar sin competir con el botón. */
-.formulario-nota {
-	margin: 0;
+/* Casilla de autorización de datos: la casilla a la izquierda y el texto
+   legal en letra pequeña y tono tenue a la derecha; el error ocupa la fila
+   completa debajo. accent-color tiñe la casilla nativa con el azul del
+   botón sin reconstruirla a mano (sigue siendo accesible por teclado). */
+.formulario-campo--casilla {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 0.25rem 0.625rem;
+	align-items: start;
 	font-size: 0.8125rem;
 	line-height: 1.5;
-	color: rgba(255, 255, 255, 0.6);
+	color: rgba(255, 255, 255, 0.7);
+}
+
+.formulario-campo--casilla input[type="checkbox"] {
+	width: 1.125rem;
+	height: 1.125rem;
+	margin: 0.125rem 0 0;
+	accent-color: var(--color-primario);
+	cursor: pointer;
+}
+
+.formulario-campo--casilla label {
+	cursor: pointer;
+}
+
+.formulario-campo--casilla a {
+	color: var(--color-primario-claro);
+}
+
+.formulario-campo--casilla .formulario-campo-error {
+	grid-column: 1 / -1;
+}
+
+.formulario-campo--casilla input[aria-invalid="true"] {
+	outline: 2px solid var(--color-alerta);
+	outline-offset: 2px;
 }
 
 /* Botón mientras se envía (ver js/formulario-contacto.js): deshabilitado
@@ -2700,4 +2730,151 @@ html:not(.ambiente-activo) .sobre-mi-foto {
 			0 -10px 28px color-mix(in srgb, var(--color-fondo-oscuro) 35%, transparent),
 			0 -1px 36px color-mix(in oklab, var(--color-acento-lavanda) 16%, transparent);
 	}
+}
+
+/* ==========================================================================
+   Enlaces legales del pie y aviso de cookies
+   ========================================================================== */
+
+/* Fila de enlaces bajo la frase del pie: mismo tono tenue que
+   .sitio-pie-actualizado. "Preferencias de cookies" es un <button> (abre el
+   aviso, no navega) con aspecto de enlace para que la fila se lea igual. */
+.sitio-pie-legal {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.25rem 1.25rem;
+	margin-top: 1rem;
+	font-size: 0.75rem;
+}
+
+.sitio-pie-legal a,
+.sitio-pie-legal-boton {
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	color: rgba(255, 255, 255, 0.6);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	cursor: pointer;
+}
+
+.sitio-pie-legal a:hover,
+.sitio-pie-legal a:focus-visible,
+.sitio-pie-legal-boton:hover,
+.sitio-pie-legal-boton:focus-visible {
+	color: var(--color-fondo);
+}
+
+/* Aviso de cookies: tarjeta fija abajo, sobre todo el contenido (z-index
+   alto), con el mismo vidrio oscuro del pie. No es un modal: no bloquea la
+   página ni roba el foco, solo informa y pide una decisión. En pantallas
+   estrechas sube por encima del dock de redes flotante (ver
+   .redes-sociales--flotante). */
+.aviso-cookies {
+	position: fixed;
+	right: 1rem;
+	bottom: 1rem;
+	left: 1rem;
+	z-index: 1000;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem 1.25rem;
+	max-width: 46rem;
+	margin: 0 auto;
+	padding: 1rem 1.25rem;
+	border: 1px solid rgba(151, 152, 249, 0.5);
+	border-radius: 1rem;
+	background-color: var(--color-vidrio);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+	color: rgba(255, 255, 255, 0.82);
+}
+
+.aviso-cookies[hidden] {
+	display: none;
+}
+
+.aviso-cookies-texto {
+	flex: 1 1 18rem;
+	margin: 0;
+	font-size: 0.875rem;
+	line-height: 1.55;
+}
+
+.aviso-cookies-texto a {
+	color: var(--color-primario-claro);
+}
+
+.aviso-cookies-botones {
+	display: flex;
+	gap: 0.625rem;
+}
+
+/* "Aceptar" y "Rechazar" idénticos: mismo tamaño, color y peso (el RGPD
+   exige que rechazar sea tan fácil y visible como aceptar). */
+.aviso-cookies-boton {
+	padding: 0.625rem 1.25rem;
+	border: 1px solid var(--color-primario-claro);
+	border-radius: 0.625rem;
+	background-color: transparent;
+	font: inherit;
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--color-fondo);
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.aviso-cookies-boton:hover,
+.aviso-cookies-boton:focus-visible {
+	background-color: rgba(155, 188, 251, 0.15);
+}
+
+.aviso-cookies-boton:focus-visible {
+	outline: 2px solid var(--color-primario-claro);
+	outline-offset: 2px;
+}
+
+@media (max-width: 40rem) {
+	.aviso-cookies {
+		bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+	}
+
+	.aviso-cookies-botones {
+		width: 100%;
+	}
+
+	.aviso-cookies-boton {
+		flex: 1;
+	}
+}
+
+/* Tablas dentro del contenido de páginas y fichas (p. ej. la Política de
+   tratamiento de datos): bordes suaves sobre el vidrio oscuro y desplazamiento
+   horizontal en pantallas estrechas en vez de desbordar la tarjeta. */
+.proyecto-single-contenido .wp-block-table {
+	margin: 1.5rem 0;
+	overflow-x: auto;
+}
+
+.proyecto-single-contenido table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.9375rem;
+}
+
+.proyecto-single-contenido th,
+.proyecto-single-contenido td {
+	padding: 0.625rem 0.75rem;
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	text-align: left;
+	vertical-align: top;
+}
+
+.proyecto-single-contenido th {
+	background-color: rgba(255, 255, 255, 0.06);
+	color: var(--color-fondo);
 }

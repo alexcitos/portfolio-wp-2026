@@ -42,6 +42,12 @@
 	 * @return {string}
 	 */
 	function obtenerErrorCampo( campo ) {
+		// Casilla de autorización de datos: obligatoria (mismo texto que
+		// devuelve el servidor en portafolio_ajax_enviar_contacto()).
+		if ( 'checkbox' === campo.type ) {
+			return campo.checked ? '' : 'Debes autorizar el tratamiento de tus datos para enviar el mensaje.';
+		}
+
 		if ( '' === campo.value.trim() ) {
 			return 'Este campo es obligatorio.';
 		}
@@ -136,7 +142,7 @@
 			}
 		} );
 
-		campo.addEventListener( 'input', function () {
+		campo.addEventListener( 'checkbox' === campo.type ? 'change' : 'input', function () {
 			if ( 'true' === campo.getAttribute( 'aria-invalid' ) && ! obtenerErrorCampo( campo ) ) {
 				limpiarErrorCampo( campo );
 			}

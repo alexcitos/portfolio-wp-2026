@@ -192,6 +192,17 @@ function portafolio_assets() {
 		$portafolio_estrategia_scripts
 	);
 
+	// Aviso de cookies: decide si se carga Google Analytics (ver
+	// portafolio_google_analytics() más abajo). Global: el aviso y el enlace
+	// "Preferencias de cookies" están en el pie de todas las páginas.
+	wp_enqueue_script(
+		'portafolio-consentimiento-cookies',
+		get_template_directory_uri() . '/js/consentimiento-cookies.min.js',
+		array(),
+		portafolio_version_activo( '/js/consentimiento-cookies.min.js' ),
+		$portafolio_estrategia_scripts
+	);
+
 	// Envío por AJAX del formulario de contacto (solo existe en portada).
 	// Ver portafolio_ajax_enviar_contacto() más abajo.
 	if ( is_front_page() ) {
@@ -990,6 +1001,34 @@ function portafolio_smtp_mailpit_from( $correo_remitente ) {
 add_filter( 'wp_mail_from', 'portafolio_smtp_mailpit_from' );
 
 /**
+ * Fecha de vigencia de la Política de tratamiento de datos que acepta quien
+ * marca la casilla del formulario. Si la política cambia de forma
+ * importante, se actualiza aquí y en la propia página: la fecha queda en
+ * el correo de cada mensaje como prueba de la autorización.
+ */
+define( 'PORTAFOLIO_POLITICA_DATOS_VERSION', '2026-10-15' );
+
+/**
+ * URL de la Política de tratamiento de datos: la página marcada en
+ * Ajustes → Privacidad o, si no hay ninguna, /privacidad/.
+ *
+ * @return string
+ */
+function portafolio_url_politica_datos() {
+	$url = get_privacy_policy_url();
+	return $url ? $url : home_url( '/privacidad/' );
+}
+
+/**
+ * URL de la Política de cookies.
+ *
+ * @return string
+ */
+function portafolio_url_politica_cookies() {
+	return home_url( '/cookies/' );
+}
+
+/**
  * Procesa el envío del formulario de contacto de la portada vía AJAX.
  *
  * Endpoint elegido: admin-ajax.php con las acciones wp_ajax_nopriv_* /
@@ -1033,6 +1072,9 @@ function portafolio_ajax_enviar_contacto() {
 	$nombre  = isset( $_POST['contacto_nombre'] ) ? sanitize_text_field( wp_unslash( $_POST['contacto_nombre'] ) ) : '';
 	$email   = isset( $_POST['contacto_email'] ) ? sanitize_email( wp_unslash( $_POST['contacto_email'] ) ) : '';
 	$mensaje = isset( $_POST['contacto_mensaje'] ) ? sanitize_textarea_field( wp_unslash( $_POST['contacto_mensaje'] ) ) : '';
+	// Casilla de autorización (Ley 1581 / RGPD): obligatoria. Se valida
+	// también aquí, no solo en el navegador.
+	$autoriza = ! empty( $_POST['contacto_autorizacion'] );
 
 	// Errores por campo (no un mensaje genérico): la clave es el "name" del
 	// input, para que el JS los asocie al campo correspondiente. Mismo
@@ -1057,6 +1099,10 @@ function portafolio_ajax_enviar_contacto() {
 		$errores['contacto_mensaje'] = __( 'Este campo es obligatorio.', 'portafolio' );
 	}
 
+	if ( ! $autoriza ) {
+		$errores['contacto_autorizacion'] = __( 'Debes autorizar el tratamiento de tus datos para enviar el mensaje.', 'portafolio' );
+	}
+
 	if ( ! empty( $errores ) ) {
 		wp_send_json_error( array( 'errores' => $errores ), 422 );
 	}
@@ -1070,6 +1116,17 @@ function portafolio_ajax_enviar_contacto() {
 	$cuerpo  = '<p><strong>' . esc_html__( 'Nombre:', 'portafolio' ) . '</strong> ' . esc_html( $nombre ) . '</p>';
 	$cuerpo .= '<p><strong>' . esc_html__( 'Correo:', 'portafolio' ) . '</strong> ' . esc_html( $email ) . '</p>';
 	$cuerpo .= '<p><strong>' . esc_html__( 'Mensaje:', 'portafolio' ) . '</strong><br>' . nl2br( esc_html( $mensaje ) ) . '</p>';
+	// Constancia de la autorización: fecha y hora (Bogotá) y versión de la
+	// política aceptada. Es la prueba que exige la Ley 1581.
+	$cuerpo .= '<p><strong>' . esc_html__( 'Autorización de tratamiento de datos:', 'portafolio' ) . '</strong> '
+		. esc_html(
+			sprintf(
+				/* translators: 1: fecha y hora de la autorización, 2: fecha de vigencia de la política. */
+				__( 'Sí, otorgada el %1$s (hora de Colombia), Política de tratamiento de datos vigente desde el %2$s.', 'portafolio' ),
+				wp_date( 'Y-m-d H:i', null, new DateTimeZone( 'America/Bogota' ) ),
+				PORTAFOLIO_POLITICA_DATOS_VERSION
+			)
+		) . '</p>';
 
 	// Reply-To (no From): que el remitente real sea del propio dominio
 	// evita que servidores de correo rechacen o marquen como spam un From
@@ -1160,22 +1217,50 @@ function portafolio_enviar_lead_a_n8n( $nombre, $email, $mensaje ) {
 }
 
 /**
- * Inserta el snippet de Google Analytics (GA4) en el <head>.
+ * Google Analytics (GA4) con consentimiento previo.
+ *
+ * Consent Mode v2 en modo "básico": se declara todo denegado por defecto y
+ * gtag.js NO se descarga hasta que el visitante acepta en el aviso de
+ * cookies (js/consentimiento-cookies.js). window.portafolioCargarAnalitica()
+ * carga gtag.js y concede analytics_storage; si el visitante ya había
+ * aceptado en una visita anterior (localStorage "alexrope_consentimiento"
+ * = "aceptado"), se llama aquí mismo al cargar la página. Ver la Política
+ * de cookies (/cookies/).
+ *
  * Solo en producción: PORTAFOLIO_ENTORNO_LOCAL se define como true
- * únicamente en el docker-compose.yml local, nunca en el de producción,
- * así que por defecto (sin la constante definida) el snippet SÍ carga.
+ * únicamente en el docker-compose.yml local, así que en local no se envía
+ * nada a Google (el aviso de cookies sí se muestra, para poder probarlo).
  */
 function portafolio_google_analytics() {
 	if ( defined( 'PORTAFOLIO_ENTORNO_LOCAL' ) && PORTAFOLIO_ENTORNO_LOCAL ) {
 		return;
 	}
 	?>
-	<script async src="https://www.googletagmanager.com/gtag/js?id=G-TCBT35N7BE"></script>
 	<script>
 		window.dataLayer = window.dataLayer || [];
 		function gtag(){dataLayer.push(arguments);}
-		gtag('js', new Date());
-		gtag('config', 'G-TCBT35N7BE');
+		gtag('consent', 'default', {
+			ad_storage: 'denied',
+			ad_user_data: 'denied',
+			ad_personalization: 'denied',
+			analytics_storage: 'denied'
+		});
+		window.portafolioCargarAnalitica = function () {
+			if (window.portafolioAnaliticaCargada) { return; }
+			window.portafolioAnaliticaCargada = true;
+			gtag('consent', 'update', { analytics_storage: 'granted' });
+			var s = document.createElement('script');
+			s.async = true;
+			s.src = 'https://www.googletagmanager.com/gtag/js?id=G-TCBT35N7BE';
+			document.head.appendChild(s);
+			gtag('js', new Date());
+			gtag('config', 'G-TCBT35N7BE');
+		};
+		try {
+			if ('aceptado' === localStorage.getItem('alexrope_consentimiento')) {
+				window.portafolioCargarAnalitica();
+			}
+		} catch (e) {}
 	</script>
 	<?php
 }
