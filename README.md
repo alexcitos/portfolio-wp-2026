@@ -1,5 +1,7 @@
 # Portafolio: tema de WordPress desde cero
 
+[![Hablemos](https://img.shields.io/badge/Hablemos-alexrope.dev-2563eb?style=for-the-badge)](https://alexrope.dev/?utm_source=github&utm_medium=readme&utm_campaign=portfolio-wp-2026#contacto)
+
 Tema de WordPress construido **sin page builders** (ni Elementor ni Divi, ni sus bloques) para mi portafolio profesional.
 
 **En producción:** [alexrope.dev](https://alexrope.dev)
@@ -67,6 +69,12 @@ El mismo tema corre en una VM Oracle Cloud Always Free (Ubuntu 24.04, ARM).
 - UFW, Fail2Ban, SSH solo por llave
 - respaldos diarios a Oracle Object Storage
 - monitoreo con alertas en Telegram ([repositorio del monitoreo](https://github.com/alexcitos/monitoreo-n8n-kuma-telegram))
+
+## ¿Necesitas algo así para tu negocio?
+
+Desarrollo sitios WordPress a la medida, sin constructores visuales, con su infraestructura, monitoreo y automatizaciones con n8n.
+
+👉 **[Escríbeme en alexrope.dev](https://alexrope.dev/?utm_source=github&utm_medium=readme&utm_campaign=portfolio-wp-2026#contacto)** · [LinkedIn](https://www.linkedin.com/in/alexrodriguezp) · [Más proyectos](https://github.com/alexcitos)
 
 ## Licencia
 
